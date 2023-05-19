@@ -3,60 +3,59 @@ package main
 import (
 	"log"
 	"net/http"
-	"maze/maze.go"
-
 
 	socketio "github.com/googollee/go-socket.io"
 )
 
 func main() {
-	var maze_1 Maze
-	
-	maze_1.new_maze()
-	maze_1.print_graph()
-	// server := socketio.NewServer(nil)
+	var maze1 Maze
 
-	// server.OnConnect("/", func(s socketio.Conn) error {
-	// 	s.SetContext("")
-	// 	log.Println("connected:", s.ID())
-	// 	return nil
-	// })
+	maze1.NewMaze()
+	maze1.AddEdge("A", "b", 5)
+	maze1.PrintGraph()
+	server := socketio.NewServer(nil)
 
-	// server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
-	// 	log.Println("notice:", msg)
-	// 	s.Emit("reply", "have "+msg)
-	// })
+	server.OnConnect("/", func(s socketio.Conn) error {
+		s.SetContext("")
+		log.Println("connected:", s.ID())
+		return nil
+	})
 
-	// server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
-	// 	s.SetContext(msg)
-	// 	return "recv " + msg
-	// })
+	server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
+		log.Println("notice:", msg)
+		s.Emit("reply", "have "+msg)
+	})
 
-	// server.OnEvent("/", "bye", func(s socketio.Conn) string {
-	// 	last := s.Context().(string)
-	// 	s.Emit("bye", last)
-	// 	s.Close()
-	// 	return last
-	// })
+	server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
+		s.SetContext(msg)
+		return "recv " + msg
+	})
 
-	// server.OnError("/", func(s socketio.Conn, e error) {
-	// 	log.Println("meet error:", e)
-	// })
+	server.OnEvent("/", "bye", func(s socketio.Conn) string {
+		last := s.Context().(string)
+		s.Emit("bye", last)
+		s.Close()
+		return last
+	})
 
-	// server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-	// 	log.Println("closed", reason)
-	// })
+	server.OnError("/", func(s socketio.Conn, e error) {
+		log.Println("meet error:", e)
+	})
 
-	// go func() {
-	// 	if err := server.Serve(); err != nil {
-	// 		log.Fatalf("socketio listen error: %s\n", err)
-	// 	}
-	// }()
-	// defer server.Close()
+	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
+		log.Println("closed", reason)
+	})
 
-	// http.Handle("/socket.io/", server)
-	// http.Handle("/", http.FileServer(http.Dir("../asset")))
+	go func() {
+		if err := server.Serve(); err != nil {
+			log.Fatalf("socketio listen error: %s\n", err)
+		}
+	}()
+	defer server.Close()
 
-	// log.Println("Serving at localhost:8000...")
-	// log.Fatal(http.ListenAndServe(":8000", nil))
+	http.Handle("/socket.io/", server)
+	http.Handle("/", http.FileServer(http.Dir("../asset")))
+
+	log.Println("Serving at localhost:8000...")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
