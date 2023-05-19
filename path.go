@@ -16,7 +16,7 @@ type edge struct {
 }
 
 // EDGE FUNCTIONS
-func (edge *edge) Print_edge() {
+func (edge *edge) PrintEdge() {
 	fmt.Println(edge.target, ": ", edge.weight)
 }
 
@@ -59,7 +59,7 @@ func (maze *Maze) AddEdge(_startnode string, _endnode string, _weight int) {
 func (maze *Maze) PrintGraph() {
 	for StartNode, EndNode := range maze.m {
 		fmt.Print("Entry: ", StartNode, ", has edges: ")
-		EndNode.Print_edge()
+		EndNode.PrintEdge()
 	}
 }
 
