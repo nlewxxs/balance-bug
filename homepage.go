@@ -21,7 +21,7 @@ func serveHomepage(writer http.ResponseWriter, request *http.Request, params htt
 
 	var homepage HomePage
 	homepage.Time = time.Now().String()
-	tmpl := template.Must(template.ParseFiles("html/homepage.html"))
+	tmpl := template.Must(template.ParseFiles("./html/homepage.html"))
 	_ = tmpl.Execute(writer, homepage)
 	writingSync.Lock()
 	programIsRunning = false
