@@ -1,61 +1,75 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
+	"os"
+	"sync"
+	"time"
 
-	socketio "github.com/googollee/go-socket.io"
+	"github.com/julienschmidt/httprouter"
+	"github.com/kardianos/service"
 )
 
+var (
+	serviceIsRunning bool
+	programIsRunning bool
+	writingSync      sync.Mutex
+)
+
+const serviceName = "Medium service"
+const serviceDescription = "Simple service, just for fun"
+
+type program struct{}
+
+func (p program) Start(s service.Service) error {
+	fmt.Println(s.String() + " started")
+	writingSync.Lock()
+	serviceIsRunning = true
+	writingSync.Unlock()
+	go p.run()
+	return nil
+}
+
+func (p program) Stop(s service.Service) error {
+	writingSync.Lock()
+	serviceIsRunning = false
+	writingSync.Unlock()
+	for programIsRunning {
+		fmt.Println(s.String() + " stopping...")
+		time.Sleep(1 * time.Second)
+	}
+	fmt.Println(s.String() + " stopped")
+	return nil
+}
+
+func (p program) run() {
+	router := httprouter.New()
+	router.ServeFiles("/js/*filepath", http.Dir("js"))
+	router.ServeFiles("/css/*filepath", http.Dir("css"))
+
+	router.GET("/", serveHomepage)
+
+	err := http.ListenAndServe(":82", router)
+	if err != nil {
+		fmt.Println("Problem starting web server: " + err.Error())
+		os.Exit(-1)
+	}
+}
+
 func main() {
-	var maze1 Maze
-
-	maze1.NewMaze()
-	maze1.AddEdge("A", "b", 5)
-	maze1.PrintGraph()
-	server := socketio.NewServer(nil)
-
-	server.OnConnect("/", func(s socketio.Conn) error {
-		s.SetContext("")
-		log.Println("connected:", s.ID())
-		return nil
-	})
-
-	server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
-		log.Println("notice:", msg)
-		s.Emit("reply", "have "+msg)
-	})
-
-	server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
-		s.SetContext(msg)
-		return "recv " + msg
-	})
-
-	server.OnEvent("/", "bye", func(s socketio.Conn) string {
-		last := s.Context().(string)
-		s.Emit("bye", last)
-		s.Close()
-		return last
-	})
-
-	server.OnError("/", func(s socketio.Conn, e error) {
-		log.Println("meet error:", e)
-	})
-
-	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		log.Println("closed", reason)
-	})
-
-	go func() {
-		if err := server.Serve(); err != nil {
-			log.Fatalf("socketio listen error: %s\n", err)
-		}
-	}()
-	defer server.Close()
-
-	http.Handle("/socket.io/", server)
-	http.Handle("/", http.FileServer(http.Dir("../asset")))
-
-	log.Println("Serving at localhost:8000...")
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	serviceConfig := &service.Config{
+		Name:        serviceName,
+		DisplayName: serviceName,
+		Description: serviceDescription,
+	}
+	prg := &program{}
+	s, err := service.New(prg, serviceConfig)
+	if err != nil {
+		fmt.Println("Cannot create the service: " + err.Error())
+	}
+	err = s.Run()
+	if err != nil {
+		fmt.Println("Cannot start the service: " + err.Error())
+	}
 }
