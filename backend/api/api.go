@@ -26,7 +26,7 @@ func SetupMySQL() {
 	// db, err = sql.Open("postgres", "postgres://postgres:password@postgres/todo?sslmode=disable")
 
 	// when running locally
-	db, err = sql.Open("mysql", "mysql://mysql:password@tcp(127.0.0.1:3306)/todo?sslmode=disable")
+	db, err = sql.Open("mysql", "mysql://mysql:password@tcp(127.0.0.1:3308)/todo?sslmode=disable")
 
 	if err != nil {
 		fmt.Println(err.Error())
