@@ -1,4 +1,4 @@
-USE docker-entrypoint-initdb.d;
+--USE docker-entrypoint-initdb.d;
 CREATE table BotKey (
     ConnTime TIMESTAMP NOT NULL,
     SessionKey char(100) NOT NULL,
