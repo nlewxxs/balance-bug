@@ -13,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type ListItem struct {
+type BotKey struct {
 	Id         string `json:"ConnTime"`
 	SessionKey string `json:"SessionKey"`
 	BugId      string `json:"done"`
@@ -48,13 +48,13 @@ func DisplayBotKey(c *gin.Context) {
 	}
 
 	// Get all rows and add into items
-	items := make([]ListItem, 0)
+	items := make([]BotKey, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			item := ListItem{}
+			item := BotKey{}
 			if err := rows.Scan(&item.Id, &item.SessionKey, &item.BugId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
