@@ -1,10 +1,11 @@
-version: "1"
+version: '3'
+
 services:
-  mysql:
+
+  mysql-development:
     build: /
     environment:
-      MYSQL_DB: todo
-      MYSQL_USER: server
-      MYSQL_ROOT_PASSWORD: test_pwd
+      MYSQL_ROOT_PASSWORD: helloworld
+      MYSQL_DATABASE: testapp
     ports:
-      - 5432
+      - "3308:3306"
