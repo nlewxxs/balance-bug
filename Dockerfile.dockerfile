@@ -49,6 +49,7 @@ RUN apt-get install yarn -y
 
 RUN apt-get install nodejs -y
 RUN apt-get install build-essential -y
+RUN apt-get install git
 
 ENV GOROOT="/home/go"
 ENV GOPATH="/usr/src/"
