@@ -16,7 +16,7 @@ services:
   go-api:
     build: 
       dockerfile: Dockerfile.dev
-      context: ./backend
+      # context: ./backend
     ports:
     - 8081:8081
     volumes:
