@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 version: '3'
 
 services:
@@ -29,36 +28,3 @@ services:
     links:
       - mysql
     tty: true
-=======
-version: '3'
-
-services:
-
-  mysql:
-    build: ./database
-    container_name: balanceadb
-    environment:
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: backend
-      MYSQL_PASSWORD: helloworld
-      MYSQL_ROOT_PASSWORD: helloworld
-    ports:
-      - "3308:3306"
-
-  go-api:
-    build: 
-      dockerfile: Dockerfile.dev
-      # context: ./backend
-    ports:
-    - 8081:8081
-    volumes:
-     - .:/app
-    expose:
-      - 8081
-    depends_on:
-      - mysql
-    links:
-      - mysql
-    tty: true
->>>>>>> bf7d7a981388e48683f0c30450d41717cedf9a5e
-      
