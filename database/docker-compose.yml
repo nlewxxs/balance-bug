@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 version: '3'
 
 services:
@@ -10,16 +9,3 @@ services:
       MYSQL_DATABASE: testapp
     ports:
       - "3308:3306"
-=======
-version: '3'
-
-services:
-
-  mysql-development:
-    build: /
-    environment:
-      MYSQL_ROOT_PASSWORD: helloworld
-      MYSQL_DATABASE: testapp
-    ports:
-      - "3308:3306"
->>>>>>> 09a6bf6768097befca043e3c6a6ac6c6f165db27
