@@ -4,6 +4,3 @@ CREATE table BotKey (
     BugId char(100) NOT NULL,
     PRIMARY KEY (ConnTime, SessionKey, BugId)
 ) ENGINE=InnoDB;
-
-
-INSERT INTO `testapp`.`BotKey` (`ConnTime`, `SessionKey`, `BugId`) VALUES (CURRENT_TIMESTAMP, 'test', 'test');

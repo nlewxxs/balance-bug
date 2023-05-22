@@ -27,7 +27,7 @@ func SetupMySQL() {
 
 	// when running locally
 
-	db, err = sql.Open("mysql", "root:helloworld@tcp(172.17.0.1:3308)/testapp?timeout=5s")
+	db, err = sql.Open("mysql", "root:helloworld@tcp(172.17.0.1:3308)/testdb?timeout=5s")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -42,7 +42,7 @@ func SetupMySQL() {
 
 // CRUD: Create Read Update Delete API Format
 func DisplayBotKey(c *gin.Context) {
-	rows, err := db.Query("SELECT * FROM testapp.BotKey")
+	rows, err := db.Query("SELECT * FROM testdb.BotKey")
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
