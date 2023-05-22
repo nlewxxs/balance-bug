@@ -15,8 +15,8 @@ import (
 
 type BotKey struct {
 	ConnTime         string `json:"ConnTime"`
-	BugId      		string `json:"done"`
-	SessionKey 		string `json:"SessionKey"`
+	BugId      		string  `json:"done"`
+	SessionKey 		string  `json:"SessionKey"`
 
 }
 
@@ -73,27 +73,31 @@ func DisplayBotKey(c *gin.Context) {
 }
 
 func CreateBotEntry(c *gin.Context) {
-	TimeStampNew := c.Param("TimeStamp")
-	BotKeyNew := c.Param("BotKey")
+	TimeStampNew := c.Param("ConnTime")
 	BugIdNew := c.Param("BugId")
+	SessionKeyNew := c.Param("SessionKey")
 
-	// Validate item
-	if (len(TimeStampNew) == 0 || len(TimeStampNew) == 0 || len(TimeStampNew) == 0) {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter an item"})
+	// Validate entry
+	if len(TimeStampNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BotKey.ConnTime"})
+	} else if len(BugIdNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BotKey.BugId"})
+	} else if len(SessionKeyNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BotKey.SessionKey"})
 	} else {
 		// Create todo item
 		var BotKeyList BotKey
 
 		BotKeyList.ConnTime = TimeStampNew
-		BotKeyList.SessionKey = BotKeyNew
 		BotKeyList.BugId = BugIdNew
+		BotKeyList.SessionKey = SessionKeyNew
+
 
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.BotKey(ConnTime, SessionKey, BugId) VALUES($1, $2, $3);", BotKeyList.ConnTime, BotKeyList.BugId, BotKeyList.SessionKey)
+		_, err := db.Query("INSERT INTO testdb.BotKey(ConnTime, SessionKey, BugId) VALUES(?, ?, ?);", BotKeyList.ConnTime, BotKeyList.BugId, BotKeyList.SessionKey)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-
 		}
 
 		// Log message

@@ -45,10 +45,10 @@ func displayBotKey(c *gin.Context) {
 // Delete all elements
 // from DB
 func emptyTable() {
-	db.Exec("DELETE from list;")
+	db.Exec("DELETE from testdb.BotKey;")
 
 	// Reset id counter
-	db.Exec("ALTER SEQUENCE list_id_seq RESTART WITH 1;")
+	//db.Exec("ALTER SEQUENCE list_id_seq RESTART WITH 1;")
 }
 
 // Setup Gin Routes
@@ -61,7 +61,7 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for API
 	router.GET("/DisplayBotKey", DisplayBotKey)
-	router.GET("/BotKey/create/:BotKey", CreateBotEntry)
+	router.GET("/BotKey/create/:ConnTime/:BugId/:SessionKey", CreateBotEntry)
 	// router.GET("/item/update/:id/:done", UpdateTodoItem)
 	// router.GET("/item/delete/:id", DeleteTodoItem)
 
@@ -125,7 +125,7 @@ func TestBotKeyCreate(t *testing.T) {
 
 	// Expected body
 	body := gin.H{
-		"BotKeyNew": BotKey{
+		"BotKeyCreation": BotKey{
 			ConnTime: "2006-01-02 15:04:05",
 			BugId: "2",
 			SessionKey: "3",
@@ -133,7 +133,7 @@ func TestBotKeyCreate(t *testing.T) {
 	}
 
 	// /item/create GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/BotKey/create/:BotKey")
+	w := performRequest(router, "GET", "/BotKey/create/2006-01-02 15:04:05/2/3")
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response
