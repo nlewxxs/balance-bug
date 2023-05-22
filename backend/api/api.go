@@ -24,9 +24,7 @@ var db *sql.DB
 var err error
 
 func SetupMySQL() {
-	// db, err = sql.Open("postgres", "postgres://postgres:password@postgres/todo?sslmode=disable")
-
-	// when running locally
+	// for local testing only:
 
 	db, err = sql.Open("mysql", "root:helloworld@tcp(172.17.0.1:3308)/testdb?timeout=5s")
 
@@ -91,7 +89,6 @@ func CreateBotEntry(c *gin.Context) {
 		BotKeyList.ConnTime = TimeStampNew
 		BotKeyList.BugId = BugIdNew
 		BotKeyList.SessionKey = SessionKeyNew
-
 
 		// Insert item to DB
 		_, err := db.Query("INSERT INTO testdb.BotKey(ConnTime, SessionKey, BugId) VALUES(?, ?, ?);", BotKeyList.ConnTime, BotKeyList.BugId, BotKeyList.SessionKey)

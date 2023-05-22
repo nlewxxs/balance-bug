@@ -62,8 +62,8 @@ func SetupRoutes() *gin.Engine {
 	// Set routes for API
 	router.GET("/DisplayBotKey", DisplayBotKey)
 	router.GET("/BotKey/create/:ConnTime/:BugId/:SessionKey", CreateBotEntry)
-	// router.GET("/item/update/:id/:done", UpdateTodoItem)
-	// router.GET("/item/delete/:id", DeleteTodoItem)
+	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
+	// // router.GET("/item/delete/:id", DeleteTodoItem)
 
 	// Set up Gin Server
 	return router
