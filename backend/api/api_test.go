@@ -60,7 +60,7 @@ func SetupRoutes() *gin.Engine {
 	router.Use(cors.New(config))
 
 	// Set routes for API
-	router.GET("/items", DisplayBotKey)
+	router.GET("/DisplayBotKey", DisplayBotKey)
 	//router.GET("/item/create/:item", CreateTodoItem)
 	// router.GET("/item/update/:id/:done", UpdateTodoItem)
 	// router.GET("/item/delete/:id", DeleteTodoItem)
@@ -87,24 +87,24 @@ func TestMain(t *testing.T) {
 // Test for successfull GET
 // response from /items
 // with no elements
-func TestItemsGet(t *testing.T) {
+func TestDisplayBotKey(t *testing.T) {
 	// Delete all elements
 	// from DB
 	emptyTable()
 
 	// Expected body
 	body := gin.H{
-		"items": []BotKey{},
+		"BotKeys": []BotKey{},
 	}
 
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/items")
+	w := performRequest(router, "GET", "/DisplayBotKey")
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Obtain response
 	var response map[string][]BotKey
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
-	value, exists := response["items"]
+	value, exists := response["BotKeys"]
 
 	// No error in response
 	assert.Nil(t, err)
@@ -113,7 +113,7 @@ func TestItemsGet(t *testing.T) {
 	assert.True(t, exists)
 
 	// Assert response
-	assert.Equal(t, body["items"], value)
+	assert.Equal(t, body["BotKeys"], value)
 }
 
 // // Test for successfull create

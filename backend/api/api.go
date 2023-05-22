@@ -26,7 +26,8 @@ func SetupMySQL() {
 	// db, err = sql.Open("postgres", "postgres://postgres:password@postgres/todo?sslmode=disable")
 
 	// when running locally
-	db, err = sql.Open("mysql", "mysql://mysql:password@tcp(127.0.0.1:3308)/todo?sslmode=disable")
+
+	db, err = sql.Open("mysql", "root:helloworld@tcp(172.17.0.1:3308)/testapp?timeout=5s")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -41,14 +42,14 @@ func SetupMySQL() {
 
 // CRUD: Create Read Update Delete API Format
 func DisplayBotKey(c *gin.Context) {
-	rows, err := db.Query("SELECT * FROM list")
+	rows, err := db.Query("SELECT * FROM testapp.BotKey")
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 	}
 
-	// Get all rows and add into items
-	items := make([]BotKey, 0)
+	// Get all rows and add into BotKeys
+	BotKeys := make([]BotKey, 0)
 
 	if rows != nil {
 		defer rows.Close()
@@ -60,14 +61,14 @@ func DisplayBotKey(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
 			item.SessionKey = strings.TrimSpace(item.SessionKey)
-			items = append(items, item)
+			BotKeys = append(BotKeys, item)
 		}
 	}
 
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, gin.H{"items": items})
+	c.JSON(http.StatusOK, gin.H{"BotKeys": BotKeys})
 }
 
 // func CreateBotEntry(c *gin.Context) {
