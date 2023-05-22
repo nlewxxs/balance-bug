@@ -14,7 +14,7 @@ import (
 func indexView(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, gin.H{"message": "TODO APP"})
+	c.JSON(http.StatusOK, gin.H{"message": "Balance Bug API"})
 }
 
 // Setup Gin Routes
@@ -31,7 +31,7 @@ func SetupRoutes() *gin.Engine {
 	// Set routes for API
 	// Update to POST, UPDATE, DELETE etc
 	router.GET("/DisplayBotKey", api.DisplayBotKey)
-	// router.GET("/item/create/:item", api.CreateTodoItem)
+	router.GET("/BotKey/create/:BotKey", api.CreateBotEntry)
 	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
 	// router.GET("/item/delete/:id", api.DeleteTodoItem)
 

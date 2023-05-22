@@ -14,9 +14,10 @@ import (
 )
 
 type BotKey struct {
-	Id         string `json:"ConnTime"`
-	SessionKey string `json:"SessionKey"`
-	BugId      string `json:"done"`
+	ConnTime         string `json:"ConnTime"`
+	BugId      		string `json:"done"`
+	SessionKey 		string `json:"SessionKey"`
+
 }
 
 var db *sql.DB
@@ -56,7 +57,7 @@ func DisplayBotKey(c *gin.Context) {
 		for rows.Next() {
 			// Individual row processing
 			item := BotKey{}
-			if err := rows.Scan(&item.Id, &item.SessionKey, &item.BugId); err != nil {
+			if err := rows.Scan(&item.ConnTime, &item.BugId, &item.SessionKey); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
@@ -71,33 +72,36 @@ func DisplayBotKey(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"BotKeys": BotKeys})
 }
 
-// func CreateBotEntry(c *gin.Context) {
-// 	item := c.Param("item")
+func CreateBotEntry(c *gin.Context) {
+	TimeStampNew := c.Param("TimeStamp")
+	BotKeyNew := c.Param("BotKey")
+	BugIdNew := c.Param("BugId")
 
-// 	// Validate item
-// 	if len(item) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter an item"})
-// 	} else {
-// 		// Create todo item
-// 		var TodoItem ListItem
+	// Validate item
+	if (len(TimeStampNew) == 0 || len(TimeStampNew) == 0 || len(TimeStampNew) == 0) {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter an item"})
+	} else {
+		// Create todo item
+		var BotKeyList BotKey
 
-// 		TodoItem.SessionKey = item
-// 		TodoItem.BugId = "false"
+		BotKeyList.ConnTime = TimeStampNew
+		BotKeyList.SessionKey = BotKeyNew
+		BotKeyList.BugId = BugIdNew
 
-// 		// Insert item to DB
-// 		_, err := db.Query("INSERT INTO list(item, done) VALUES($1, $2);", TodoItem.Item, TodoItem.Done)
-// 		if err != nil {
-// 			fmt.Println(err.Error())
-// 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		// Insert item to DB
+		_, err := db.Query("INSERT INTO testdb.BotKey(ConnTime, SessionKey, BugId) VALUES($1, $2, $3);", BotKeyList.ConnTime, BotKeyList.BugId, BotKeyList.SessionKey)
+		if err != nil {
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 
-// 		}
+		}
 
-// 		// Log message
-// 		log.Println("created todo item", item)
+		// Log message
+		log.Println("created BugKey entry", BotKeyList)
 
-// 		// Return success response
-// 		c.Header("Access-Control-Allow-Origin", "*")
-// 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-// 		c.JSON(http.StatusCreated, gin.H{"items": &TodoItem})
-// 	}
-// }
+		// Return success response
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+		c.JSON(http.StatusCreated, gin.H{"BotKeyCreation": &BotKeyList})
+	}
+}

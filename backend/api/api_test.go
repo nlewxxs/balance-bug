@@ -32,7 +32,7 @@ func displayBotKey(c *gin.Context) {
 		for rows.Next() {
 			// Individual row processing
 			item := BotKey{}
-			if err := rows.Scan(&item.Id, &item.SessionKey, &item.BugId); err != nil {
+			if err := rows.Scan(&item.ConnTime, &item.BugId, &item.SessionKey); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
@@ -61,7 +61,7 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for API
 	router.GET("/DisplayBotKey", DisplayBotKey)
-	//router.GET("/item/create/:item", CreateTodoItem)
+	router.GET("/BotKey/create/:BotKey", CreateBotEntry)
 	// router.GET("/item/update/:id/:done", UpdateTodoItem)
 	// router.GET("/item/delete/:id", DeleteTodoItem)
 
@@ -118,38 +118,38 @@ func TestDisplayBotKey(t *testing.T) {
 
 // // Test for successfull create
 // // response from /item/create
-// func TestItemCreate(t *testing.T) {
-// 	// Delete all elements
-// 	// from DB
-// 	emptyTable()
+func TestBotKeyCreate(t *testing.T) {
+	// Delete all elements
+	// from DB
+	emptyTable()
 
-// 	// Expected body
-// 	body := gin.H{
-// 		"items": ListItem{
-// 			Id:   "",
-// 			Item: "Test-API",
-// 			Done: false,
-// 		},
-// 	}
+	// Expected body
+	body := gin.H{
+		"BotKeyNew": BotKey{
+			ConnTime: "2006-01-02 15:04:05",
+			BugId: "2",
+			SessionKey: "3",
+		},
+	}
 
-// 	// /item/create GET request and check 200 OK status code
-// 	w := performRequest(router, "GET", "/item/create/Test-API")
-// 	assert.Equal(t, http.StatusCreated, w.Code)
+	// /item/create GET request and check 200 OK status code
+	w := performRequest(router, "GET", "/BotKey/create/:BotKey")
+	assert.Equal(t, http.StatusCreated, w.Code)
 
-// 	// Obtain response
-// 	var response map[string]ListItem
-// 	err := json.Unmarshal([]byte(w.Body.String()), &response)
-// 	value, exists := response["items"]
+	// Obtain response
+	var response map[string]BotKey
+	err := json.Unmarshal([]byte(w.Body.String()), &response)
+	value, exists := response["BotKeyCreation"]
 
-// 	// No error in response
-// 	assert.Nil(t, err)
+	// No error in response
+	assert.Nil(t, err)
 
-// 	// Check if response exits
-// 	assert.True(t, exists)
+	// Check if response exits
+	assert.True(t, exists)
 
-// 	// Assert response
-// 	assert.Equal(t, body["items"], value)
-// }
+	// Assert response
+	assert.Equal(t, body["BotKeyCreation"], value)
+}
 
 // // Test for successfull creates
 // // response for multiple items
