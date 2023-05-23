@@ -3,8 +3,8 @@ import MainMenu from './components/MainMenu.js';
 import CreateSession from './components/CreateSession.js';
 import LoadSession from './components/LoadSession.js';
 import DisplayGraph from './components/DisplayGraph.js';
-import logo from './logo.svg';
 import './App.css';
+// import logo from './logo.svg';
 
 function App() {
   return (
