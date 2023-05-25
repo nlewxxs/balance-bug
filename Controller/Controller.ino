@@ -1,21 +1,23 @@
 // #include <ArduinoEigenDense.h>
-
 // using namespace Eigen;
 #include <Wire.h>
+#include <MPU6050.h>
 
-// placeholder values for now - get from MATLAB auto-tuning
+// heading PD controller
 double Kp_heading = 2.0;
-double Ki_heading = 0; // PD controller for heading
+double Ki_heading = 0; 
 double Kd_heading = 0.75;
+
+// position PD controller
 double Kp_position = 0.0005;
-double Ki_position = 0; // PD controller for position
+double Ki_position = 0; 
 double Kd_position = 0.75;
+
+// balance PID controller
 double Kp_tilt = 175;
 double Ki_tilt = 5.0;
 double Kd_tilt = 8.5;
-
 double balanceCenter = 90; // whatever tilt value is balanced
-
 double P_bias, T_bias, H_bias = 0;
 
 double H_derivative, H_out, P_derivative, P_out, T_derivative, T_out;
@@ -24,30 +26,25 @@ double H_integral[2], P_integral[2], T_integral[2] = {0, 0}; //stores current an
 int iteration_time;
 int oldMillis = 0;
 
-
-
-const int mpu_addy = 0x68;  // designated mpu_addy I2C address
+// sensor definitions
+const int mpu_addy = 0x68;
 double AccX, AccY, AccZ;
 double GyroX, GyroY, GyroZ;  
 double accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ;
 double roll, pitch, yaw;
 double AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
 double elapsedTime, currentTime, previousTime;
-
 int calibrate = 0;  // calibration counter
 
 
 void setup() {
   Serial.begin(9600);
   // put your setup code here, to run once:
-
   // how to define matrices using eigen for when we do LQR
   // MatrixXf m1(2,4);
   // m1 << 1, 2, 3, 4, 5, 6, 7, 8;
-  
   // MatrixXf m2(4,3);
   // m2 << 9, 3, 2, 6, 4, 2, 6, 7, 3, 1, 4, 2;
-
   // MatrixXf outm = m1 * m2;
 
   Wire.begin();                      
@@ -56,14 +53,11 @@ void setup() {
   Wire.write(0x00);                  // placing 0 in the PWR_MGMT_1 register (wakes mpu)
   Wire.endTransmission(true);        //end the transmission
 
-
   calculate_IMU_error();
   delay(20);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  // Serial.println("test");
 
   iteration_time = millis() - oldMillis;
 
@@ -103,16 +97,16 @@ void loop() {
   double rightWheelDrive = T_out + H_out;
 
   Serial.print("Currently at\nPosition: ");
-  Serial.println(positionReading);
-  Serial.print("Tilt: ");
-  Serial.println(tiltReading);
-  Serial.print("Heading: ");
+  Serial.print(positionReading);
+  Serial.print("| Tilt: ");
+  Serial.print(tiltReading);
+  Serial.print("| Heading: ");
   Serial.println(headingReading);
   Serial.print("Control outputs\nPosition: ");
-  Serial.println(P_out);
-  Serial.print("Tilt: ");
-  Serial.println(T_out);
-  Serial.print("Heading: ");
+  Serial.print(P_out);
+  Serial.print("| Tilt: ");
+  Serial.print(T_out);
+  Serial.print("| Heading: ");
   Serial.println(H_out);
 
   Serial.print("Wheel inputs: ");
@@ -129,7 +123,7 @@ void loop() {
 
 double getPosition() { //unsure of how this reading will work - needs to be 1D (as in just x)
   // could potentially have position just be a relative thing i.e. move forwards 1 / backwards 1 rather than move to position 23?
-  return 10;
+  return 0;
 }
 
 double getPosSetpoint() {
@@ -138,7 +132,7 @@ double getPosSetpoint() {
 }
 
 double getHeading() { // probably range from 0->2pi
-  return 0.6;
+  return yaw;
 }
 
 double getHeadingSetpoint() {

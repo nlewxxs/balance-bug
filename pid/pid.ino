@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <mpu_6050.h>
 
 const int mpu_addy = 0x68;  // designated mpu_addy I2C address
 float AccX, AccY, AccZ;
