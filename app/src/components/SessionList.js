@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SessionList = (props) => {
@@ -5,9 +6,11 @@ const SessionList = (props) => {
 
   const navigate = useNavigate();
   
-  const handleClick = (id) => {
-    navigate(`/Display/`+id);
+  const handleClick = (name, id) => {
+    navigate(`/Display/`+ name + "?=" + id);
   };
+  
+  console.log("LIST", sessions);
 
   return (
       <div className="session_list">
@@ -19,15 +22,16 @@ const SessionList = (props) => {
               <th>Date Created</th>
             </tr>
           </thead>
+          {sessions && 
           <tbody> 
             {sessions.map(session => (
-              <tr className="session_row" key={session.id} onClick={() => handleClick(session.id)}>
-                  <td>{ session.name }</td>
-                  <td>{ session.id }</td>
-                  <td>{ session.date }</td>
+              <tr className="session_row" key={session.SessionKey} onClick={() => handleClick(session.BugId, session.SessionKey)}>
+                  <td>{ session.BugId }</td>
+                  <td>{ session.SessionKey }</td>
+                  <td>{ session.ConnTime }</td>
                 </tr>
           ))}
-          </tbody>
+          </tbody>}
           </table>
       </div>
     )
