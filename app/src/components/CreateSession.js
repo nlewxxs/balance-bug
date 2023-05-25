@@ -62,8 +62,10 @@ function CreateSession() {
         .then( response => {
             const data = response.data;
             console.log(data);
-            setLoading(response.isLoading);
-            navigateToPath(data.BugId,data.SessionKey);
+            setTimeout(() => {
+                setLoading(response.isLoading);
+                navigateToPath(data.BugId,data.SessionKey);
+            }, 300);
         });
     };
 
