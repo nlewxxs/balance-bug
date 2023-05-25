@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SessionList = (props) => {
@@ -10,7 +9,7 @@ const SessionList = (props) => {
     navigate(`/Display/`+ name + "?=" + id);
   };
   
-  console.log("LIST", sessions);
+  // console.log("Sessions", sessions);
 
   return (
       <div className="session_list">

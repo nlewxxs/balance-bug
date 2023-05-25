@@ -16,9 +16,11 @@ function LoadSession() {
         setLoading(true);
         fetchData(url)
         .then(response => {
-            console.log(response.data);
+            // console.log(response.data);
             setSessions(response.data);
-            setTimeout(() => { setLoading(response.isLoading); }, 300); });
+            setTimeout(() => {setLoading(response.isLoading); }, 300);
+        })
+        .catch(error => console.log(error));
     }, [] );
 
     return (
@@ -34,7 +36,7 @@ function LoadSession() {
       </button>
       <button className="back_btn">
           <Link to="/">Back to Menu</Link>
-      </button> }
+      </button>
     </div>
     )}
     </div>

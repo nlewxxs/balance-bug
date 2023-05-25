@@ -33,7 +33,7 @@ function CreateSession() {
 
     const navigateToPath = (name, id) => {
         const path = "/Display/" + name + "?=" + id;
-        console.log(path);
+        // console.log(path);
         navigate(path);
     }
 
