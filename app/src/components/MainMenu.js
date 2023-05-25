@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 function MainMenu() {
     return (
       <div className="Menu">
-        <h1>MainMenu</h1>
+        <h1>Main Menu</h1>
         <button className="create_btn">
            <Link to="/Create">Create New Session</Link> 
         </button>
