@@ -31,7 +31,7 @@ func SetupRoutes() *gin.Engine {
 	// Set routes for API
 	// Update to POST, UPDATE, DELETE etc
 	router.GET("/DisplayBotKey", api.DisplayBotKey)
-	router.GET("/BotKey/create/:ConnTime/:BugId/:SessionKey", api.CreateBotEntry)
+	router.GET("/BotKey/create", api.CreateBotEntry)
 	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
 	// router.GET("/item/delete/:id", api.DeleteTodoItem)
 

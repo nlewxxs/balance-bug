@@ -11,11 +11,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+
+	"github.com/google/uuid"
 )
 
 type BotKey struct {
-	ConnTime         string `json:"ConnTime"`
-	BugId      		string  `json:"done"`
+	ConnTime    	  	string `json:"ConnTime"`
+	BugId      		string  `json:"BugId"`
 	SessionKey 		string  `json:"SessionKey"`
 
 }
@@ -67,13 +69,13 @@ func DisplayBotKey(c *gin.Context) {
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, gin.H{"BotKeys": BotKeys})
+	c.JSON(http.StatusOK, &BotKeys)
 }
 
 func CreateBotEntry(c *gin.Context) {
-	TimeStampNew := c.Param("ConnTime")
-	BugIdNew := c.Param("BugId")
-	SessionKeyNew := c.Param("SessionKey")
+	TimeStampNew := c.Query("time")
+	BugIdNew := c.Query("bugid")
+	SessionKeyNew := uuid.New().String()
 
 	// Validate entry
 	if len(TimeStampNew) == 0 {
@@ -103,6 +105,6 @@ func CreateBotEntry(c *gin.Context) {
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-		c.JSON(http.StatusCreated, gin.H{"BotKeyCreation": &BotKeyList})
+		c.JSON(http.StatusCreated, &BotKeyList)
 	}
 }
