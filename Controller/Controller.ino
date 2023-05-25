@@ -1,7 +1,7 @@
 // #include <ArduinoEigenDense.h>
 // using namespace Eigen;
 #include <Wire.h>
-#include <MPU6050.h>
+// #include <MPU6050.h>
 
 // heading PD controller
 double Kp_heading = 2.0;
@@ -17,13 +17,13 @@ double Kd_position = 0.75;
 double Kp_tilt = 175;
 double Ki_tilt = 5.0;
 double Kd_tilt = 8.5;
-double balanceCenter = 90; // whatever tilt value is balanced
+double balanceCenter = 0; // whatever tilt value is balanced
 double P_bias, T_bias, H_bias = 0;
 
 double H_derivative, H_out, P_derivative, P_out, T_derivative, T_out;
 double H_error[2], P_error[2], T_error[2] = {0, 0}; //stores current and previous value for derivative calculation
 double H_integral[2], P_integral[2], T_integral[2] = {0, 0}; //stores current and previous value for integral calculation
-int iteration_time;
+double iteration_time;
 int oldMillis = 0;
 
 // sensor definitions
@@ -58,8 +58,9 @@ void setup() {
 }
 
 void loop() {
-
-  iteration_time = millis() - oldMillis;
+  iteration_time = (millis() - oldMillis);
+  iteration_time = iteration_time / 1000;
+  oldMillis = millis();
 
   // position control first
   double positionReading = getPosition(); // example I used for the controller has position read from rotary encoders - this value is total distance travelled
@@ -77,7 +78,7 @@ void loop() {
   T_error[1] = balanceCenter + P_out - tiltReading; // offset the tilt reading with the distance output to allow us to manipulate the position of the robot via tilt
   T_integral[1] = T_integral[0] + T_error[1] * iteration_time; // 1 is current, 0 is old
   T_derivative = (T_error[1] - T_error[0]) / iteration_time;
-  T_out = Kp_position*T_error[1] + Ki_position*T_integral[1] + Kd_position*T_derivative + T_bias;
+  T_out = Kp_tilt*T_error[1] + Ki_tilt*T_integral[1] + Kd_tilt*T_derivative + T_bias;
 
   T_integral[0] = T_integral[1]; // time shift integral readings after out calculated
   T_error[0] = T_error[1];
@@ -96,23 +97,29 @@ void loop() {
   double leftWheelDrive = T_out - H_out; // voltage / pwm that will actually drive the wheels
   double rightWheelDrive = T_out + H_out;
 
-  Serial.print("Currently at\nPosition: ");
-  Serial.print(positionReading);
-  Serial.print("| Tilt: ");
-  Serial.print(tiltReading);
-  Serial.print("| Heading: ");
-  Serial.println(headingReading);
-  Serial.print("Control outputs\nPosition: ");
-  Serial.print(P_out);
-  Serial.print("| Tilt: ");
-  Serial.print(T_out);
-  Serial.print("| Heading: ");
-  Serial.println(H_out);
+  // Serial.print("Currently at\nPosition: ");
+  // Serial.print(positionReading);
+  // Serial.print("| Tilt: ");
+  // Serial.print(tiltReading);
+  // Serial.print("| Heading: ");
+  // Serial.println(headingReading);
+  // Serial.print("Control outputs\nPosition: ");
+  // Serial.print(P_out);
+  // Serial.print("| Tilt: ");
+  // Serial.print(T_out);
+  // Serial.print("| Heading: ");
+  // Serial.println(H_out);
 
-  Serial.print("Wheel inputs: ");
-  Serial.print(leftWheelDrive);
-  Serial.print(" / ");
-  Serial.println(rightWheelDrive);
+  // Serial.print("Wheel inputs: ");
+  // Serial.print(leftWheelDrive);
+  // Serial.print(" / ");
+  // Serial.println(rightWheelDrive);
+
+  Serial.print("Tilt: ");
+  Serial.print(tiltReading);
+  Serial.print(" Tilt output: ");
+  Serial.println(T_out);
+
 
 }
 
