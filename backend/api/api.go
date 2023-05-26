@@ -15,10 +15,10 @@ import (
 	"github.com/google/uuid"
 )
 
-type BotKey struct {
-	ConnTime    	  	string `json:"ConnTime"`
-	BugId      		string  `json:"BugId"`
-	SessionKey 		string  `json:"SessionKey"`
+type SessionListStruct struct {
+	TimeStamp    	  	string `json:"TimeStamp"`
+	BugName      		string  `json:"BugName"`
+	SessionId 			string  `json:"Sessionid"`
 
 }
 
@@ -42,69 +42,69 @@ func SetupMySQL() {
 }
 
 // CRUD: Create Read Update Delete API Format
-func DisplayBotKey(c *gin.Context) {
-	rows, err := db.Query("SELECT * FROM testdb.BotKey")
+func DisplaySessionList(c *gin.Context) {
+	rows, err := db.Query("SELECT * FROM testdb.SessionList")
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 	}
 
-	// Get all rows and add into BotKeys
-	BotKeys := make([]BotKey, 0)
+	// Get all rows and add into SessionListStructs
+	SessionLists := make([]SessionListStruct, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			item := BotKey{}
-			if err := rows.Scan(&item.ConnTime, &item.BugId, &item.SessionKey); err != nil {
+			SessionListRow := SessionListStruct{}
+			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
-			item.SessionKey = strings.TrimSpace(item.SessionKey)
-			BotKeys = append(BotKeys, item)
+			SessionListRow.SessionId = strings.TrimSpace(SessionListRow.SessionId)
+			SessionListStructs = append(SessionListStructs, SessionListRow)
 		}
 	}
 
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, &BotKeys)
+	c.JSON(http.StatusOK, &SessionListStructs)
 }
 
-func CreateBotEntry(c *gin.Context) {
+func CreateBugEntry(c *gin.Context) {
 	TimeStampNew := c.Query("time")
-	BugIdNew := c.Query("bugid")
-	SessionKeyNew := uuid.New().String()
+	BugNameNew := c.Query("bugid")
+	SessionidNew := uuid.New().String()
 
 	// Validate entry
 	if len(TimeStampNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BotKey.ConnTime"})
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
 	} else if len(BugIdNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BotKey.BugId"})
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.BugId"})
 	} else if len(SessionKeyNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BotKey.SessionKey"})
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionKey"})
 	} else {
 		// Create todo item
-		var BotKeyList BotKey
+		var SessionListStruct SessionListNew
 
-		BotKeyList.ConnTime = TimeStampNew
-		BotKeyList.BugId = BugIdNew
-		BotKeyList.SessionKey = SessionKeyNew
+		SessionListNew.ConnTime = TimeStampNew
+		SessionListNew.BugId = BugNameNew
+		SessionListNew.SessionKey = SessionidNew
 
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.BotKey(ConnTime, SessionKey, BugId) VALUES(?, ?, ?);", BotKeyList.ConnTime, BotKeyList.BugId, BotKeyList.SessionKey)
+		_, err := db.Query("INSERT INTO testdb.SessionList('Timestamp', 'BugName', 'SessionId') VALUES(?, ?, ?);", SessionListNew.ConnTime, SessionListNew.BugId, SessionListNew.SessionKey)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
 
 		// Log message
-		log.Println("created BugKey entry", BotKeyList)
+		log.Println("created SessionList entry", SessionListNew)
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-		c.JSON(http.StatusCreated, &BotKeyList)
+		c.JSON(http.StatusCreated, &SessionListNew)
 	}
 }

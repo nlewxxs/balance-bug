@@ -25,19 +25,19 @@ func displayBotKey(c *gin.Context) {
 	}
 
 	// Get all rows and add into items
-	items := make([]BotKey, 0)
+	SessionListOverall := make([]SessionListStruct, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			item := BotKey{}
-			if err := rows.Scan(&item.ConnTime, &item.BugId, &item.SessionKey); err != nil {
+			SessionListRow := SessionListStruct{}
+			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
-			item.SessionKey = strings.TrimSpace(item.SessionKey)
-			items = append(items, item)
+			SessionListRow.SessionId = strings.TrimSpace(SessionListRow.SessionId)
+			SessionListOverall = append(SessionListOverall, SessionListRow)
 		}
 	}
 }
@@ -45,7 +45,7 @@ func displayBotKey(c *gin.Context) {
 // Delete all elements
 // from DB
 func emptyTable() {
-	db.Exec("DELETE from testdb.BotKey;")
+	db.Exec("DELETE from testdb.SessionList;")
 
 	// Reset id counter
 	//db.Exec("ALTER SEQUENCE list_id_seq RESTART WITH 1;")
@@ -60,8 +60,8 @@ func SetupRoutes() *gin.Engine {
 	router.Use(cors.New(config))
 
 	// Set routes for API
-	router.GET("/DisplayBotKey", DisplayBotKey)
-	router.GET("/BotKey/create/:ConnTime/:BugId/:SessionKey", CreateBotEntry)
+	router.GET("/DisplaySessionList", DisplaySessionList)
+	router.GET("/BotKey/create", CreateBotEntry)
 	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
 	// // router.GET("/item/delete/:id", DeleteTodoItem)
 
@@ -94,7 +94,7 @@ func TestDisplayBotKey(t *testing.T) {
 
 	// Expected body
 	body := gin.H{
-		"BotKeys": []BotKey{},
+		"SessionList": []SessionListStruct{},
 	}
 
 	// /items GET request and check 200 OK status code
@@ -102,9 +102,9 @@ func TestDisplayBotKey(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Obtain response
-	var response map[string][]BotKey
+	var response map[string][]SessionListStruct
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
-	value, exists := response["BotKeys"]
+	value, exists := response["SessionList"]
 
 	// No error in response
 	assert.Nil(t, err)
@@ -113,7 +113,7 @@ func TestDisplayBotKey(t *testing.T) {
 	assert.True(t, exists)
 
 	// Assert response
-	assert.Equal(t, body["BotKeys"], value)
+	assert.Equal(t, body["SessionList"], value)
 }
 
 // // Test for successfull create

@@ -1,6 +1,6 @@
-CREATE table BotKey (
-    ConnTime TIMESTAMP NOT NULL,
-    SessionKey char(100) NOT NULL,
-    BugId char(100) NOT NULL,
-    PRIMARY KEY (ConnTime, BugId, SessionKey)
+CREATE table SessionList (
+    'TimeStamp' TIMESTAMP NOT NULL,
+    'BugName' char(100) NOT NULL,
+    'SessionId' char(100) NOT NULL,
+    PRIMARY KEY ('TimeStamp', 'BugName', 'SessionId')
 ) ENGINE=InnoDB;
