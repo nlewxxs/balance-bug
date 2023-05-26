@@ -9,7 +9,8 @@ function CreateSession() {
     const navigate = useNavigate();
     const errors = {
         taken: "Name is currently in use",
-        empty: "Please enter a name"
+        empty: "Please enter a name",
+        fetch: "There was an error connecting to the database"
     };
 
     const checkIfTaken = () => {
@@ -64,8 +65,11 @@ function CreateSession() {
             console.log(data);
             setTimeout(() => {
                 setLoading(response.isLoading);
-                navigateToPath(data.BugId,data.SessionKey);
+                if(!response.error) { navigateToPath(data.BugId,data.SessionKey); }
             }, 300);
+        })
+        .catch( error => {
+            setErrorMsgs(errors.fetch);
         });
     };
 
