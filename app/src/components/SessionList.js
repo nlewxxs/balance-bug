@@ -9,7 +9,7 @@ const SessionList = (props) => {
     navigate(`/Display/`+ name + "?=" + id);
   };
   
-  // console.log("Sessions", sessions);
+  console.log("Sessions", sessions);
 
   return (
       <div className="session_list">

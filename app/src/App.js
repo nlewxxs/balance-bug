@@ -7,14 +7,15 @@ import './App.css';
 // import logo from './logo.svg';
 
 function App() {
+    
   return (
     <Router>
       <div className="App">
         <Routes>
           <Route exact path = "/" element={<MainMenu />}/>
-          <Route exact path = "/Create" element={<CreateSession />}/>
-          <Route exact path = "/Load" element={<LoadSession />}/>
-          <Route exact path = "/Display/:id" element={<DisplayGraph />}/>
+          <Route path = "/Create" element={<CreateSession />}/>
+          <Route path = "/Load" element={<LoadSession />}/>
+          <Route path = "/Display/:id" element={<DisplayGraph />}/>
         </Routes>
         </div>
     </Router>

@@ -33,13 +33,15 @@ div.selection {
 } */
 
 table {
+  display: block;
+  height: 500px;
+  overflow-y: scroll;
   width: 100%;
   min-height: 70%;
   border-collapse: separate;
   border-spacing: 0;
   margin-bottom: 10px;
   border-radius: 20px;
-  overflow: hidden;
   border: 5px solid whitesmoke;
 }
 
@@ -52,7 +54,6 @@ td, th{
   border: 2px solid whitesmoke;
   border-bottom: none;
   border-right: none;
-
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 5px;
