@@ -42,6 +42,7 @@ func SetupMySQL() {
 }
 
 // CRUD: Create Read Update Delete API Format
+//DISPLAY SESSION IDs
 func DisplaySessionList(c *gin.Context) {
 	rows, err := db.Query("SELECT * FROM testdb.SessionList")
 	if err != nil {
@@ -93,7 +94,7 @@ func CreateBugEntry(c *gin.Context) {
 		SessionListNew.SessionId = SessionIdNew
 
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.SessionList('Timestamp', 'BugName', 'SessionId') VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
+		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`) VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})

@@ -87,24 +87,24 @@ func TestMain(t *testing.T) {
 // Test for successfull GET
 // response from /items
 // with no elements
-func TestDisplayBotKey(t *testing.T) {
+func TestDisplaySessionList(t *testing.T) {
 	// Delete all elements
 	// from DB
 	emptyTable()
 
 	// Expected body
 	body := gin.H{
-		"SessionList": []SessionListStruct{},
+		"SessionLists": []SessionListStruct{},
 	}
 
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/DisplayBotKey")
+	w := performRequest(router, "GET", "/DisplaySessionList")
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Obtain response
 	var response map[string][]SessionListStruct
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
-	value, exists := response["SessionList"]
+	value, exists := response["SessionLists"]
 
 	// No error in response
 	assert.Nil(t, err)
@@ -113,7 +113,7 @@ func TestDisplayBotKey(t *testing.T) {
 	assert.True(t, exists)
 
 	// Assert response
-	assert.Equal(t, body["SessionList"], value)
+	assert.Equal(t, body["SessionLists"], value)
 }
 
 // // Test for successfull create
