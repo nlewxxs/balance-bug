@@ -61,7 +61,7 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for API
 	router.GET("/DisplaySessionList", DisplaySessionList)
-	router.GET("/BotKey/create", CreateBotEntry)
+	router.GET("/BotKey/create", CreateBugEntry)
 	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
 	// // router.GET("/item/delete/:id", DeleteTodoItem)
 
@@ -125,10 +125,10 @@ func TestBotKeyCreate(t *testing.T) {
 
 	// Expected body
 	body := gin.H{
-		"BotKeyCreation": BotKey{
-			ConnTime: "2006-01-02 15:04:05",
-			BugId: "2",
-			SessionKey: "3",
+		"SessionListCreation": SessionListStruct{
+			TimeStamp: "2006-01-02 15:04:05",
+			BugName: "2",
+			SessionId: "3",
 		},
 	}
 
@@ -137,12 +137,13 @@ func TestBotKeyCreate(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response
-	var response map[string]BotKey
+	var response map[string]SessionListStruct
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
 	value, exists := response["BotKeyCreation"]
 
 	// No error in response
 	assert.Nil(t, err)
+	
 
 	// Check if response exits
 	assert.True(t, exists)

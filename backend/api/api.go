@@ -62,38 +62,38 @@ func DisplaySessionList(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
 			SessionListRow.SessionId = strings.TrimSpace(SessionListRow.SessionId)
-			SessionListStructs = append(SessionListStructs, SessionListRow)
+			SessionLists = append(SessionLists, SessionListRow)
 		}
 	}
 
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, &SessionListStructs)
+	c.JSON(http.StatusOK, &SessionLists)
 }
 
 func CreateBugEntry(c *gin.Context) {
 	TimeStampNew := c.Query("time")
-	BugNameNew := c.Query("bugid")
-	SessionidNew := uuid.New().String()
+	BugNameNew := c.Query("bugname")
+	SessionIdNew := uuid.New().String()
 
 	// Validate entry
 	if len(TimeStampNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
-	} else if len(BugIdNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.BugId"})
-	} else if len(SessionKeyNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionKey"})
+	} else if len(BugNameNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.bugname"})
+	} else if len(SessionIdNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionIdNew"})
 	} else {
 		// Create todo item
-		var SessionListStruct SessionListNew
+		var SessionListNew SessionListStruct
 
-		SessionListNew.ConnTime = TimeStampNew
-		SessionListNew.BugId = BugNameNew
-		SessionListNew.SessionKey = SessionidNew
+		SessionListNew.TimeStamp = TimeStampNew
+		SessionListNew.BugName = BugNameNew
+		SessionListNew.SessionId = SessionIdNew
 
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.SessionList('Timestamp', 'BugName', 'SessionId') VALUES(?, ?, ?);", SessionListNew.ConnTime, SessionListNew.BugId, SessionListNew.SessionKey)
+		_, err := db.Query("INSERT INTO testdb.SessionList('Timestamp', 'BugName', 'SessionId') VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
