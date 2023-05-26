@@ -1,6 +1,6 @@
 CREATE table SessionList (
-    `TimeStamp` TIMESTAMP NOT NULL,
-    `BugName` char(100) NOT NULL,
-    `SessionId` char(100) NOT NULL,
+    `TimeStamp` TIMESTAMP,
+    `BugName` char(100),
+    `SessionId` char(100),
     PRIMARY KEY (`TimeStamp`, `BugName`, `SessionId`)
 ) ENGINE=InnoDB;
