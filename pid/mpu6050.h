@@ -12,6 +12,7 @@ class mpu6050 {
         double getPitch();
         double getRoll();
         double getYaw();
+        unsigned long getElapsedTime();
         double getRawXAccel();
         double getRawYAccel();
         double getRawXGyro();

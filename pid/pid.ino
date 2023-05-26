@@ -1,15 +1,12 @@
 #include <Wire.h>
 #include "mpu6050.h"
 
-const int mpu_addy = 0x68;  // designated mpu_addy I2C address
 
-
-int calibrate = 0;  // calibration counter 
 mpu6050 mpu = mpu6050();
 
 void setup() {
 
-  Serial.begin(19200);
+  Serial.begin(9600);
   mpu.init();
 
   Serial.println("la mpu esta hablando con el monitor serial!!!");
@@ -38,20 +35,25 @@ void setup() {
 
   mpu.calibrate();
   delay(20);
-
 }
 
 void loop() {
-  
+
   // reading accelerometer data
   mpu.update();
+  // Serial.println("test");
 
-  Serial.println(mpu.getPitch());
+  Serial.print(mpu.getPitch());
+  Serial.print("\t");
+  Serial.print(mpu.getYaw());
+  Serial.print("\t");
+  Serial.print(mpu.getRoll());
+  Serial.print("\t");
+  Serial.println(mpu.getElapsedTime());
 
   //-------------------- PUT PID LOOP HERE ----------------------//
 
 
 
   //--------------------------------------------------------------//
-
 }

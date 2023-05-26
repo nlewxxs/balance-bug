@@ -14,8 +14,13 @@ double pitch, roll, yaw;
 
 const int mpu_addr = 0x68;
 
-void mpu6050::init(){
+unsigned long previousTime, currentTime, elapsedTimeTemp = 0;
+double elapsedTime;
 
+double accAngleX, accAngleY;
+double gyroAngleX, gyroAngleY;
+
+void mpu6050::init(){
     Wire.begin();
     Wire.beginTransmission(mpu_addr);
     Wire.write(0x6B); // writing to PWR_MGMT_1 register
@@ -25,15 +30,14 @@ void mpu6050::init(){
 
 void mpu6050::calibrate() {
 
-    int c;
-    c = calibration_span;
+    int c = 0;
 
-    while (c < 200){
+    while (c < calibration_span) {
 
         Wire.beginTransmission(mpu_addr);
         Wire.write(0x3B);
         Wire.endTransmission(false);
-        Wire.requestFrom(mpu_addr, 6, 1);
+        Wire.requestFrom(mpu_addr, 6, true);
 
         AccX = ((Wire.read() << 8) | Wire.read()) / 16384.0;
         AccY = ((Wire.read() << 8) | Wire.read()) / 16384.0;
@@ -46,42 +50,40 @@ void mpu6050::calibrate() {
 
     AccErrorX = AccErrorX / calibration_span;
     AccErrorY = AccErrorY / calibration_span;
+    c = 0;
 
-    c = calibration_span;
-
-    while (c < 200){
+    while (c < calibration_span) {
         
         Wire.beginTransmission(mpu_addr);
         Wire.write(0x43);
         Wire.endTransmission(false);
-        Wire.requestFrom(mpu_addr, 6, 1);
+        Wire.requestFrom(mpu_addr, 6, true);
+        GyroX = (Wire.read() << 8 | Wire.read()) / 131.0;
+        GyroY = (Wire.read() << 8 | Wire.read()) / 131.0;
+        GyroZ = (Wire.read() << 8 | Wire.read()) / 131.0;
 
-        GyroX = Wire.read() << 8 | Wire.read();
-        GyroY = Wire.read() << 8 | Wire.read();
-        GyroZ = Wire.read() << 8 | Wire.read();
-
-        GyroErrorX = GyroErrorX + (GyroX / 131.0);
-        GyroErrorY = GyroErrorY + (GyroY / 131.0);
-        GyroErrorZ = GyroErrorZ + (GyroZ / 131.0);
+        GyroErrorX = GyroX + GyroErrorX; 
+        GyroErrorY = GyroY + GyroErrorY; 
+        GyroErrorZ = GyroZ + GyroErrorZ;
+        c++;
     }
 
     GyroErrorX = GyroErrorX / calibration_span;
     GyroErrorY = GyroErrorY / calibration_span;
     GyroErrorZ = GyroErrorZ / calibration_span;
-    c++;
+    // c++;
+}
+
+unsigned long mpu6050::getElapsedTime() {
+  return elapsedTime;
 }
 
 void mpu6050::update(){
 
-    double previousTime, currentTime, elapsedTime;
-
-    double accAngleX, accAngleY;
-    double gyroAngleX, gyroAngleY;
-
     Wire.beginTransmission(mpu_addr);
     Wire.write(0x3B);                     
     Wire.endTransmission(false);          
-    Wire.requestFrom(mpu_addr, 6, 1);
+    Wire.requestFrom(mpu_addr, 6, true);
 
     // normalising
     // for a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
@@ -94,14 +96,16 @@ void mpu6050::update(){
     accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI) - AccErrorY;
 
     // reading gyro data 
-    previousTime = currentTime;                         
-    currentTime = millis();                             
-    elapsedTime = (currentTime - previousTime) / 1000;  
+    previousTime = currentTime;
+    currentTime = millis();
+    // elapsedTime = (currentTime - previousTime) / 1000;
+    elapsedTimeTemp = (currentTime - previousTime);
+    elapsedTime = elapsedTimeTemp / 1000.0;
 
     Wire.beginTransmission(mpu_addr);
     Wire.write(0x43); 
     Wire.endTransmission(false);
-    Wire.requestFrom(mpu_addr, 6, 1); 
+    Wire.requestFrom(mpu_addr, 6, true); 
 
     // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
     GyroX = (Wire.read() << 8 | Wire.read()) / 131.0; 
@@ -115,7 +119,7 @@ void mpu6050::update(){
 
     gyroAngleX = gyroAngleX + GyroX * elapsedTime; 
     gyroAngleY = gyroAngleY + GyroY * elapsedTime;
-    yaw =  yaw + GyroZ * elapsedTime;
+    yaw = yaw + GyroZ * elapsedTime;
 
     // Complementary filter
     roll = 0.98 * gyroAngleX + 0.02 * accAngleX;
