@@ -70,7 +70,7 @@ func DisplaySessionList(c *gin.Context) {
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, gin.H{"SessionLists": SessionLists})//&SessionLists)
+	c.JSON(http.StatusOK, &SessionLists)
 }
 
 func CreateBugEntry(c *gin.Context) {

@@ -93,9 +93,9 @@ func TestDisplaySessionList(t *testing.T) {
 	emptyTable()
 
 	// Expected body
-	body := gin.H{
-		"SessionLists": []SessionListStruct{},
-	}
+	// body := gin.H{
+	// 	"SessionLists": []SessionListStruct{},
+	// }
 
 	// /items GET request and check 200 OK status code
 	w := performRequest(router, "GET", "/DisplaySessionList")
@@ -113,7 +113,7 @@ func TestDisplaySessionList(t *testing.T) {
 	assert.True(t, exists)
 
 	// Assert response
-	assert.Equal(t, body["SessionLists"], value)
+	assert.Equal(t, []SessionListStruct{}, value)
 }
 
 // // Test for successfull create
