@@ -18,7 +18,7 @@ import (
 type SessionListStruct struct {
 	TimeStamp    	  	string `json:"TimeStamp"`
 	BugName      		string  `json:"BugName"`
-	SessionId 			string  `json:"Sessionid"`
+	SessionId 			string  `json:"SessionId"`
 
 }
 
