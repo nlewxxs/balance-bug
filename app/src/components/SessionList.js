@@ -23,11 +23,13 @@ const SessionList = (props) => {
           </thead>
           {sessions && 
           <tbody> 
-            {sessions.map(session => (
-              <tr className="session_row" key={session.SessionKey} onClick={() => handleClick(session.BugId, session.SessionKey)}>
-                  <td>{ session.BugId }</td>
-                  <td>{ session.SessionKey }</td>
-                  <td>{ session.ConnTime }</td>
+            {sessions
+            .sort((a, b) => new Date(b.TimeStamp) - new Date(a.TimeStamp)) 
+            .map(session => (
+              <tr className="session_row" key={session.SessionId} onClick={() => handleClick(session.BugName, session.SessionId)}>
+                  <td>{ session.BugName }</td>
+                  <td>{ session.SessionId.substring(0,8) }</td>
+                  <td>{ session.TimeStamp }</td>
                 </tr>
           ))}
           </tbody>}

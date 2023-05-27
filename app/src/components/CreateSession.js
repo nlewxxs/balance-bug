@@ -30,7 +30,7 @@ function CreateSession() {
         //  });
 
         return false;
-    };
+};
 
     const navigateToPath = (name, id) => {
         const path = "/Display/" + name + "?=" + id;
@@ -58,7 +58,7 @@ function CreateSession() {
 
         // Make api call
         setLoading(true);
-        const url = `http://localhost:8081/BotKey/create?time=${dateTime}&bugid=${sessionName}`;
+        const url = `http://localhost:8081/Session/Create?TimeStamp=${dateTime}&BugName=${sessionName}`;
         fetchData(url)
         .then( response => {
             const data = response.data;
@@ -66,6 +66,8 @@ function CreateSession() {
             setTimeout(() => {
                 setLoading(response.isLoading);
                 if(!response.error) { navigateToPath(data.BugId,data.SessionKey); }
+                else { setErrorMsgs( { err: "fetch", msg: errors.fetch } );  }
+                console.log(errorMsgs);
             }, 300);
         })
         .catch( error => {
@@ -94,6 +96,7 @@ function CreateSession() {
                     value={sessionName}
                     onChange={(e) => setSessionName(e.target.value) }
                 />
+                {renderErrorMsg("fetch")}
                 {renderErrorMsg("empty")}
                 {renderErrorMsg("taken")}
                 <input type="submit" value="Start Session"/>

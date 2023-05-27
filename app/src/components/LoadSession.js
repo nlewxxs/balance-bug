@@ -11,12 +11,11 @@ function LoadSession() {
 //    {name: "bug3", id: "101", date: "2023-05-12 18:00:00.00"}
 //    ]);
 
-    const url = "http://localhost:8081/DisplayBotKey"
+    const url = "http://localhost:8081/Session/DisplayAll"
     useEffect( () => {
         setLoading(true);
         fetchData(url)
         .then(response => {
-            // console.log(response.data);
             setSessions(response.data);
             setTimeout(() => {setLoading(response.isLoading); }, 300);
         })
@@ -30,7 +29,7 @@ function LoadSession() {
     ) : (
     <div className="selection">
       <h1>Select Session</h1>
-      <SessionList sessions={sessions} />
+      {<SessionList sessions={sessions} />}
       <button className="create_btn">
           <Link to="/Create">Create New Session</Link>
       </button>
