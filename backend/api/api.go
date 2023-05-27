@@ -73,9 +73,9 @@ func DisplaySessionList(c *gin.Context) {
 	c.JSON(http.StatusOK, &SessionLists)
 }
 
-func CreateBugEntry(c *gin.Context) {
-	TimeStampNew := c.Query("time")
-	BugNameNew := c.Query("bugname")
+func CreateSession(c *gin.Context) {
+	TimeStampNew := c.Query("TimeStamp")
+	BugNameNew := c.Query("BugName")
 	SessionIdNew := uuid.New().String()
 
 	// Validate entry
