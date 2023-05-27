@@ -10,7 +10,7 @@ Year 2 EEE/EIE project
 
 | Jacob | JJ | Luca | Ben | Ahmad | Nik |
 |:--------:|:---------:|:--------:|:---------:|:---------:|:---------:|
-| | 27th to 28th March | | 27th to 28th March | | 20th to 21st March |
+| | 27th to 28th March | | | | 20th to 21st March |
 
 
 
