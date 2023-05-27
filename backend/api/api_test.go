@@ -60,8 +60,8 @@ func SetupRoutes() *gin.Engine {
 	router.Use(cors.New(config))
 
 	// Set routes for API
-	router.GET("/DisplaySessionList", DisplaySessionList)
-	router.GET("/BotKey/create", CreateBugEntry)
+	router.GET("/Session/DisplayAll", DisplaySessionList)
+	router.GET("/Session/Create", CreateSession)
 	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
 	// // router.GET("/item/delete/:id", DeleteTodoItem)
 
@@ -143,7 +143,6 @@ func TestDisplaySessionList(t *testing.T) {
 
 // 	// No error in response
 // 	assert.Nil(t, err)
-	
 
 // 	// Check if response exits
 // 	assert.True(t, exists)
