@@ -1,0 +1,7 @@
+|spi_slave
+clk => ~NO_FANOUT~
+SCK => ~NO_FANOUT~
+MISO <= <VCC>
+SS => ~NO_FANOUT~
+
+
