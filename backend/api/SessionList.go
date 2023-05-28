@@ -53,7 +53,7 @@ func DisplaySessionList(c *gin.Context) {
 	c.JSON(http.StatusOK, &SessionLists)
 }
 
-func CreateSession(c *gin.Context) {
+func AddSession(c *gin.Context) {
 	TimeStampNew := c.Query("TimeStamp")
 	BugNameNew := c.Query("BugName")
 	SessionIdNew := uuid.New().String()

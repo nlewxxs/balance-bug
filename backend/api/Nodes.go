@@ -47,6 +47,10 @@ func CreateNodeTable (c *gin.Context) {
 //DISPLAY SESSION IDs
 func DisplayAllNodes(c *gin.Context) {
 	SessionId := c.Query("SessionId")
+	
+	if len(SessionId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a valid SessionId!"})
+	}
 
 	SqlQuery := fmt.Sprintf("SELECT * FROM testdb.%s_nodes", SessionId)
 	rows, err := db.Query(SqlQuery)
@@ -78,39 +82,37 @@ func DisplayAllNodes(c *gin.Context) {
 	c.JSON(http.StatusOK, &NodeLists)
 }
 
-// func CreateSession(c *gin.Context) {
-// 	TimeStampNew := c.Query("TimeStamp")
-// 	BugNameNew := c.Query("BugName")
-// 	SessionIdNew := uuid.New().String()
+func AddSession(c *gin.Context) {
+	var NodeNew NodeStruct
 
-// 	// Validate entry
-// 	if len(TimeStampNew) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
-// 	} else if len(BugNameNew) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.bugname"})
-// 	} else if len(SessionIdNew) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionIdNew"})
-// 	} else {
-// 		// Create todo item
-// 		var SessionListNew SessionListStruct
+	SessionId := c.Query("SessionId")
+	NodeNew.NodeId := c.Query("NodeId")
+	NodeNew.XCoord := c.Query("XCoord")
+	NodeNew.YCoord := c.Query("YCoordNew")
 
-// 		SessionListNew.TimeStamp = TimeStampNew
-// 		SessionListNew.BugName = BugNameNew
-// 		SessionListNew.SessionId = SessionIdNew
+	// Validate entry
+	if len(NodeNew.NodeId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a NodeId"})
+	} else if len(XCoordNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a XCoord"})
+	} else if len(YCoordNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a YCoord"})
+	} else if len(SessionId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
+	}else {
+		// Insert item to DB
+		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`) VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
+		if err != nil {
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		}
 
-// 		// Insert item to DB
-// 		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`) VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
-// 		if err != nil {
-// 			fmt.Println(err.Error())
-// 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-// 		}
+		// Log message
+		log.Println("created SessionList entry", SessionListNew)
 
-// 		// Log message
-// 		log.Println("created SessionList entry", SessionListNew)
-
-// 		// Return success response
-// 		c.Header("Access-Control-Allow-Origin", "*")
-// 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-// 		c.JSON(http.StatusCreated, &SessionListNew)
-// 	}
-// }
+		// Return success response
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+		c.JSON(http.StatusCreated, &SessionListNew)
+	}
+}

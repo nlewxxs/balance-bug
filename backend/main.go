@@ -33,7 +33,7 @@ func SetupRoutes() *gin.Engine {
 
 	//SessionList Paths
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
-	router.GET("/Session/Create", api.CreateSession)
+	router.GET("/Session/Add", api.CreateSession)
 
 
 	//Node Paths
