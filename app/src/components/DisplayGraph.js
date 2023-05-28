@@ -9,8 +9,10 @@ function DisplayGraph() {
     return (
       <div className="display_page">
         <h1 className="title">GRAPH FILLER</h1>
-        <p> {id} </p>
-        {/* Display Graph Info */}
+        <div className="graph">
+            <p> {id} </p>
+            {/* Display Graph Info */}
+        </div>
         <div className="btn_container">
             <div className="load_btn">
               <button className="btn">
