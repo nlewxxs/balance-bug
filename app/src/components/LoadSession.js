@@ -27,15 +27,21 @@ function LoadSession() {
     { isLoading ? (
         <div> Loading... </div>
     ) : (
-    <div className="selection">
-      <h1>Select Session</h1>
+    <div className="load_page">
+      <h1 className="title">Select Session</h1>
       {<SessionList sessions={sessions} />}
-      <button className="create_btn">
-          <Link to="/Create">Create New Session</Link>
-      </button>
-      <button className="back_btn">
-          <Link to="/">Back to Menu</Link>
-      </button>
+      <div className="btn_container">
+          <div className="create_btn">
+              <button className="btn">
+                  <Link to="/Create" className="btn_link">Create Session</Link>
+              </button>
+          </div>
+          <div className="back_btn">
+              <button className="btn">
+                  <Link to="/" className="btn_link">Back to Menu</Link>
+              </button>
+          </div>
+      </div>
     </div>
     )}
     </div>

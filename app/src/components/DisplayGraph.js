@@ -7,16 +7,22 @@ function DisplayGraph() {
     // make api call
 
     return (
-      <div className="GraphPage">
-        <h1>GRAPH FILLER</h1>
+      <div className="display_page">
+        <h1 className="title">GRAPH FILLER</h1>
         <p> {id} </p>
         {/* Display Graph Info */}
-        <button className="load_btn">
-          <Link to="/Load">Change Session</Link> 
-        </button>
-        <button className="back_btn">
-           <Link to="/">Back to Menu</Link> 
-        </button>
+        <div className="btn_container">
+            <div className="load_btn">
+              <button className="btn">
+                <Link to={"/Load"} className="btn_link">Load Session</Link>
+              </button>
+            </div>
+            <div className="back_btn">
+              <button className="btn">
+                <Link to="/" className="btn_link">Back to Menu</Link> 
+              </button>
+            </div>
+        </div>
       </div>
       
     )

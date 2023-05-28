@@ -14,7 +14,7 @@ function CreateSession() {
     };
 
     const checkIfTaken = () => {
-        // Realistically won't need this due to the id/SessionKey
+        // Realistically won't need this due to the id/SessionName
 
         // Make api call
         //  fetchData(`api/isnametaken?name=${sessionName}`)
@@ -65,7 +65,7 @@ function CreateSession() {
             console.log(data);
             setTimeout(() => {
                 setLoading(response.isLoading);
-                if(!response.error) { navigateToPath(data.BugId,data.SessionKey); }
+                if(!response.error) { navigateToPath(data.BugName,data.SessionId); }
                 else { setErrorMsgs( { err: "fetch", msg: errors.fetch } );  }
                 console.log(errorMsgs);
             }, 300);
@@ -86,27 +86,34 @@ function CreateSession() {
         {isLoading ? (
             <div>Loading...</div>
         ) : (
-            <div>
-            <h1>Create New Session</h1>
+            <div className="create_page">
+            <h1 className="title">Create Session</h1>
+            <div className="form_container">
             <form onSubmit={handleSubmit}>
-                <label>Session Name:</label>
-                <input
+                <label className="input_label">SESSION NAME</label>
+                <input className="input_box"
                     type="text"
                     placeholder="Enter a name"
                     value={sessionName}
-                    onChange={(e) => setSessionName(e.target.value) }
-                />
+                    onChange={(e) => setSessionName(e.target.value) } />
                 {renderErrorMsg("fetch")}
                 {renderErrorMsg("empty")}
                 {renderErrorMsg("taken")}
-                <input type="submit" value="Start Session"/>
+                <input className="input_btn" type="submit" value="Start Session"/>
             </form>
-            <button className = "load_btn">
-                <Link to={"/Load"}>Load Previous Session</Link>
-            </button>
-            <button className = "back_btn">
-                <Link to={"/"}>Back to Menu</Link>
-            </button>
+            </div>
+            <div className="btn_container">
+                <div className="load_btn">
+                  <button className="btn">
+                    <Link to="/Load" className="btn_link">Load Session</Link>
+                  </button>
+                </div>
+                <div className="back_btn">
+                  <button className="btn">
+                      <Link to="/" className="btn_link">Back to Menu</Link>
+                    </button>
+                </div>
+            </div>
             </div>
         )}
       </div>
