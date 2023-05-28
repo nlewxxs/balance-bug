@@ -23,9 +23,10 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for API
 	router.GET("/Session/DisplayAll", DisplaySessionList)
-	router.GET("/Session/Add", CreateSession)
+	router.GET("/Session/Add", AddSession)
 
 	router.GET("/Nodes/CreateTable", CreateNodeTable)
+	router.GET("/Nodes/Add", AddNode)
 	router.GET("/Nodes/DisplayAll", DisplayAllNodes)
 	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
 	// // router.GET("/item/delete/:id", DeleteTodoItem)

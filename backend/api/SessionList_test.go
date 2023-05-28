@@ -45,7 +45,7 @@ func TestEmptyDisplaySessionList(t *testing.T) {
 
 // // Test for successfull create
 // // response from /item/create
-func TestBotKeyCreate(t *testing.T) {
+func TestAddSession(t *testing.T) {
 	// Delete all elements
 	// from DB
 	emptySessionListTable()
@@ -58,8 +58,7 @@ func TestBotKeyCreate(t *testing.T) {
 	}
 
 	// /item/create GET request and check 200 OK status code
-	///Session/Create?TimeStamp=${dateTime}&BugName=${sessionName}
-	w := performRequest(router, "GET", "/Session/Create?TimeStamp=2006-01-02 15:04:05&BugName=2")
+	w := performRequest(router, "GET", "/Session/Add?TimeStamp=2006-01-02 15:04:05&BugName=2")
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response

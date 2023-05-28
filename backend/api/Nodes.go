@@ -22,14 +22,7 @@ type NodeStruct struct {
 func CreateNodeTable (c *gin.Context) {
 	SessionId := c.Query("SessionId")
 
-	SqlCommand := fmt.Sprintf(`
-			CREATE TABLE 
-			IF NOT EXISTS testdb.%s_nodes 
-		   (`NodeId` char(100) NOT NULL, 
-			`XCoord` char(100) NOT NULL, 
-			`YCoord` char(100) NOT NULL, 
-			PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) 
-			ENGINE=InnoDB;`, SessionId)
+	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS testdb.%s_nodes (`NodeId` char(100) NOT NULL, `XCoord` char(100) NOT NULL, `YCoord` char(100) NOT NULL, PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) ENGINE=InnoDB;", SessionId)
 	
 	_, err := db.Exec(SqlCommand)
     if err != nil {
@@ -39,7 +32,7 @@ func CreateNodeTable (c *gin.Context) {
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, gin.H{"message": "successfully created new table"})
+	c.JSON(http.StatusCreated, gin.H{"message": "successfully created new table"})
 }
 
 
@@ -82,37 +75,39 @@ func DisplayAllNodes(c *gin.Context) {
 	c.JSON(http.StatusOK, &NodeLists)
 }
 
-func AddSession(c *gin.Context) {
+func AddNode(c *gin.Context) {
 	var NodeNew NodeStruct
 
 	SessionId := c.Query("SessionId")
-	NodeNew.NodeId := c.Query("NodeId")
-	NodeNew.XCoord := c.Query("XCoord")
-	NodeNew.YCoord := c.Query("YCoordNew")
+	NodeNew.NodeId = c.Query("NodeId")
+	NodeNew.XCoord = c.Query("XCoord")
+	NodeNew.YCoord = c.Query("YCoord")
 
 	// Validate entry
 	if len(NodeNew.NodeId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a NodeId"})
-	} else if len(XCoordNew) == 0 {
+	} else if len(NodeNew.XCoord) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a XCoord"})
-	} else if len(YCoordNew) == 0 {
+	} else if len(NodeNew.YCoord) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a YCoord"})
 	} else if len(SessionId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
 	}else {
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`) VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
+		SqlCommand := fmt.Sprintf("INSERT INTO testdb.%s_nodes (`NodeId`, `XCoord`, `YCoord`) VALUES(?,?,?);", SessionId)
+
+		_, err := db.Query(SqlCommand, NodeNew.NodeId, NodeNew.XCoord, NodeNew.YCoord)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
 
 		// Log message
-		log.Println("created SessionList entry", SessionListNew)
+		fmt.Println("created SessionList entry", NodeNew)
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-		c.JSON(http.StatusCreated, &SessionListNew)
+		c.JSON(http.StatusCreated, &NodeNew)
 	}
 }

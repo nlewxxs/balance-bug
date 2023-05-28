@@ -4,16 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+	"fmt"
 
 	"github.com/stretchr/testify/assert"
 
 	"github.com/gin-gonic/gin"
 )
 
-// func emptySessionListTable(SessionId string) {
-// 	SqlCommand := fmt.Sprintf("DELETE from testdb.SessionList_nodes;", SessionId)
-// 	db.Exec(SqlCommand)
-// }
+func emptyNodeTable(SessionId string) {
+	SqlCommand := fmt.Sprintf("DELETE from testdb.%s_nodes;", SessionId)
+	_, err = db.Exec(SqlCommand)
+	if err != nil{
+		panic("Error with dB")
+	}
+}
 
 
 func TestCreateNodeTable(t *testing.T) {
@@ -28,7 +32,7 @@ func TestCreateNodeTable(t *testing.T) {
 
 	// /items GET request and check 200 OK status code
 	w := performRequest(router, "GET", "/Nodes/CreateTable?SessionId=Test123")
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response
 	var response map[string]string
@@ -43,4 +47,41 @@ func TestCreateNodeTable(t *testing.T) {
 
 	// Assert response
 	assert.Equal(t, body["message"], value)
+}
+
+func TestAddNode(t *testing.T) {
+	// Delete all elements
+	// from DB
+	//emptySessionListTable()
+
+	// Expected body
+	expected := NodeStruct{
+		NodeId: "Node1",
+		XCoord: "0",
+		YCoord: "0",
+	}
+
+	emptyNodeTable("Test123")
+
+	// /items GET request and check 200 OK status code
+	w := performRequest(router, "GET", "/Nodes/Add?SessionId=Test123&NodeId=Node1&XCoord=0&YCoord=0")
+	assert.Equal(t, http.StatusCreated, w.Code)
+
+	// Obtain response
+	var response NodeStruct
+	err := json.Unmarshal([]byte(w.Body.String()), &response)
+	
+	exists := false
+	if ((len(response.NodeId) > 0) && (len(response.XCoord) > 0) && (len(response.YCoord) > 0)) {
+		exists = true 
+	}
+
+	// No error in response
+	assert.Nil(t, err)
+
+	// Check if response exits
+	assert.True(t, exists)
+
+	// Assert response
+	assert.Equal(t, expected, response)
 }
