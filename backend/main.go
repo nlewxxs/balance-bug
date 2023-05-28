@@ -30,8 +30,18 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for API
 	// Update to POST, UPDATE, DELETE etc
+
+	//SessionList Paths
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
 	router.GET("/Session/Create", api.CreateSession)
+
+
+	//Node paths
+	router.GET("/Nodes/CreateTable", api.CreateNodeTable)
+	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
+
+
+
 	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
 	// router.GET("/item/delete/:id", api.DeleteTodoItem)
 
