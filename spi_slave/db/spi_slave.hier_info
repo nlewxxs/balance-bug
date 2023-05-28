@@ -1,7 +1,7 @@
 |spi_slave
-clk => ~NO_FANOUT~
+clk => count.CLK
 SCK => ~NO_FANOUT~
-MISO <= <VCC>
+MISO <= count.DB_MAX_OUTPUT_PORT_TYPE
 SS => ~NO_FANOUT~
 
 

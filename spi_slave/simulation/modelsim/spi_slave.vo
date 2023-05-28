@@ -17,7 +17,7 @@
 // PROGRAM "Quartus Prime"
 // VERSION "Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition"
 
-// DATE "05/28/2023 01:51:06"
+// DATE "05/28/2023 10:59:04"
 
 // 
 // Device: Altera 10M50DAF484C7G Package FBGA484
@@ -40,10 +40,10 @@ output 	MISO;
 input 	SS;
 
 // Design Ports Information
-// clk	=>  Location: PIN_P11,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
 // SCK	=>  Location: PIN_AB20,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
 // MISO	=>  Location: PIN_Y19,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: 8mA
 // SS	=>  Location: PIN_AB9,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
+// clk	=>  Location: PIN_P11,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
 
 
 wire gnd;
@@ -57,7 +57,6 @@ assign unknown = 1'bx;
 tri1 devclrn;
 tri1 devpor;
 tri1 devoe;
-wire \clk~input_o ;
 wire \SCK~input_o ;
 wire \SS~input_o ;
 wire \~QUARTUS_CREATED_GND~I_combout ;
@@ -65,6 +64,9 @@ wire \~QUARTUS_CREATED_UNVM~~busy ;
 wire \~QUARTUS_CREATED_ADC1~~eoc ;
 wire \~QUARTUS_CREATED_ADC2~~eoc ;
 wire \MISO~output_o ;
+wire \clk~input_o ;
+wire \count~0_combout ;
+wire \count~q ;
 
 
 hard_block auto_generated_inst(
@@ -72,7 +74,7 @@ hard_block auto_generated_inst(
 	.devclrn(devclrn),
 	.devoe(devoe));
 
-// Location: LCCOMB_X1_Y1_N24
+// Location: LCCOMB_X44_Y41_N24
 fiftyfivenm_lcell_comb \~QUARTUS_CREATED_GND~I (
 // Equation(s):
 // \~QUARTUS_CREATED_GND~I_combout  = GND
@@ -91,7 +93,7 @@ defparam \~QUARTUS_CREATED_GND~I .sum_lutc_input = "datac";
 
 // Location: IOOBUF_X62_Y0_N16
 fiftyfivenm_io_obuf \MISO~output (
-	.i(vcc),
+	.i(\count~q ),
 	.oe(vcc),
 	.seriesterminationcontrol(16'b0000000000000000),
 	.devoe(devoe),
@@ -112,6 +114,42 @@ fiftyfivenm_io_ibuf \clk~input (
 defparam \clk~input .bus_hold = "false";
 defparam \clk~input .listen_to_nsleep_signal = "false";
 defparam \clk~input .simulate_z_as = "z";
+// synopsys translate_on
+
+// Location: LCCOMB_X35_Y1_N20
+fiftyfivenm_lcell_comb \count~0 (
+// Equation(s):
+// \count~0_combout  = !\count~q 
+
+	.dataa(gnd),
+	.datab(gnd),
+	.datac(\count~q ),
+	.datad(gnd),
+	.cin(gnd),
+	.combout(\count~0_combout ),
+	.cout());
+// synopsys translate_off
+defparam \count~0 .lut_mask = 16'h0F0F;
+defparam \count~0 .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X35_Y1_N21
+dffeas count(
+	.clk(\clk~input_o ),
+	.d(\count~0_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(\count~q ),
+	.prn(vcc));
+// synopsys translate_off
+defparam count.is_wysiwyg = "true";
+defparam count.power_up = "low";
 // synopsys translate_on
 
 // Location: IOIBUF_X56_Y0_N1

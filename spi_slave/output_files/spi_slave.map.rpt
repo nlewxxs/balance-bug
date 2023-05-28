@@ -1,5 +1,5 @@
 Analysis & Synthesis report for spi_slave
-Sun May 28 01:50:49 2023
+Sun May 28 10:58:43 2023
 Quartus Prime Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition
 
 
@@ -43,15 +43,15 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                     ;
 +------------------------------------+---------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Sun May 28 01:50:49 2023       ;
+; Analysis & Synthesis Status        ; Successful - Sun May 28 10:58:43 2023       ;
 ; Quartus Prime Version              ; 20.1.0 Build 711 06/05/2020 SJ Lite Edition ;
 ; Revision Name                      ; spi_slave                                   ;
 ; Top-level Entity Name              ; spi_slave                                   ;
 ; Family                             ; MAX 10                                      ;
-; Total logic elements               ; 0                                           ;
-;     Total combinational functions  ; 0                                           ;
-;     Dedicated logic registers      ; 0                                           ;
-; Total registers                    ; 0                                           ;
+; Total logic elements               ; 1                                           ;
+;     Total combinational functions  ; 1                                           ;
+;     Dedicated logic registers      ; 1                                           ;
+; Total registers                    ; 1                                           ;
 ; Total pins                         ; 4                                           ;
 ; Total virtual pins                 ; 0                                           ;
 ; Total memory bits                  ; 0                                           ;
@@ -157,10 +157,11 @@ https://fpgasoftware.intel.com/eula.
 ; Maximum allowed            ; 2           ;
 ;                            ;             ;
 ; Average used               ; 1.00        ;
-; Maximum used               ; 1           ;
+; Maximum used               ; 2           ;
 ;                            ;             ;
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
+;     Processor 2            ;   0.0%      ;
 +----------------------------+-------------+
 
 
@@ -178,29 +179,30 @@ https://fpgasoftware.intel.com/eula.
 +---------------------------------------------+-------+
 ; Resource                                    ; Usage ;
 +---------------------------------------------+-------+
+; Estimated Total logic elements              ; 1     ;
 ;                                             ;       ;
-; Total combinational functions               ; 0     ;
+; Total combinational functions               ; 1     ;
 ; Logic element usage by number of LUT inputs ;       ;
 ;     -- 4 input functions                    ; 0     ;
 ;     -- 3 input functions                    ; 0     ;
-;     -- <=2 input functions                  ; 0     ;
+;     -- <=2 input functions                  ; 1     ;
 ;                                             ;       ;
 ; Logic elements by mode                      ;       ;
-;     -- normal mode                          ; 0     ;
+;     -- normal mode                          ; 1     ;
 ;     -- arithmetic mode                      ; 0     ;
 ;                                             ;       ;
-; Total registers                             ; 0     ;
-;     -- Dedicated logic registers            ; 0     ;
+; Total registers                             ; 1     ;
+;     -- Dedicated logic registers            ; 1     ;
 ;     -- I/O registers                        ; 0     ;
 ;                                             ;       ;
 ; I/O pins                                    ; 4     ;
 ;                                             ;       ;
 ; Embedded Multiplier 9-bit elements          ; 0     ;
 ;                                             ;       ;
-; Maximum fan-out node                        ; clk   ;
-; Maximum fan-out                             ; 1     ;
-; Total fan-out                               ; 4     ;
-; Average fan-out                             ; 0.50  ;
+; Maximum fan-out node                        ; count ;
+; Maximum fan-out                             ; 2     ;
+; Total fan-out                               ; 8     ;
+; Average fan-out                             ; 0.80  ;
 +---------------------------------------------+-------+
 
 
@@ -209,7 +211,7 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+---------------------+-------------+--------------+
 ; Compilation Hierarchy Node ; Combinational ALUTs ; Dedicated Logic Registers ; Memory Bits ; UFM Blocks ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; ADC blocks ; Full Hierarchy Name ; Entity Name ; Library Name ;
 +----------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+---------------------+-------------+--------------+
-; |spi_slave                 ; 0 (0)               ; 0 (0)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 4    ; 0            ; 0          ; |spi_slave          ; spi_slave   ; work         ;
+; |spi_slave                 ; 1 (1)               ; 1 (1)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 4    ; 0            ; 0          ; |spi_slave          ; spi_slave   ; work         ;
 +----------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+---------------------+-------------+--------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
 
@@ -219,7 +221,7 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------------------------------------+-------+
 ; Statistic                                    ; Value ;
 +----------------------------------------------+-------+
-; Total registers                              ; 0     ;
+; Total registers                              ; 1     ;
 ; Number of registers using Synchronous Clear  ; 0     ;
 ; Number of registers using Synchronous Load   ; 0     ;
 ; Number of registers using Asynchronous Clear ; 0     ;
@@ -235,12 +237,14 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 ; Type                  ; Count                       ;
 +-----------------------+-----------------------------+
 ; boundary_port         ; 4                           ;
+; cycloneiii_ff         ; 1                           ;
+;     plain             ; 1                           ;
 ; cycloneiii_lcell_comb ; 1                           ;
 ;     normal            ; 1                           ;
-;         0 data inputs ; 1                           ;
+;         1 data inputs ; 1                           ;
 ;                       ;                             ;
-; Max LUT depth         ; 0.00                        ;
-; Average LUT depth     ; 0.00                        ;
+; Max LUT depth         ; 1.00                        ;
+; Average LUT depth     ; 0.67                        ;
 +-----------------------+-----------------------------+
 
 
@@ -249,7 +253,7 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:00:00     ;
+; Top            ; 00:00:01     ;
 +----------------+--------------+
 
 
@@ -259,33 +263,32 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition
-    Info: Processing started: Sun May 28 01:50:39 2023
+    Info: Processing started: Sun May 28 10:58:30 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off spi_slave -c spi_slave
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file spi_slave.v
     Info (12023): Found entity 1: spi_slave File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 1
 Info (12127): Elaborating entity "spi_slave" for the top level hierarchy
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(9): object "SCK_risingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 9
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(10): object "SCK_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 10
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(14): object "SS_active" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 14
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(15): object "SS_risingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 15
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(16): object "SS_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 16
-Warning (13024): Output pins are stuck at VCC or GND
-    Warning (13410): Pin "MISO" is stuck at VCC File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 4
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(11): object "SCK_risingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 11
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(12): object "SCK_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 12
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(16): object "SS_active" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 16
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(17): object "SS_risingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 17
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(18): object "SS_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 18
+Info (286030): Timing-Driven Synthesis is running
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
-Warning (21074): Design contains 3 input pin(s) that do not drive logic
-    Warning (15610): No output dependent on input pin "clk" File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 2
+Warning (21074): Design contains 2 input pin(s) that do not drive logic
     Warning (15610): No output dependent on input pin "SCK" File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 3
     Warning (15610): No output dependent on input pin "SS" File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 3
-Info (21057): Implemented 4 device resources after synthesis - the final resource count might be different
+Info (21057): Implemented 5 device resources after synthesis - the final resource count might be different
     Info (21058): Implemented 3 input pins
     Info (21059): Implemented 1 output pins
-Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 12 warnings
-    Info: Peak virtual memory: 374 megabytes
-    Info: Processing ended: Sun May 28 01:50:49 2023
-    Info: Elapsed time: 00:00:10
-    Info: Total CPU time (on all processors): 00:00:23
+    Info (21061): Implemented 1 logic cells
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 9 warnings
+    Info: Peak virtual memory: 393 megabytes
+    Info: Processing ended: Sun May 28 10:58:43 2023
+    Info: Elapsed time: 00:00:13
+    Info: Total CPU time (on all processors): 00:00:29
 
 

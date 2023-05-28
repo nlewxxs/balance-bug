@@ -2,6 +2,8 @@ module spi_slave(clk, SCK, MISO, SS);
 input clk;
 input SCK, SS;
 output MISO;
+
+reg count = 1'b0;
 // no MOSI bc i can't think of anything we would need to send to the FPGA
 
 //sync the SCK to the FPGA clock using 3-bits shift register
@@ -36,6 +38,11 @@ wire SS_fallingedge = (SSr[2:1] == 2'b10);
 //	end
 //end
 
-assign MISO = 1'b1;
+always @(posedge clk)
+begin
+count = ~count;
+end
+
+assign MISO = count;
 
 endmodule
