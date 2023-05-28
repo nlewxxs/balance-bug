@@ -87,32 +87,25 @@ func TestMain(t *testing.T) {
 // Test for successfull GET
 // response from /items
 // with no elements
-func TestDisplaySessionList(t *testing.T) {
-	// Delete all elements
-	// from DB
+func TestEmptyDisplaySessionList(t *testing.T) {
+	// clear db table
 	emptyTable()
 
-	// Expected body
-	// body := gin.H{
-	// 	"SessionLists": []SessionListStruct{},
-	// }
-
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/DisplaySessionList")
+	w := performRequest(router, "GET", "/Session/DisplayAll")
+	
+	//check for response from server, and that response is ok
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	// Obtain response
-	var response map[string][]SessionListStruct
+	//obtain and process response
+	var response []SessionListStruct
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
-	value, exists := response["SessionLists"]
+	value := response
 
 	// No error in response
 	assert.Nil(t, err)
 
-	// Check if response exits
-	assert.True(t, exists)
-
-	// Assert response
+	// Assert response is what is expected, in this case empty
 	assert.Equal(t, []SessionListStruct{}, value)
 }
 
