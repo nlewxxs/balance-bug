@@ -1,55 +1,56 @@
 #include <SPI.h>
 #include <BluetoothSerial.h>
+#include "mpu6050.h"
 
-// #define MOSI 23
+// #define MOSI 23  // these are the default for our ESP-32s, just putting them here so yk
 // #define MISO 19
 // #define SCK 18
 // #define SS 5
 
-int sckdelay = 0.001;
-int fpga_cs = 4;
-int buf = 0;
+int sckdelay = 0.001;  // arbitrary number tbh can tweak this
+int fpga_cs = 4;  // fpga "chip select" - selects the FPGA as the slave
+int buf = 0;  // recv buffer
 
 BluetoothSerial SerialBT;
+mpu6050 mpu = mpu6050();
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! please run 'make menuconfig' to enable it
 #endif
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  SerialBT.begin();
-  Serial.print("MOSI: ");
-  Serial.println(MOSI);
-  Serial.print("MISO: ");
-  Serial.println(MISO);
-  Serial.print("SCK: ");
-  Serial.println(SCK);
-  Serial.print("SS: ");
-  Serial.println(SS);  
 
   pinMode(fpga_cs, OUTPUT);
   SPI.begin();
+
+  SerialBT.begin();
+
+  mpu.init();
+  mpu.calibrate();
+  delay(200);
+
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println("SS set to low");
-  digitalWrite(fpga_cs, LOW);
-  delay(1000);
 
-  for (int i = 0; i < 100; i++){
-    digitalWrite(SCK, HIGH);
+  digitalWrite(fpga_cs, LOW); // SPI is active-low
+  delay(100);
+
+  for (int i = 0; i < 8; i++){
+    digitalWrite(SCK, HIGH); // toggle SCK
     delay(sckdelay);
-    SerialBT.print("MISO: ");
-    buf = SPI.transfer(0xF0);
+    buf = SPI.transfer(0xFF);
+    SerialBT.print("FPGA: ");
     SerialBT.println(buf);
+    
     digitalWrite(SCK, LOW);
     delay(sckdelay);
   }
 
-  digitalWrite(fpga_cs, HIGH);
-  Serial.println("SS set to high");
-  delay(1000);
+  digitalWrite(fpga_cs, HIGH); // stop FPGA sending
+
+  mpu.update();
+  SerialBT.print("IMU Pitch: ");
+  SerialBT.println(mpu.getPitch());
+  
 }
