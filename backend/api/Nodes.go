@@ -103,7 +103,7 @@ func AddNode(c *gin.Context) {
 		}
 
 		// Log message
-		fmt.Println("created SessionList entry", NodeNew)
+		log.Println("created SessionList entry", SessionListNew)
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")

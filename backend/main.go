@@ -43,18 +43,17 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
 
 	//Edge Paths
-	router.Get("/Edges/Create", api.CreateEdge)
+	router.Get("/Edges/Add", api.CreateEdgeTable)
+	router.Get("/Edges/CreateTable", api.CreateEdgeTable)
 	router.Get("/Edges/DisplayAll", api.DisplayAllEdges)
-
+	
 	/*
-	Edges
+	SessionId.Edges
 		- Foreign keys 
-			- Node
-			- Connecting Node
-			- 	
-
-
-
+			- Node             - PRIMARY1
+			- Connecting Node  - PRIMARY2
+		- Distance
+		- Angle
 	*/
 
 	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
