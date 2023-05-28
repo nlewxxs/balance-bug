@@ -1,4 +1,5 @@
 #include <SPI.h>
+#include <BluetoothSerial.h>
 
 // #define MOSI 23
 // #define MISO 19
@@ -9,9 +10,16 @@ int sckdelay = 0.001;
 int fpga_cs = 4;
 int buf = 0;
 
+BluetoothSerial SerialBT;
+
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! please run 'make menuconfig' to enable it
+#endif
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  SerialBT.begin();
   Serial.print("MOSI: ");
   Serial.println(MOSI);
   Serial.print("MISO: ");
@@ -33,13 +41,11 @@ void loop() {
 
   for (int i = 0; i < 100; i++){
     digitalWrite(SCK, HIGH);
-    Serial.println("1");
     delay(sckdelay);
-    Serial.print("MISO: ");
+    SerialBT.print("MISO: ");
     buf = SPI.transfer(0xF0);
-    Serial.println(buf);
+    SerialBT.println(buf);
     digitalWrite(SCK, LOW);
-    Serial.println("0");
     delay(sckdelay);
   }
 
