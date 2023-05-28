@@ -33,19 +33,15 @@ func SetupRoutes() *gin.Engine {
 	
 	
 	//SessionList Paths
-	router.GET("/Session/Add", api.AddSession)
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
+	router.GET("/Session/Add", api.AddSession)
 
-
-
-	//Node Paths
 	router.GET("/Nodes/CreateTable", api.CreateNodeTable)
+	router.GET("/Nodes/Add", api.AddNode)
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
 
-	//Edge Paths
-	router.Get("/Edges/Add", api.CreateEdgeTable)
-	router.Get("/Edges/CreateTable", api.CreateEdgeTable)
-	router.Get("/Edges/DisplayAll", api.DisplayAllEdges)
+	router.GET("/Edges/CreateTable", api.CreateEdgeTable)
+	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
 	
 	/*
 	SessionId.Edges

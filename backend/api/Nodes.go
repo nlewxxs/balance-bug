@@ -22,6 +22,10 @@ type NodeStruct struct {
 func CreateNodeTable (c *gin.Context) {
 	SessionId := c.Query("SessionId")
 
+	if len(SessionId) == 0{
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a SessionId"})
+	}
+	
 	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS testdb.%s_nodes (`NodeId` char(100) NOT NULL, `XCoord` char(100) NOT NULL, `YCoord` char(100) NOT NULL, PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) ENGINE=InnoDB;", SessionId)
 	
 	_, err := db.Exec(SqlCommand)
@@ -103,7 +107,7 @@ func AddNode(c *gin.Context) {
 		}
 
 		// Log message
-		log.Println("created SessionList entry", SessionListNew)
+		fmt.Println("created SessionList entry", NodeNew)
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
