@@ -111,38 +111,42 @@ func TestEmptyDisplaySessionList(t *testing.T) {
 
 // // Test for successfull create
 // // response from /item/create
-// func TestBotKeyCreate(t *testing.T) {
-// 	// Delete all elements
-// 	// from DB
-// 	emptyTable()
+func TestBotKeyCreate(t *testing.T) {
+	// Delete all elements
+	// from DB
+	emptyTable()
 
-// 	// Expected body
-// 	body := gin.H{
-// 		"SessionListCreation": SessionListStruct{
-// 			TimeStamp: "2006-01-02 15:04:05",
-// 			BugName: "2",
-// 			SessionId: "3",
-// 		},
-// 	}
+	// Expected body
+	expected := SessionListStruct{
+			TimeStamp: "2006-01-02 15:04:05",
+			BugName: "2",
+			SessionId: "",
+	}
 
-// 	// /item/create GET request and check 200 OK status code
-// 	w := performRequest(router, "GET", "/BotKey/create/2006-01-02 15:04:05/2/3")
-// 	assert.Equal(t, http.StatusCreated, w.Code)
+	// /item/create GET request and check 200 OK status code
+	///Session/Create?TimeStamp=${dateTime}&BugName=${sessionName}
+	w := performRequest(router, "GET", "/Session/Create?TimeStamp=2006-01-02 15:04:05&BugName=2")
+	assert.Equal(t, http.StatusCreated, w.Code)
 
-// 	// Obtain response
-// 	var response map[string]SessionListStruct
-// 	err := json.Unmarshal([]byte(w.Body.String()), &response)
-// 	value, exists := response["BotKeyCreation"]
+	// Obtain response
+	var response SessionListStruct
+	err := json.Unmarshal([]byte(w.Body.String()), &response)
+	
+	exists := false
+	if ((len(response.TimeStamp) > 0) && (len(response.BugName) > 0)) {
+		exists = true 
+	}
 
-// 	// No error in response
-// 	assert.Nil(t, err)
+	// No error in response
+	assert.Nil(t, err)
 
-// 	// Check if response exits
-// 	assert.True(t, exists)
+	// Check if response exits
+	assert.True(t, exists)
 
-// 	// Assert response
-// 	assert.Equal(t, body["BotKeyCreation"], value)
-// }
+	// Assert response
+	assert.Equal(t, expected.TimeStamp, response.TimeStamp)
+	assert.Equal(t, expected.BugName, response.BugName)
+}
 
 // // Test for successfull creates
 // // response for multiple items
