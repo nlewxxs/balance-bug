@@ -10,7 +10,7 @@ function CreateSession() {
     const errors = {
         taken: "Name is currently in use",
         empty: "Please enter a name",
-        fetch: "There was an error connecting to the database"
+        fetch: "Error connecting to the database"
     };
 
     const checkIfTaken = () => {
@@ -77,7 +77,7 @@ function CreateSession() {
 
     const renderErrorMsg = (error) => {
         return ( error === errorMsgs.err &&
-            <p className="error_msg">{errorMsgs.msg}</p>
+            <div className="error_msg">{errorMsgs.msg}</div>
         )
     };
 
@@ -96,8 +96,8 @@ function CreateSession() {
                     placeholder="Enter a name"
                     value={sessionName}
                     onChange={(e) => setSessionName(e.target.value) } />
-                {renderErrorMsg("fetch")}
                 {renderErrorMsg("empty")}
+                {renderErrorMsg("fetch")}
                 {renderErrorMsg("taken")}
                 <input className="input_btn" type="submit" value="Start Session"/>
             </form>
