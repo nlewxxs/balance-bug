@@ -2,86 +2,20 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gin-gonic/contrib/cors"
-	"github.com/gin-gonic/gin"
 )
-
-var router *gin.Engine
-
-// print database
-func displayBotKey(c *gin.Context) {
-	rows, err := db.Query("SELECT * FROM list")
-	if err != nil {
-		fmt.Println(err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-	}
-
-	// Get all rows and add into items
-	SessionListOverall := make([]SessionListStruct, 0)
-
-	if rows != nil {
-		defer rows.Close()
-		for rows.Next() {
-			// Individual row processing
-			SessionListRow := SessionListStruct{}
-			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId); err != nil {
-				fmt.Println(err.Error())
-				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-			}
-			SessionListRow.SessionId = strings.TrimSpace(SessionListRow.SessionId)
-			SessionListOverall = append(SessionListOverall, SessionListRow)
-		}
-	}
-}
 
 // Delete all elements
 // from DB
-func emptyTable() {
+func emptySessionListTable() {
 	db.Exec("DELETE from testdb.SessionList;")
 
 	// Reset id counter
 	//db.Exec("ALTER SEQUENCE list_id_seq RESTART WITH 1;")
-}
-
-// Setup Gin Routes
-func SetupRoutes() *gin.Engine {
-	// Use Gin as router
-	router := gin.Default()
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	router.Use(cors.New(config))
-
-	// Set routes for API
-	router.GET("/Session/DisplayAll", DisplaySessionList)
-	router.GET("/Session/Create", CreateSession)
-	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
-	// // router.GET("/item/delete/:id", DeleteTodoItem)
-
-	// Set up Gin Server
-	return router
-}
-
-// Perform Reuest
-// and return response
-func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, nil)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
-}
-
-// Init Test Function
-func TestMain(t *testing.T) {
-	SetupMySQL()
-	router = SetupRoutes()
 }
 
 // Test for successfull GET
@@ -89,7 +23,7 @@ func TestMain(t *testing.T) {
 // with no elements
 func TestEmptyDisplaySessionList(t *testing.T) {
 	// clear db table
-	emptyTable()
+	emptySessionListTable()
 
 	// /items GET request and check 200 OK status code
 	w := performRequest(router, "GET", "/Session/DisplayAll")
@@ -114,7 +48,7 @@ func TestEmptyDisplaySessionList(t *testing.T) {
 func TestBotKeyCreate(t *testing.T) {
 	// Delete all elements
 	// from DB
-	emptyTable()
+	emptySessionListTable()
 
 	// Expected body
 	expected := SessionListStruct{

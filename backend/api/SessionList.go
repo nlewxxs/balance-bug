@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,25 +19,6 @@ type SessionListStruct struct {
 	BugName      		string  `json:"BugName"`
 	SessionId 			string  `json:"SessionId"`
 
-}
-
-var db *sql.DB
-var err error
-
-func SetupMySQL() {
-	// for local testing only:
-
-	db, err = sql.Open("mysql", "root:helloworld@tcp(172.17.0.1:3308)/testdb?timeout=5s")
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-
-	if err = db.Ping(); err != nil {
-		fmt.Println(err.Error())
-	}
-
-	log.Println("connected to mysql")
 }
 
 // CRUD: Create Read Update Delete API Format
