@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import dsc from '../Imperialdc.png';
+import msk from '../Imperial-masked.png';
 import imp from '../Imperial.png';
 import { useNavigate } from "react-router-dom";
 
 
-  
+
 function MainMenu() {
     const [isHover, setHover] = useState(false);
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ function MainMenu() {
         window.open("https://www.imperial.ac.uk/students/academic-support/graduate-school/students/masters/professional-development/plagiarism-online/");
     };
 
-    const img = isHover ? dsc : imp; 
+    const img = isHover ? msk : imp;
     return (
       <div className="menu_page">
         <h1 className="title">Main Menu</h1>
@@ -32,7 +32,7 @@ function MainMenu() {
         <div className="btn_container">
             <div className="create_btn">
               <button className="btn">
-               <Link to="/Create" className="btn_link">Create Session</Link> 
+               <Link to="/Create" className="btn_link">Create Session</Link>
               </button>
             </div>
             <div className="load_btn">
@@ -45,4 +45,4 @@ function MainMenu() {
     )
 }
 
-export default MainMenu; 
+export default MainMenu;

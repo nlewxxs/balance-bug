@@ -202,7 +202,7 @@ form {
 
 table {
   position: absolute;
-  top: 20vh;
+  top: 22vh;
   display: block;
   left: 50%;
   transform: translateX(-50%);
@@ -243,6 +243,7 @@ table {
 }
 
 table.empty {
+  top: 24vh;
   overflow: hidden;
   padding: 3vh 3vw 3vh 3vw;
 }
@@ -315,15 +316,22 @@ tr:focus-within {
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
-  11% { transform: rotate(360deg); }
-  14% { transform: rotate(420deg); }
-  20% { transform: rotate(340deg); }
-  27% { transform: rotate(380deg); }
-  33% { transform: rotate(360deg); }
-  38% { transform: rotate(365deg); }
-  43% { transform: rotate(358deg); }
-  47% { transform: rotate(362deg); }
-  50% { transform: rotate(360deg); }
+  7% { transform: rotate(-40deg); }
+  15% { transform: rotate(360deg); }
+  18% { transform: rotate(420deg); }
+  24% { transform: rotate(335deg); }
+  31% { transform: rotate(380deg); }
+  35% { transform: rotate(360deg); }
+  39% { transform: rotate(349deg); }
+  44% { transform: rotate(368deg); }
+  48% { transform: rotate(353deg); }
+  51% { transform: rotate(364deg); }
+  56% { transform: rotate(358deg); }
+  59% { transform: rotate(356deg); }
+  62% { transform: rotate(361deg); }
+  63% { transform: rotate(360deg); }
+  64% { transform: rotate(359deg); }
+  65% { transform: rotate(360deg); }
   100% { transform: rotate(360deg); }
 }
 
@@ -335,8 +343,8 @@ tr:focus-within {
 .img { 
   width: min(45vh, 45vw);
   height: min(45vh, 45vw);
-  margin-top: 19vh;
-  animation: spin 2.5s linear infinite;
+  margin-top: 20vh;
+  animation: spin 2.7s linear infinite;
 }
 
 .img:hover {
