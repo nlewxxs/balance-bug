@@ -36,11 +36,24 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Session/Create", api.CreateSession)
 
 
-	//Node paths
+	//Node Paths
 	router.GET("/Nodes/CreateTable", api.CreateNodeTable)
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
 
+	//Edge Paths
+	router.Get("/Edges/Create", api.CreateEdge)
+	router.Get("/Edges/DisplayAll", api.DisplayAllEdges)
 
+	/*
+	Edges
+		- Foreign keys 
+			- Node
+			- Connecting Node
+			- 	
+
+
+
+	*/
 
 	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
 	// router.GET("/item/delete/:id", api.DeleteTodoItem)

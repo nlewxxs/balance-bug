@@ -19,11 +19,18 @@ type NodeStruct struct {
 }
 
 //Create the table, this is REQUIRED before reading
-
 func CreateNodeTable (c *gin.Context) {
 	SessionId := c.Query("SessionId")
 
-	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS testdb.%s_nodes (`NodeId` char(100) NOT NULL, `XCoord` char(100) NOT NULL, `YCoord` char(100) NOT NULL, PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) ENGINE=InnoDB;", SessionId)
+	SqlCommand := fmt.Sprintf(`
+			CREATE TABLE 
+			IF NOT EXISTS testdb.%s_nodes 
+		   (`NodeId` char(100) NOT NULL, 
+			`XCoord` char(100) NOT NULL, 
+			`YCoord` char(100) NOT NULL, 
+			PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) 
+			ENGINE=InnoDB;`, SessionId)
+	
 	_, err := db.Exec(SqlCommand)
     if err != nil {
 		fmt.Println(err.Error())
