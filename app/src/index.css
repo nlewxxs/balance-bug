@@ -34,7 +34,7 @@ body {
   box-sizing: border-box;
 }
 
-.create_page {
+.add_page {
   position: relative;
   height: 100vh;
   display: flex;

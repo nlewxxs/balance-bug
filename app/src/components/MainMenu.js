@@ -30,9 +30,9 @@ function MainMenu() {
             className="img" alt="imperial"/>
         </div>
         <div className="btn_container">
-            <div className="create_btn">
+            <div className="add_btn">
               <button className="btn">
-               <Link to="/Create" className="btn_link">Create Session</Link>
+               <Link to="/Add" className="btn_link">Add New Session</Link>
               </button>
             </div>
             <div className="load_btn">

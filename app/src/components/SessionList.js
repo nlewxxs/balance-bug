@@ -18,7 +18,7 @@ const SessionList = (props) => {
             <tr className="session_col_names">
               <th>Name</th>
               <th>ID</th>
-              <th>Date Created</th>
+              <th>Date Added</th>
             </tr>
           </thead>
           {sessions && 

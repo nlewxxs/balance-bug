@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MainMenu from './components/MainMenu.js';
-import CreateSession from './components/CreateSession.js';
+import AddSession from './components/AddSession.js';
 import LoadSession from './components/LoadSession.js';
 import DisplayGraph from './components/DisplayGraph.js';
 import './App.css';
@@ -12,7 +12,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route exact path = "/" element={<MainMenu />}/>
-          <Route path = "/Create" element={<CreateSession />}/>
+          <Route path = "/Add" element={<AddSession />}/>
           <Route path = "/Load" element={<LoadSession />}/>
           <Route path = "/Display/:id" element={<DisplayGraph />}/>
         </Routes>
