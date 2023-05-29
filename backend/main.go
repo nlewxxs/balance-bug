@@ -47,7 +47,6 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/BugInformation/Add", DatabaseApi.AddBugInformation)
 	router.GET("/BugInformation/Ping", DatabaseApi.PingBugInformation)
 	router.GET("/BugInformation/UpdateBugName", DatabaseApi.UpdateBugNameBugInformation)
-	router.GET("/BugInformation/Online", DatabaseApi.UpdateBugNameBugInformation)
 	router.GET("/BugInformation/Online", DatabaseApi.OnlineBugInformation)
 	router.GET("/BugInformation/DisplayAll", DatabaseApi.DisplayBugInformation)
 
