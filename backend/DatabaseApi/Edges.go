@@ -83,6 +83,7 @@ func DisplayAllEdges(c *gin.Context) {
 			if err := rows.Scan(&EdgeListRow.NodeId, &EdgeListRow.EdgeNodeId, &EdgeListRow.Distance, &EdgeListRow.Angle); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				break
 			}
 			EdgeListRow.NodeId = strings.TrimSpace(EdgeListRow.NodeId)
 			EdgeLists = append(EdgeLists, EdgeListRow)

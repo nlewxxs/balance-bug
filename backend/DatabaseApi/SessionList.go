@@ -41,6 +41,7 @@ func DisplaySessionList(c *gin.Context) {
 			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				break
 			}
 			SessionListRow.SessionId = strings.TrimSpace(SessionListRow.SessionId)
 			SessionLists = append(SessionLists, SessionListRow)

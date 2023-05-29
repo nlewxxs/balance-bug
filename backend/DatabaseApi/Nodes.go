@@ -67,6 +67,7 @@ func DisplayAllNodes(c *gin.Context) {
 			if err := rows.Scan(&NodeListRow.NodeId, &NodeListRow.XCoord, &NodeListRow.YCoord); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				break
 			}
 			NodeListRow.NodeId = strings.TrimSpace(NodeListRow.NodeId)
 			NodeLists = append(NodeLists, NodeListRow)

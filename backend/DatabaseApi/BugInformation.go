@@ -36,9 +36,10 @@ func DisplayBugInformation(c *gin.Context) {
 		for rows.Next() {
 			// Individual row processing
 			BugInformationRow := BugInformationStruct{}
-			if err := rows.Scan(&BugInformationRow.BugName, &BugInformationRow.LastSeen); err != nil {
+			if err := rows.Scan(&BugInformationRow.BugId,&BugInformationRow.BugName, &BugInformationRow.LastSeen); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				break
 			}
 			BugInformationRow.BugId = strings.TrimSpace(BugInformationRow.BugId)
 			BugInformationList = append(BugInformationList, BugInformationRow)
