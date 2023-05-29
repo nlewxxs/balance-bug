@@ -35,6 +35,7 @@ func SetupRoutes() *gin.Engine {
 	
 	router.GET("/BugInformation/Add", AddBugInformation)
 	router.GET("/BugInformation/Ping", PingBugInformation)
+	router.GET("/BugInformation/UpdateBugName", UpdateBugNameBugInformation)
 	router.GET("/BugInformation/DisplayAll", DisplayBugInformation)
 
 	// Set up Gin Server

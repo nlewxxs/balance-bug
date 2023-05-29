@@ -74,7 +74,7 @@ func AddBugInformation(c *gin.Context) {
 		}
 
 		// Log message
-		log.Println("created SessionList entry", BugInformationNew)
+		log.Println("created BugInformation entry", BugInformationNew)
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -103,7 +103,7 @@ func PingBugInformation(c *gin.Context) {
 		}
 
 		// Log message
-		log.Println("updated SessionList entry", BugInformationNew)
+		log.Println("updated BugInformation entry", BugInformationNew)
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
@@ -111,3 +111,33 @@ func PingBugInformation(c *gin.Context) {
 		c.JSON(http.StatusOK, &BugInformationNew)
 	}
 }
+
+func UpdateBugNameBugInformation(c *gin.Context) {
+	var BugInformationNew BugInformationStruct
+
+	BugInformationNew.BugId = c.Query("BugId")
+	BugInformationNew.BugName = c.Query("BugName")
+
+	// Validate entry
+	if len(BugInformationNew.BugId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
+	} else if len(BugInformationNew.BugName) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
+	} else {
+		// Insert item to DB
+		_, err := db.Query("UPDATE testdb.BugInformation SET `BugName`=? WHERE BugId=?;", BugInformationNew.BugName, BugInformationNew.BugId)
+		if err != nil {
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		}
+
+		// Log message
+		log.Println("updated BugInformation entry", BugInformationNew)
+
+		// Return success response
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+		c.JSON(http.StatusOK, &BugInformationNew)
+	}
+}
+
