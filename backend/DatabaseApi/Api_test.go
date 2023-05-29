@@ -32,8 +32,6 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Edges/CreateTable", CreateEdgeTable)
 	router.GET("/Edges/Add", AddEdge)
 	router.GET("/Edges/DisplayAll", DisplayAllEdges)
-	// router.GET("/Botkey/update/:id/:done", UpdateTodoItem)
-	// // router.GET("/item/delete/:id", DeleteTodoItem)
 
 	// Set up Gin Server
 	return router
