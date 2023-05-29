@@ -43,7 +43,7 @@ func CreateEdgeTable (c *gin.Context) {
 
 	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS testdb.%s_edges (`NodeId` char(100) NOT NULL, `EdgeNodeId` char(100) NOT NULL, `Distance` char(100), `Angle` char(100), PRIMARY KEY (`NodeId`, `EdgeNodeId`), FOREIGN KEY (`NodeId`) REFERENCES testdb.%s_nodes(`NodeId`), FOREIGN KEY (`EdgeNodeId`) REFERENCES testdb.%s_nodes(`NodeId`)) ENGINE=InnoDB;", SessionId,SessionId,SessionId)
 	
-	_, err := db.Exec(SqlCommand)
+	_, err := db.Query(SqlCommand)
     if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not create table"})
@@ -117,14 +117,17 @@ func AddEdge(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
 	}else {
 		// Insert item to DB
-
+		fmt.Println("SessionID: ", SessionId)
 		//TODO: ADD FOREIGN KEY FOR SYMBOLIC LINK
 		//NEST A REQUEST, LUCKILY READ HAVE VERY LOW LATENCY
 
+		
+		SqlCommand := fmt.Sprintf("INSERT INTO testdb.%s_edges (`NodeId`, `EdgeNodeId`, `Distance`, `Angle`) VALUES((SELECT NodeId FROM testdb.%s_nodes WHERE NodeId='%s'),(SELECT NodeId FROM testdb.%s_nodes WHERE NodeId='%s'),%s,%s);", SessionId, SessionId, EdgeNew.NodeId, SessionId, EdgeNew.EdgeNodeId, EdgeNew.Distance, EdgeNew.Angle)
 
-		SqlCommand := fmt.Sprintf("INSERT INTO testdb.%s_edges (`NodeId`, `EdgeNodeId`, `Distance`, `Angle`) VALUES(?,?,?,?);", SessionId)
 
-		_, err := db.Query(SqlCommand, EdgeNew.NodeId, EdgeNew.EdgeNodeId, EdgeNew.Distance, EdgeNew.Angle)
+		fmt.Println("SQL Command: ", SqlCommand)
+
+		_, err := db.Query(SqlCommand)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})

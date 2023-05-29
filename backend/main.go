@@ -41,6 +41,7 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
 
 	router.GET("/Edges/CreateTable", api.CreateEdgeTable)
+	router.GET("/Edges/Add", api.AddEdge)
 	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
 	
 	/*

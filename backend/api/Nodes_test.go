@@ -15,7 +15,7 @@ func emptyNodeTable(SessionId string) {
 	SqlCommand := fmt.Sprintf("DELETE from testdb.%s_nodes;", SessionId)
 	_, err = db.Exec(SqlCommand)
 	if err != nil{
-		panic("Error with dB")
+		panic("Error with dB for Nodes")
 	}
 }
 
@@ -47,6 +47,27 @@ func TestCreateNodeTable(t *testing.T) {
 
 	// Assert response
 	assert.Equal(t, body["message"], value)
+}
+
+func TestDisplayAllNodes(t *testing.T) {
+	// clear db table
+	emptyNodeTable("Test123")
+
+	// /items GET request and check 200 OK status code
+	w := performRequest(router, "GET", "/Nodes/DisplayAll?SessionId=Test123")
+	
+	//check for response from server, and that response is ok
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	//obtain and process response
+	var response []NodeStruct
+	err := json.Unmarshal([]byte(w.Body.String()), &response)
+
+	// No error in response
+	assert.Nil(t, err)
+
+	// Assert response is what is expected, in this case empty
+	assert.Equal(t, []NodeStruct{}, response)
 }
 
 func TestAddNode(t *testing.T) {
@@ -86,23 +107,4 @@ func TestAddNode(t *testing.T) {
 	assert.Equal(t, expected, response)
 }
 
-func TestDisplayAllNodes(t *testing.T) {
-	// clear db table
-	emptyNodeTable("Test123")
 
-	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/Nodes/DisplayAll?SessionId=Test123")
-	
-	//check for response from server, and that response is ok
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	//obtain and process response
-	var response []NodeStruct
-	err := json.Unmarshal([]byte(w.Body.String()), &response)
-
-	// No error in response
-	assert.Nil(t, err)
-
-	// Assert response is what is expected, in this case empty
-	assert.Equal(t, []NodeStruct{}, response)
-}
