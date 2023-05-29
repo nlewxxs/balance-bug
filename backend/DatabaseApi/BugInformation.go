@@ -5,22 +5,21 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-
-	"github.com/google/uuid"
 )
 
 type BugInformationStruct struct {
-	BugName      		string  `json:"BugId"`
-	LastSeen    	  	string  `json:"LastSeen"`
+	BugName  string `json:"BugId"`
+	LastSeen string `json:"LastSeen"`
 }
 
 // CRUD: Create Read Update Delete API Format
-//DISPLAY SESSION IDs
+// DISPLAY SESSION IDs
 func DisplayBugInformation(c *gin.Context) {
 	rows, err := db.Query("SELECT * FROM testdb.BugInformation")
 	if err != nil {
@@ -36,7 +35,7 @@ func DisplayBugInformation(c *gin.Context) {
 		for rows.Next() {
 			// Individual row processing
 			BugInformationRow := BugInformationStruct{}
-			if err := rows.Scan(&BugInformationRow.TimeStamp, &BugInformationRow.BugName); err != nil {
+			if err := rows.Scan(&BugInformationRow.BugName, &BugInformationRow.LastSeen); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
@@ -57,7 +56,7 @@ func AddBugInformation(c *gin.Context) {
 	BugInformationNew.BugName = c.Query("BugName")
 
 	t := time.Now()
-	BugInformationNew.LastSeen := t.Format(time.RFC850)
+	BugInformationNew.LastSeen = t.Format(time.RFC850)
 
 	// Validate entry
 	if len(BugInformationNew.BugName) == 0 {

@@ -4,7 +4,8 @@ import (
 	// "BalanceBugServer/backend/api"
 	"net/http"
 
-	api "BalanceBugServer/backend/api"
+	"BalanceBugServer/backend/DatabaseApi"
+	api "BalanceBugServer/backend/DatabaseApi"
 
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -30,8 +31,7 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for API
 	// Update to POST, UPDATE, DELETE etc
-	
-	
+
 	//DatabaseApi Paths
 	router.GET("/Session/DisplayAll", DatabaseApi.DisplaySessionList)
 	router.GET("/Session/Add", DatabaseApi.AddSession)
@@ -40,25 +40,17 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Nodes/Add", DatabaseApi.AddNode)
 	router.GET("/Nodes/DisplayAll", DatabaseApi.DisplayAllNodes)
 
-	router.GET("/Edges/CreateTable", api.CreateEdgeTable)
+	router.GET("/Edges/CreateTable", DatabaseApi.CreateEdgeTable)
 	router.GET("/Edges/Add", DatabaseApi.AddEdge)
-	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
+	router.GET("/Edges/DisplayAll", DatabaseApi.DisplayAllEdges)
 
-
-
-
-
-
-
-	
-	
 	/*
-	SessionId.Edges
-		- Foreign keys 
-			- Node             - PRIMARY1
-			- Connecting Node  - PRIMARY2
-		- Distance
-		- Angle
+		SessionId.Edges
+			- Foreign keys
+				- Node             - PRIMARY1
+				- Connecting Node  - PRIMARY2
+			- Distance
+			- Angle
 	*/
 
 	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
