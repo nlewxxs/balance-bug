@@ -33,7 +33,7 @@ func TestDisplayBugInformation(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Assert response is what is expected, in this case empty
-	assert.Equal(t, []SessionListStruct{}, response)
+	assert.Equal(t, []BugInformationStruct{}, response)
 }
 
 // // Test for successfull create

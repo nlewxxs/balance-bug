@@ -58,7 +58,7 @@ func AddBugInformation(c *gin.Context) {
 	BugInformationNew.BugName = c.Query("BugName")
 
 	t := time.Now()
-	BugInformationNew.LastSeen = t.Format(time.RFC850)
+	BugInformationNew.LastSeen = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
 	if len(BugInformationNew.BugId) == 0 {
@@ -67,7 +67,7 @@ func AddBugInformation(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
 	} else {
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`,  `LastSeen`) VALUES(?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
+		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
