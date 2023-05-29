@@ -1,5 +1,5 @@
 Analysis & Synthesis report for spi_slave
-Mon May 29 15:40:18 2023
+Mon May 29 19:33:13 2023
 Quartus Prime Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition
 
 
@@ -13,10 +13,13 @@ Quartus Prime Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition
   5. Analysis & Synthesis Source Files Read
   6. Analysis & Synthesis Resource Usage Summary
   7. Analysis & Synthesis Resource Utilization by Entity
-  8. General Register Statistics
-  9. Post-Synthesis Netlist Statistics for Top Partition
- 10. Elapsed Time Per Partition
- 11. Analysis & Synthesis Messages
+  8. Registers Removed During Synthesis
+  9. General Register Statistics
+ 10. Inverted Register Statistics
+ 11. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 12. Post-Synthesis Netlist Statistics for Top Partition
+ 13. Elapsed Time Per Partition
+ 14. Analysis & Synthesis Messages
 
 
 
@@ -43,15 +46,15 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                     ;
 +------------------------------------+---------------------------------------------+
-; Analysis & Synthesis Status        ; Successful - Mon May 29 15:40:18 2023       ;
+; Analysis & Synthesis Status        ; Successful - Mon May 29 19:33:13 2023       ;
 ; Quartus Prime Version              ; 20.1.0 Build 711 06/05/2020 SJ Lite Edition ;
 ; Revision Name                      ; spi_slave                                   ;
 ; Top-level Entity Name              ; spi_slave                                   ;
 ; Family                             ; MAX 10                                      ;
-; Total logic elements               ; 4                                           ;
-;     Total combinational functions  ; 1                                           ;
-;     Dedicated logic registers      ; 4                                           ;
-; Total registers                    ; 4                                           ;
+; Total logic elements               ; 65                                          ;
+;     Total combinational functions  ; 60                                          ;
+;     Dedicated logic registers      ; 49                                          ;
+; Total registers                    ; 49                                          ;
 ; Total pins                         ; 4                                           ;
 ; Total virtual pins                 ; 0                                           ;
 ; Total memory bits                  ; 0                                           ;
@@ -179,20 +182,20 @@ https://fpgasoftware.intel.com/eula.
 +---------------------------------------------+-----------+
 ; Resource                                    ; Usage     ;
 +---------------------------------------------+-----------+
-; Estimated Total logic elements              ; 4         ;
+; Estimated Total logic elements              ; 65        ;
 ;                                             ;           ;
-; Total combinational functions               ; 1         ;
+; Total combinational functions               ; 60        ;
 ; Logic element usage by number of LUT inputs ;           ;
-;     -- 4 input functions                    ; 0         ;
-;     -- 3 input functions                    ; 1         ;
-;     -- <=2 input functions                  ; 0         ;
+;     -- 4 input functions                    ; 16        ;
+;     -- 3 input functions                    ; 3         ;
+;     -- <=2 input functions                  ; 41        ;
 ;                                             ;           ;
 ; Logic elements by mode                      ;           ;
-;     -- normal mode                          ; 1         ;
-;     -- arithmetic mode                      ; 0         ;
+;     -- normal mode                          ; 29        ;
+;     -- arithmetic mode                      ; 31        ;
 ;                                             ;           ;
-; Total registers                             ; 4         ;
-;     -- Dedicated logic registers            ; 4         ;
+; Total registers                             ; 49        ;
+;     -- Dedicated logic registers            ; 49        ;
 ;     -- I/O registers                        ; 0         ;
 ;                                             ;           ;
 ; I/O pins                                    ; 4         ;
@@ -200,9 +203,9 @@ https://fpgasoftware.intel.com/eula.
 ; Embedded Multiplier 9-bit elements          ; 0         ;
 ;                                             ;           ;
 ; Maximum fan-out node                        ; clk~input ;
-; Maximum fan-out                             ; 4         ;
-; Total fan-out                               ; 16        ;
-; Average fan-out                             ; 1.23      ;
+; Maximum fan-out                             ; 49        ;
+; Total fan-out                               ; 300       ;
+; Average fan-out                             ; 2.56      ;
 +---------------------------------------------+-----------+
 
 
@@ -211,9 +214,19 @@ https://fpgasoftware.intel.com/eula.
 +----------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+---------------------+-------------+--------------+
 ; Compilation Hierarchy Node ; Combinational ALUTs ; Dedicated Logic Registers ; Memory Bits ; UFM Blocks ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; ADC blocks ; Full Hierarchy Name ; Entity Name ; Library Name ;
 +----------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+---------------------+-------------+--------------+
-; |spi_slave                 ; 1 (1)               ; 4 (4)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 4    ; 0            ; 0          ; |spi_slave          ; spi_slave   ; work         ;
+; |spi_slave                 ; 60 (60)             ; 49 (49)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 4    ; 0            ; 0          ; |spi_slave          ; spi_slave   ; work         ;
 +----------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+---------------------+-------------+--------------+
 Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++------------------------------------------------------------+
+; Registers Removed During Synthesis                         ;
++---------------------------------------+--------------------+
+; Register name                         ; Reason for Removal ;
++---------------------------------------+--------------------+
+; index[4]                              ; Lost fanout        ;
+; Total Number of Removed Registers = 1 ;                    ;
++---------------------------------------+--------------------+
 
 
 +------------------------------------------------------+
@@ -221,14 +234,34 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------------------------------------+-------+
 ; Statistic                                    ; Value ;
 +----------------------------------------------+-------+
-; Total registers                              ; 4     ;
+; Total registers                              ; 49    ;
 ; Number of registers using Synchronous Clear  ; 0     ;
 ; Number of registers using Synchronous Load   ; 0     ;
 ; Number of registers using Asynchronous Clear ; 0     ;
 ; Number of registers using Asynchronous Load  ; 0     ;
-; Number of registers using Clock Enable       ; 0     ;
+; Number of registers using Clock Enable       ; 44    ;
 ; Number of registers using Preset             ; 0     ;
 +----------------------------------------------+-------+
+
+
++--------------------------------------------------+
+; Inverted Register Statistics                     ;
++----------------------------------------+---------+
+; Inverted Register                      ; Fan out ;
++----------------------------------------+---------+
+; byte_to_send[0]                        ; 1       ;
+; Total number of inverted registers = 1 ;         ;
++----------------------------------------+---------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (Restructuring Performed)                                                                           ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
+; 3:1                ; 3 bits    ; 6 LEs         ; 3 LEs                ; 3 LEs                  ; Yes        ; |spi_slave|byte_to_send[7] ;
+; 3:1                ; 2 bits    ; 4 LEs         ; 2 LEs                ; 2 LEs                  ; Yes        ; |spi_slave|byte_to_send[3] ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+----------------------------+
 
 
 +-----------------------------------------------------+
@@ -237,14 +270,21 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 ; Type                  ; Count                       ;
 +-----------------------+-----------------------------+
 ; boundary_port         ; 4                           ;
-; cycloneiii_ff         ; 4                           ;
-;     plain             ; 4                           ;
-; cycloneiii_lcell_comb ; 1                           ;
-;     normal            ; 1                           ;
+; cycloneiii_ff         ; 49                          ;
+;     ENA               ; 44                          ;
+;     plain             ; 5                           ;
+; cycloneiii_lcell_comb ; 60                          ;
+;     arith             ; 31                          ;
+;         2 data inputs ; 30                          ;
 ;         3 data inputs ; 1                           ;
+;     normal            ; 29                          ;
+;         1 data inputs ; 2                           ;
+;         2 data inputs ; 9                           ;
+;         3 data inputs ; 2                           ;
+;         4 data inputs ; 16                          ;
 ;                       ;                             ;
-; Max LUT depth         ; 1.00                        ;
-; Average LUT depth     ; 0.57                        ;
+; Max LUT depth         ; 10.10                       ;
+; Average LUT depth     ; 7.08                        ;
 +-----------------------+-----------------------------+
 
 
@@ -253,7 +293,7 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:00:00     ;
+; Top            ; 00:00:01     ;
 +----------------+--------------+
 
 
@@ -263,30 +303,34 @@ Note: For table entries with two numbers listed, the numbers in parentheses indi
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition
-    Info: Processing started: Mon May 29 15:40:08 2023
+    Info: Processing started: Mon May 29 19:32:59 2023
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off spi_slave -c spi_slave
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 2 of the 2 processors detected
 Info (12021): Found 1 design units, including 1 entities, in source file spi_slave.v
     Info (12023): Found entity 1: spi_slave File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 1
 Info (12127): Elaborating entity "spi_slave" for the top level hierarchy
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(12): object "SCK_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 12
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(16): object "SS_active" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 16
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(17): object "SS_risingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 17
-Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(18): object "SS_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 18
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(10): object "b" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 10
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(45): object "SS_risingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 45
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.v(46): object "SS_fallingedge" assigned a value but never read File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 46
+Warning (10230): Verilog HDL assignment warning at spi_slave.v(93): truncated value with size 32 to match size of target (5) File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 93
+Warning (10030): Net "data.data_a" at spi_slave.v(7) has no driver or initial value, using a default initial value '0' File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 7
+Warning (10030): Net "data.waddr_a" at spi_slave.v(7) has no driver or initial value, using a default initial value '0' File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 7
+Warning (10030): Net "data.we_a" at spi_slave.v(7) has no driver or initial value, using a default initial value '0' File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 7
+Info (276014): Found 1 instances of uninferred RAM logic
+    Info (276013): RAM logic "data" is uninferred because MIF is not supported for the selected family File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 7
 Info (286030): Timing-Driven Synthesis is running
+Info (17049): 1 registers lost all their fanouts during netlist optimizations.
 Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
     Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
-Warning (21074): Design contains 1 input pin(s) that do not drive logic
-    Warning (15610): No output dependent on input pin "SS" File: /home/nik/eie/balance-bug/spi_slave/spi_slave.v Line: 3
-Info (21057): Implemented 8 device resources after synthesis - the final resource count might be different
+Info (21057): Implemented 102 device resources after synthesis - the final resource count might be different
     Info (21058): Implemented 3 input pins
     Info (21059): Implemented 1 output pins
-    Info (21061): Implemented 4 logic cells
-Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 7 warnings
-    Info: Peak virtual memory: 393 megabytes
-    Info: Processing ended: Mon May 29 15:40:18 2023
-    Info: Elapsed time: 00:00:10
-    Info: Total CPU time (on all processors): 00:00:24
+    Info (21061): Implemented 98 logic cells
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 8 warnings
+    Info: Peak virtual memory: 396 megabytes
+    Info: Processing ended: Mon May 29 19:33:13 2023
+    Info: Elapsed time: 00:00:14
+    Info: Total CPU time (on all processors): 00:00:29
 
 

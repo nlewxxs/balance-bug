@@ -38,7 +38,7 @@ void loop() {
 
   for (int i = 0; i < 8; i++){
     buf = SPI.transfer(0xFF);
-    SerialBT.print("FPGA: ");
+    SerialBT.print("MISO: ");
     SerialBT.println(buf);
     delay(sckdelay);
   }
