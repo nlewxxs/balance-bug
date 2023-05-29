@@ -32,17 +32,25 @@ func SetupRoutes() *gin.Engine {
 	// Update to POST, UPDATE, DELETE etc
 	
 	
-	//SessionList Paths
-	router.GET("/Session/DisplayAll", api.DisplaySessionList)
-	router.GET("/Session/Add", api.AddSession)
+	//DatabaseApi Paths
+	router.GET("/Session/DisplayAll", DatabaseApi.DisplaySessionList)
+	router.GET("/Session/Add", DatabaseApi.AddSession)
 
-	router.GET("/Nodes/CreateTable", api.CreateNodeTable)
-	router.GET("/Nodes/Add", api.AddNode)
-	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
+	router.GET("/Nodes/CreateTable", DatabaseApi.CreateNodeTable)
+	router.GET("/Nodes/Add", DatabaseApi.AddNode)
+	router.GET("/Nodes/DisplayAll", DatabaseApi.DisplayAllNodes)
 
 	router.GET("/Edges/CreateTable", api.CreateEdgeTable)
-	router.GET("/Edges/Add", api.AddEdge)
+	router.GET("/Edges/Add", DatabaseApi.AddEdge)
 	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
+
+
+
+
+
+
+
+	
 	
 	/*
 	SessionId.Edges

@@ -1,4 +1,4 @@
-package api
+package DatabaseApi
 
 import (
 	"database/sql"

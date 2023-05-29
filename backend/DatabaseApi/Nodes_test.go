@@ -1,4 +1,4 @@
-package api
+package DatabaseApi
 
 import (
 	"encoding/json"
@@ -11,22 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// func emptySessionListTable(SessionId string) {
-// 	SqlCommand := fmt.Sprintf("DELETE from testdb.SessionList_nodes;", SessionId)
-// 	db.Exec(SqlCommand)
-// }
-
-func emptyEdgeTable(SessionId string) {
-	SqlCommand := fmt.Sprintf("DELETE from testdb.%s_edges;", SessionId)
+func emptyNodeTable(SessionId string) {
+	SqlCommand := fmt.Sprintf("DELETE from testdb.%s_nodes;", SessionId)
 	_, err = db.Exec(SqlCommand)
 	if err != nil{
-		fmt.Println("Error: ", err)
-		panic("Error with dB for Edges")
+		panic("Error with dB for Nodes")
 	}
 }
 
 
-func TestCreateEdgeTable(t *testing.T) {
+func TestCreateNodeTable(t *testing.T) {
 	// Delete all elements
 	// from DB
 	//emptySessionListTable()
@@ -37,7 +31,7 @@ func TestCreateEdgeTable(t *testing.T) {
 	}
 
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/Edges/CreateTable?SessionId=Test123")
+	w := performRequest(router, "GET", "/Nodes/CreateTable?SessionId=Test123")
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response
@@ -55,58 +49,51 @@ func TestCreateEdgeTable(t *testing.T) {
 	assert.Equal(t, body["message"], value)
 }
 
-
-
-func TestDisplayAllEdges(t *testing.T) {
+func TestDisplayAllNodes(t *testing.T) {
 	// clear db table
-	emptyEdgeTable("Test123")
+	emptyNodeTable("Test123")
 
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/Edges/DisplayAll?SessionId=Test123")
+	w := performRequest(router, "GET", "/Nodes/DisplayAll?SessionId=Test123")
 	
 	//check for response from server, and that response is ok
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	//obtain and process response
-	var response []EdgeStruct
+	var response []NodeStruct
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
 
 	// No error in response
 	assert.Nil(t, err)
 
 	// Assert response is what is expected, in this case empty
-	assert.Equal(t, []EdgeStruct{}, response)
+	assert.Equal(t, []NodeStruct{}, response)
 }
 
-func TestAddEdge(t *testing.T) {
+func TestAddNode(t *testing.T) {
 	// Delete all elements
 	// from DB
 	//emptySessionListTable()
-	
+
 	// Expected body
-	expected := EdgeStruct{
-		NodeId: "Node3",
-		EdgeNodeId: "Node4",
-		Distance: "5",
-		Angle: "30",
+	expected := NodeStruct{
+		NodeId: "Node1",
+		XCoord: "0",
+		YCoord: "0",
 	}
 
-	// /items GET request and check 200 OK status code
-	performRequest(router, "GET", "/Nodes/CreateTable?SessionId=EdgeTest")
-	performRequest(router, "GET", "/Nodes/Add?SessionId=EdgeTest&NodeId=Node3&XCoord=10&YCoord=0")
-	performRequest(router, "GET", "/Nodes/Add?SessionId=EdgeTest&NodeId=Node4&XCoord=20&YCoord=0")
-	performRequest(router, "GET", "/Edges/CreateTable?SessionId=EdgeTest")
+	emptyNodeTable("Test123")
 
-	emptyEdgeTable("EdgeTest")
-	w := performRequest(router, "GET", "/Edges/Add?SessionId=EdgeTest&NodeId=Node3&EdgeNodeId=Node4&Distance=5&Angle=30")
+	// /items GET request and check 200 OK status code
+	w := performRequest(router, "GET", "/Nodes/Add?SessionId=Test123&NodeId=Node1&XCoord=0&YCoord=0")
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response
-	var response EdgeStruct
+	var response NodeStruct
 	err := json.Unmarshal([]byte(w.Body.String()), &response)
 	
 	exists := false
-	if ((len(response.NodeId) > 0) && (len(response.EdgeNodeId) > 0) && (len(response.Distance) > 0) && (len(response.Angle) > 0)) {
+	if ((len(response.NodeId) > 0) && (len(response.XCoord) > 0) && (len(response.YCoord) > 0)) {
 		exists = true 
 	}
 
@@ -119,3 +106,5 @@ func TestAddEdge(t *testing.T) {
 	// Assert response
 	assert.Equal(t, expected, response)
 }
+
+

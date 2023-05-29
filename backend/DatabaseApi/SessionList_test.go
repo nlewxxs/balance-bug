@@ -1,4 +1,4 @@
-package api
+package DatabaseApi
 
 import (
 	"encoding/json"
