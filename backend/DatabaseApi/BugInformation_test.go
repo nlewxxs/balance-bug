@@ -146,3 +146,38 @@ func TestUpdateBugNameBugInformation(t *testing.T) {
 	assert.Equal(t, expected.BugId, response.BugId)
 	assert.Equal(t, expected.BugName, response.BugName)
 }
+
+
+func TestOnlineBugInformation(t *testing.T) {
+	// Delete all elements
+	// from DB
+	//emptySessionListTable()
+
+	// Expected body
+	emptyBugInformationTable()
+	
+	performRequest(router, "GET", "/BugInformation/Add?BugId=OnlineTest")
+
+	expected := "OnlineTest"
+	// /item/create GET request and check 200 OK status code
+	w := performRequest(router, "GET", "/BugInformation/Online?Timeout=100.0")
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Obtain response
+	var response []string
+	err := json.Unmarshal([]byte(w.Body.String()), &response)
+	
+	exists := false
+	if (len(response) > 0) {
+		exists = true 
+	}
+
+	// No error in response
+	assert.Nil(t, err)
+
+	// Check if response exits
+	assert.True(t, exists)
+
+	// Assert response
+	assert.Equal(t, expected, response[0])
+}

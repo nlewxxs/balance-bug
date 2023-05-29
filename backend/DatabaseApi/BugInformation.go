@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -64,9 +65,12 @@ func AddBugInformation(c *gin.Context) {
 	// Validate entry
 	if len(BugInformationNew.BugId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
-	} else if len(BugInformationNew.BugName) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
 	} else {
+		
+		if len(BugInformationNew.BugName) == 0 {
+			BugInformationNew.BugName = BugInformationNew.BugId
+		}
+
 		// Insert item to DB
 		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
 		if err != nil {
@@ -142,3 +146,54 @@ func UpdateBugNameBugInformation(c *gin.Context) {
 	}
 }
 
+
+func OnlineBugInformation(c *gin.Context) {
+
+	TimeoutNew := c.Query("Timeout")
+	Timeout := 5.0
+	
+	if (len(TimeoutNew) > 0) {
+		TimeoutExtracted, err := strconv.ParseFloat(TimeoutNew, 32)
+		if err != nil {
+			c.JSON(http.StatusNotAcceptable, gin.H{"message" : "invalid timeout format, please enter a valid float"})
+		}
+		Timeout = TimeoutExtracted
+	}
+
+	t := time.Now()
+	CurrentTime := t.Format("2006-01-02 15:04:05")
+
+	// read from DB
+	rows, err := db.Query("SELECT BugName FROM testdb.BugInformation WHERE (SELECT TIMESTAMPDIFF(SECOND, LastSeen, ?) FROM testdb.BugInformation)<?;", CurrentTime, Timeout)
+	if err != nil {
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+	}
+
+	// Get all rows and add into SessionListStructs
+	BugInformationList := make([]string, 0)
+
+	if rows != nil {
+		defer rows.Close()
+		for rows.Next() {
+			// Individual row processing
+			BugInformationRow := ""
+			if err := rows.Scan(&BugInformationRow); err != nil {
+				fmt.Println(err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+				break
+			}
+			BugInformationRow = strings.TrimSpace(BugInformationRow)
+			BugInformationList = append(BugInformationList, BugInformationRow)
+		}
+	}
+
+
+	// Log message
+	log.Println("Retrieved Online Bugs")
+
+	// Return success response
+	c.Header("Access-Control-Allow-Origin", "*")
+	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+	c.JSON(http.StatusOK, &BugInformationList)
+}
