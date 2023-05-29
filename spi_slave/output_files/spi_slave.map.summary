@@ -1,12 +1,12 @@
-Analysis & Synthesis Status : Successful - Sun May 28 10:58:43 2023
+Analysis & Synthesis Status : Successful - Mon May 29 15:40:18 2023
 Quartus Prime Version : 20.1.0 Build 711 06/05/2020 SJ Lite Edition
 Revision Name : spi_slave
 Top-level Entity Name : spi_slave
 Family : MAX 10
-Total logic elements : 1
+Total logic elements : 4
     Total combinational functions : 1
-    Dedicated logic registers : 1
-Total registers : 1
+    Dedicated logic registers : 4
+Total registers : 4
 Total pins : 4
 Total virtual pins : 0
 Total memory bits : 0

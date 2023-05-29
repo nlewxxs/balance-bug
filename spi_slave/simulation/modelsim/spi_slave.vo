@@ -17,7 +17,7 @@
 // PROGRAM "Quartus Prime"
 // VERSION "Version 20.1.0 Build 711 06/05/2020 SJ Lite Edition"
 
-// DATE "05/28/2023 10:59:04"
+// DATE "05/29/2023 15:40:36"
 
 // 
 // Device: Altera 10M50DAF484C7G Package FBGA484
@@ -40,10 +40,10 @@ output 	MISO;
 input 	SS;
 
 // Design Ports Information
-// SCK	=>  Location: PIN_AB20,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
-// MISO	=>  Location: PIN_Y19,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: 8mA
-// SS	=>  Location: PIN_AB9,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
+// MISO	=>  Location: PIN_Y10,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: 8mA
+// SS	=>  Location: PIN_AA19,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
 // clk	=>  Location: PIN_P11,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
+// SCK	=>  Location: PIN_AA11,	 I/O Standard: 3.3-V LVTTL,	 Current Strength: Default
 
 
 wire gnd;
@@ -57,7 +57,6 @@ assign unknown = 1'bx;
 tri1 devclrn;
 tri1 devpor;
 tri1 devoe;
-wire \SCK~input_o ;
 wire \SS~input_o ;
 wire \~QUARTUS_CREATED_GND~I_combout ;
 wire \~QUARTUS_CREATED_UNVM~~busy ;
@@ -65,8 +64,14 @@ wire \~QUARTUS_CREATED_ADC1~~eoc ;
 wire \~QUARTUS_CREATED_ADC2~~eoc ;
 wire \MISO~output_o ;
 wire \clk~input_o ;
+wire \clk~inputclkctrl_outclk ;
+wire \SCK~input_o ;
+wire \SCKr[0]~feeder_combout ;
+wire \SCKr[1]~feeder_combout ;
+wire \SCKr[2]~feeder_combout ;
 wire \count~0_combout ;
 wire \count~q ;
+wire [2:0] SCKr;
 
 
 hard_block auto_generated_inst(
@@ -91,7 +96,7 @@ defparam \~QUARTUS_CREATED_GND~I .lut_mask = 16'h0000;
 defparam \~QUARTUS_CREATED_GND~I .sum_lutc_input = "datac";
 // synopsys translate_on
 
-// Location: IOOBUF_X62_Y0_N16
+// Location: IOOBUF_X34_Y0_N9
 fiftyfivenm_io_obuf \MISO~output (
 	.i(\count~q ),
 	.oe(vcc),
@@ -116,26 +121,159 @@ defparam \clk~input .listen_to_nsleep_signal = "false";
 defparam \clk~input .simulate_z_as = "z";
 // synopsys translate_on
 
-// Location: LCCOMB_X35_Y1_N20
-fiftyfivenm_lcell_comb \count~0 (
+// Location: CLKCTRL_G19
+fiftyfivenm_clkctrl \clk~inputclkctrl (
+	.ena(vcc),
+	.inclk({vcc,vcc,vcc,\clk~input_o }),
+	.clkselect(2'b00),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.outclk(\clk~inputclkctrl_outclk ));
+// synopsys translate_off
+defparam \clk~inputclkctrl .clock_type = "global clock";
+defparam \clk~inputclkctrl .ena_register_mode = "none";
+// synopsys translate_on
+
+// Location: IOIBUF_X40_Y0_N8
+fiftyfivenm_io_ibuf \SCK~input (
+	.i(SCK),
+	.ibar(gnd),
+	.nsleep(vcc),
+	.o(\SCK~input_o ));
+// synopsys translate_off
+defparam \SCK~input .bus_hold = "false";
+defparam \SCK~input .listen_to_nsleep_signal = "false";
+defparam \SCK~input .simulate_z_as = "z";
+// synopsys translate_on
+
+// Location: LCCOMB_X39_Y1_N6
+fiftyfivenm_lcell_comb \SCKr[0]~feeder (
 // Equation(s):
-// \count~0_combout  = !\count~q 
+// \SCKr[0]~feeder_combout  = \SCK~input_o 
 
 	.dataa(gnd),
 	.datab(gnd),
+	.datac(gnd),
+	.datad(\SCK~input_o ),
+	.cin(gnd),
+	.combout(\SCKr[0]~feeder_combout ),
+	.cout());
+// synopsys translate_off
+defparam \SCKr[0]~feeder .lut_mask = 16'hFF00;
+defparam \SCKr[0]~feeder .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X39_Y1_N7
+dffeas \SCKr[0] (
+	.clk(\clk~inputclkctrl_outclk ),
+	.d(\SCKr[0]~feeder_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(SCKr[0]),
+	.prn(vcc));
+// synopsys translate_off
+defparam \SCKr[0] .is_wysiwyg = "true";
+defparam \SCKr[0] .power_up = "low";
+// synopsys translate_on
+
+// Location: LCCOMB_X39_Y1_N28
+fiftyfivenm_lcell_comb \SCKr[1]~feeder (
+// Equation(s):
+// \SCKr[1]~feeder_combout  = SCKr[0]
+
+	.dataa(gnd),
+	.datab(gnd),
+	.datac(gnd),
+	.datad(SCKr[0]),
+	.cin(gnd),
+	.combout(\SCKr[1]~feeder_combout ),
+	.cout());
+// synopsys translate_off
+defparam \SCKr[1]~feeder .lut_mask = 16'hFF00;
+defparam \SCKr[1]~feeder .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X39_Y1_N29
+dffeas \SCKr[1] (
+	.clk(\clk~inputclkctrl_outclk ),
+	.d(\SCKr[1]~feeder_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(SCKr[1]),
+	.prn(vcc));
+// synopsys translate_off
+defparam \SCKr[1] .is_wysiwyg = "true";
+defparam \SCKr[1] .power_up = "low";
+// synopsys translate_on
+
+// Location: LCCOMB_X39_Y1_N22
+fiftyfivenm_lcell_comb \SCKr[2]~feeder (
+// Equation(s):
+// \SCKr[2]~feeder_combout  = SCKr[1]
+
+	.dataa(gnd),
+	.datab(gnd),
+	.datac(gnd),
+	.datad(SCKr[1]),
+	.cin(gnd),
+	.combout(\SCKr[2]~feeder_combout ),
+	.cout());
+// synopsys translate_off
+defparam \SCKr[2]~feeder .lut_mask = 16'hFF00;
+defparam \SCKr[2]~feeder .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X39_Y1_N23
+dffeas \SCKr[2] (
+	.clk(\clk~inputclkctrl_outclk ),
+	.d(\SCKr[2]~feeder_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(SCKr[2]),
+	.prn(vcc));
+// synopsys translate_off
+defparam \SCKr[2] .is_wysiwyg = "true";
+defparam \SCKr[2] .power_up = "low";
+// synopsys translate_on
+
+// Location: LCCOMB_X39_Y1_N24
+fiftyfivenm_lcell_comb \count~0 (
+// Equation(s):
+// \count~0_combout  = \count~q  $ (((!SCKr[2] & SCKr[1])))
+
+	.dataa(SCKr[2]),
+	.datab(gnd),
 	.datac(\count~q ),
-	.datad(gnd),
+	.datad(SCKr[1]),
 	.cin(gnd),
 	.combout(\count~0_combout ),
 	.cout());
 // synopsys translate_off
-defparam \count~0 .lut_mask = 16'h0F0F;
+defparam \count~0 .lut_mask = 16'hA5F0;
 defparam \count~0 .sum_lutc_input = "datac";
 // synopsys translate_on
 
-// Location: FF_X35_Y1_N21
+// Location: FF_X39_Y1_N25
 dffeas count(
-	.clk(\clk~input_o ),
+	.clk(\clk~inputclkctrl_outclk ),
 	.d(\count~0_combout ),
 	.asdata(vcc),
 	.clrn(vcc),
@@ -152,19 +290,7 @@ defparam count.is_wysiwyg = "true";
 defparam count.power_up = "low";
 // synopsys translate_on
 
-// Location: IOIBUF_X56_Y0_N1
-fiftyfivenm_io_ibuf \SCK~input (
-	.i(SCK),
-	.ibar(gnd),
-	.nsleep(vcc),
-	.o(\SCK~input_o ));
-// synopsys translate_off
-defparam \SCK~input .bus_hold = "false";
-defparam \SCK~input .listen_to_nsleep_signal = "false";
-defparam \SCK~input .simulate_z_as = "z";
-// synopsys translate_on
-
-// Location: IOIBUF_X34_Y0_N15
+// Location: IOIBUF_X58_Y0_N15
 fiftyfivenm_io_ibuf \SS~input (
 	.i(SS),
 	.ibar(gnd),

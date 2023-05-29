@@ -1,6 +1,9 @@
 |spi_slave
 clk => count.CLK
-SCK => ~NO_FANOUT~
+clk => SCKr[0].CLK
+clk => SCKr[1].CLK
+clk => SCKr[2].CLK
+SCK => SCKr[0].DATAIN
 MISO <= count.DB_MAX_OUTPUT_PORT_TYPE
 SS => ~NO_FANOUT~
 

@@ -10,6 +10,10 @@
 				{
 					"name" : "clk",
 					"strict" : false
+				},
+				{
+					"name" : "SCK",
+					"strict" : false
 				}
 			]
 		}

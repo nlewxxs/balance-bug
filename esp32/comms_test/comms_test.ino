@@ -12,7 +12,7 @@ int fpga_cs = 4;  // fpga "chip select" - selects the FPGA as the slave
 int buf = 0;  // recv buffer
 
 BluetoothSerial SerialBT;
-mpu6050 mpu = mpu6050();
+// mpu6050 mpu = mpu6050();
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! please run 'make menuconfig' to enable it
@@ -25,32 +25,42 @@ void setup() {
 
   SerialBT.begin();
 
-  mpu.init();
-  mpu.calibrate();
-  delay(200);
+  // mpu.init();
+  // mpu.calibrate();
+  // delay(200);
 
 }
 
 void loop() {
 
   digitalWrite(fpga_cs, LOW); // SPI is active-low
-  delay(100);
+  delay(10);
 
   for (int i = 0; i < 8; i++){
-    digitalWrite(SCK, HIGH); // toggle SCK
-    delay(sckdelay);
     buf = SPI.transfer(0xFF);
     SerialBT.print("FPGA: ");
     SerialBT.println(buf);
-    
-    digitalWrite(SCK, LOW);
     delay(sckdelay);
   }
 
   digitalWrite(fpga_cs, HIGH); // stop FPGA sending
+  delay(10);
 
-  mpu.update();
-  SerialBT.print("IMU Pitch: ");
-  SerialBT.println(mpu.getPitch());
-  
+  // SerialBT.print("MOSI: ");
+  // SerialBT.println(MOSI);
+  // SerialBT.print("MISO: ");
+  // SerialBT.println(MISO);
+  // SerialBT.print("SCK: ");
+  // SerialBT.println(SCK);
+  // SerialBT.print("SS: ");
+  // SerialBT.println(SS);
+
+  // mpu.update();
+  // SerialBT.print("IMU Pitch: ");
+  // SerialBT.println(mpu.getRawXGyro());
+  // SerialBT.print("IMU Roll: ");
+  // SerialBT.println(mpu.getRawYGyro());
+  // SerialBT.print("IMU Yaw: ");
+  // SerialBT.println(mpu.getRawZGyro());
+
 }

@@ -39,6 +39,7 @@ wire SS_fallingedge = (SSr[2:1] == 2'b10);
 //end
 
 always @(posedge clk)
+if (SCK_risingedge)
 begin
 count = ~count;
 end

@@ -59,9 +59,9 @@ set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name VECTOR_WAVEFORM_FILE Waveform.vwf
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
-set_location_assignment PIN_Y19 -to MISO
-set_location_assignment PIN_AB20 -to SCK
-set_location_assignment PIN_AB9 -to SS
+set_location_assignment PIN_Y10 -to MISO
+set_location_assignment PIN_AA11 -to SCK
+set_location_assignment PIN_AA19 -to SS
 set_location_assignment PIN_P11 -to clk
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SS
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SCK
