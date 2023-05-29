@@ -21,7 +21,7 @@ type BugInformationStruct struct {
 
 // CRUD: Create Read Update Delete API Format
 //DISPLAY SESSION IDs
-func DisplayOnlineBug(c *gin.Context) {
+func DisplayBugInformation(c *gin.Context) {
 	rows, err := db.Query("SELECT * FROM testdb.BugInformation")
 	if err != nil {
 		fmt.Println(err.Error())
@@ -29,29 +29,29 @@ func DisplayOnlineBug(c *gin.Context) {
 	}
 
 	// Get all rows and add into SessionListStructs
-	OnlineBugs := make([]OnlineBugStruct, 0)
+	BugInformationList := make([]BugInformationStruct, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			OnlineBugRow := OnlineBugStruct{}
-			if err := rows.Scan(&OnlineBugs.TimeStamp, &OnlineBugs.BugName); err != nil {
+			BugInformationRow := BugInformationStruct{}
+			if err := rows.Scan(&BugInformationRow.TimeStamp, &BugInformationRow.BugName); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
-			OnlineBugRow.BugName = strings.TrimSpace(OnlineBugRow.BugName)
-			OnlineBugs = append(OnlineBugs, OnlineBugRow)
+			BugInformationRow.BugName = strings.TrimSpace(BugInformationRow.BugName)
+			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
 
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, &OnlineBugs)
+	c.JSON(http.StatusOK, &BugInformationList)
 }
 
-func AddSession(c *gin.Context) {
+func AddBugInformation(c *gin.Context) {
 	var BugInformationNew BugInformationStruct
 
 	BugInformationNew.BugName = c.Query("BugName")
