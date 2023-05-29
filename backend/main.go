@@ -44,6 +44,10 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Edges/Add", DatabaseApi.AddEdge)
 	router.GET("/Edges/DisplayAll", DatabaseApi.DisplayAllEdges)
 
+
+	router.GET("/BugInformation/Add", AddBugInformation)
+	router.GET("/BugInformation/DisplayAll", DisplayBugInformation)
+
 	/*
 		SessionId.Edges
 			- Foreign keys

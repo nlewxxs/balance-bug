@@ -117,7 +117,7 @@ func AddEdge(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
 	}else {
 		// Insert item to DB
-		fmt.Println("SessionID: ", SessionId)
+		// fmt.Println("SessionID: ", SessionId)
 		//TODO: ADD FOREIGN KEY FOR SYMBOLIC LINK
 		//NEST A REQUEST, LUCKILY READ HAVE VERY LOW LATENCY
 
@@ -125,7 +125,7 @@ func AddEdge(c *gin.Context) {
 		SqlCommand := fmt.Sprintf("INSERT INTO testdb.%s_edges (`NodeId`, `EdgeNodeId`, `Distance`, `Angle`) VALUES((SELECT NodeId FROM testdb.%s_nodes WHERE NodeId='%s'),(SELECT NodeId FROM testdb.%s_nodes WHERE NodeId='%s'),%s,%s);", SessionId, SessionId, EdgeNew.NodeId, SessionId, EdgeNew.EdgeNodeId, EdgeNew.Distance, EdgeNew.Angle)
 
 
-		fmt.Println("SQL Command: ", SqlCommand)
+		// fmt.Println("SQL Command: ", SqlCommand)
 
 		_, err := db.Query(SqlCommand)
 		if err != nil {

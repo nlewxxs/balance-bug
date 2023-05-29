@@ -27,6 +27,7 @@ func emptyEdgeTable(SessionId string) {
 
 
 func TestCreateEdgeTable(t *testing.T) {
+	performRequest(router, "GET", "/Nodes/CreateTable?SessionId=EdgeTest")
 	// Delete all elements
 	// from DB
 	//emptySessionListTable()
@@ -37,7 +38,7 @@ func TestCreateEdgeTable(t *testing.T) {
 	}
 
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/Edges/CreateTable?SessionId=Test123")
+	w := performRequest(router, "GET", "/Edges/CreateTable?SessionId=EdgeTest")
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	// Obtain response
@@ -59,10 +60,10 @@ func TestCreateEdgeTable(t *testing.T) {
 
 func TestDisplayAllEdges(t *testing.T) {
 	// clear db table
-	emptyEdgeTable("Test123")
+	emptyEdgeTable("EdgeTest")
 
 	// /items GET request and check 200 OK status code
-	w := performRequest(router, "GET", "/Edges/DisplayAll?SessionId=Test123")
+	w := performRequest(router, "GET", "/Edges/DisplayAll?SessionId=EdgeTest")
 	
 	//check for response from server, and that response is ok
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -92,12 +93,14 @@ func TestAddEdge(t *testing.T) {
 	}
 
 	// /items GET request and check 200 OK status code
-	performRequest(router, "GET", "/Nodes/CreateTable?SessionId=EdgeTest")
-	performRequest(router, "GET", "/Nodes/Add?SessionId=EdgeTest&NodeId=Node3&XCoord=10&YCoord=0")
-	performRequest(router, "GET", "/Nodes/Add?SessionId=EdgeTest&NodeId=Node4&XCoord=20&YCoord=0")
-	performRequest(router, "GET", "/Edges/CreateTable?SessionId=EdgeTest")
+	
 
 	emptyEdgeTable("EdgeTest")
+	performRequest(router, "GET", "/Nodes/Add?SessionId=EdgeTest&NodeId=Node3&XCoord=10&YCoord=0")
+	performRequest(router, "GET", "/Nodes/Add?SessionId=EdgeTest&NodeId=Node4&XCoord=20&YCoord=0")
+
+
+
 	w := performRequest(router, "GET", "/Edges/Add?SessionId=EdgeTest&NodeId=Node3&EdgeNodeId=Node4&Distance=5&Angle=30")
 	assert.Equal(t, http.StatusCreated, w.Code)
 

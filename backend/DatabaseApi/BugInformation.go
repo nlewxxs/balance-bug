@@ -14,7 +14,8 @@ import (
 )
 
 type BugInformationStruct struct {
-	BugName  string `json:"BugId"`
+	BugId  string `json:"BugId"`
+	BugName  string `json:"BugName"`
 	LastSeen string `json:"LastSeen"`
 }
 
@@ -39,7 +40,7 @@ func DisplayBugInformation(c *gin.Context) {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
-			BugInformationRow.BugName = strings.TrimSpace(BugInformationRow.BugName)
+			BugInformationRow.BugId = strings.TrimSpace(BugInformationRow.BugId)
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
@@ -53,17 +54,20 @@ func DisplayBugInformation(c *gin.Context) {
 func AddBugInformation(c *gin.Context) {
 	var BugInformationNew BugInformationStruct
 
+	BugInformationNew.BugId = c.Query("BugId")
 	BugInformationNew.BugName = c.Query("BugName")
 
 	t := time.Now()
 	BugInformationNew.LastSeen = t.Format(time.RFC850)
 
 	// Validate entry
-	if len(BugInformationNew.BugName) == 0 {
+	if len(BugInformationNew.BugId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
+	} else if len(BugInformationNew.BugName) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
 	} else {
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugName`, `LastSeen`) VALUES(?, ?);", BugInformationNew.BugName, BugInformationNew.LastSeen)
+		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`,  `LastSeen`) VALUES(?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
