@@ -33,18 +33,29 @@ void setup() {
 
 void loop() {
 
+  SerialBT.println("Sending 125,000 bytes ...");
+
   digitalWrite(fpga_cs, LOW); // SPI is active-low
   delay(10);
 
-  for (int i = 0; i < 8; i++){
+  double oldtime = millis();
+
+  for (int i = 0; i < 125000; i++){
     buf = SPI.transfer(0xFF);
-    SerialBT.print("MISO: ");
-    SerialBT.println(buf);
-    delay(sckdelay);
+    // SerialBT.print("MISO: ");
+    // SerialBT.println(buf);
+    // delay(sckdelay);
   }
+
+  double timetaken = millis() - oldtime;
 
   digitalWrite(fpga_cs, HIGH); // stop FPGA sending
   delay(10);
+
+  SerialBT.print("time taken for 1Mb: ");
+  SerialBT.print(timetaken);
+  SerialBT.println("ms");
+  delay(3000);
 
   // SerialBT.print("MOSI: ");
   // SerialBT.println(MOSI);
