@@ -3,7 +3,6 @@ package DatabaseApi
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 
