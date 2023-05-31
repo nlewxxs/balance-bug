@@ -10,9 +10,6 @@ double AccErrorX, AccErrorY = 0;
 double GyroX, GyroY, GyroZ;
 double GyroErrorX, GyroErrorY, GyroErrorZ = 0;
 
-int8_t gyrox1, gyrox2, gyroy1, gyroy2, gyroz1, gyroz2;
-int8_t accx1, accx2, accy1, accy2, accz1, accz2;
-
 double pitch, roll, yaw;
 
 const int mpu_addr = 0x68;
@@ -25,7 +22,6 @@ double gyroAngleX, gyroAngleY;
 
 void mpu6050::init(){
     Wire.begin();
-    Wire.setBufferSize(128);
     Wire.beginTransmission(mpu_addr);
     Wire.write(0x6B); // writing to PWR_MGMT_1 register
     Wire.write(0x00); // set to low (wakes mpu)
@@ -43,16 +39,9 @@ void mpu6050::calibrate() {
         Wire.endTransmission(false);
         Wire.requestFrom(mpu_addr, 6, 1);
 
-        accx1 = Wire.read();
-        accx2 = Wire.read();
-        accy1 = Wire.read();
-        accy2 = Wire.read();
-        accz1 = Wire.read();
-        accz2 = Wire.read();
-
-        AccX = (double) (((accx1 << 8) | accx2) / 16384.0);
-        AccY = (double) (((accy1 << 8) | accy2) / 16384.0);
-        AccZ = (double) (((accz1 << 8) | accz2) / 16384.0);
+        AccX = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 16384.0;
+        AccY = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 16384.0;
+        AccZ = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 16384.0;
 
         AccErrorX = AccErrorX + ((atan((AccY) / sqrt(pow((AccX), 2) + pow((AccZ), 2))) * 180 / PI));
         AccErrorY = AccErrorY + ((atan(-1 * (AccX) / sqrt(pow((AccY), 2) + pow((AccZ), 2))) * 180 / PI));
@@ -69,17 +58,10 @@ void mpu6050::calibrate() {
         Wire.write(0x43);
         Wire.endTransmission(false);
         Wire.requestFrom(mpu_addr, 6, 1);
-        
-        gyrox1 = Wire.read(); 
-        gyrox2 = Wire.read();
-        gyroy1 = Wire.read();
-        gyroy2 = Wire.read();
-        gyroz1 = Wire.read();
-        gyroz2 = Wire.read();
 
-        GyroX = (double) (((gyrox1 << 8) | gyrox2) / 131.0);
-        GyroY = (double) (((gyroy1 << 8) | gyroy2) / 131.0);
-        GyroZ = (double) (((gyroz1 << 8) | gyroz2) / 131.0);
+        GyroX = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
+        GyroY = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
+        GyroZ = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
 
         GyroErrorX = GyroX + GyroErrorX; 
         GyroErrorY = GyroY + GyroErrorY; 
@@ -90,7 +72,6 @@ void mpu6050::calibrate() {
     GyroErrorX = GyroErrorX / calibration_span;
     GyroErrorY = GyroErrorY / calibration_span;
     GyroErrorZ = GyroErrorZ / calibration_span;
-    // c++;
 }
 
 void mpu6050::update(){
@@ -100,16 +81,9 @@ void mpu6050::update(){
     Wire.endTransmission(false);          
     Wire.requestFrom(mpu_addr, 6, 1);
 
-    accx1 = Wire.read();
-    accx2 = Wire.read();
-    accy1 = Wire.read();
-    accy2 = Wire.read();
-    accz1 = Wire.read();
-    accz2 = Wire.read();
-
-    AccX = (double) (((accx1 << 8) | accx2) / 16384.0);
-    AccY = (double) (((accy1 << 8) | accy2) / 16384.0);
-    AccZ = (double) (((accz1 << 8) | accz2) / 16384.0);
+    AccX = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 16384.0;
+    AccY = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 16384.0;
+    AccZ = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 16384.0;
 
     // Calculating Roll and Pitch from the accelerometer data
     accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI) - AccErrorX;
@@ -128,17 +102,10 @@ void mpu6050::update(){
     Wire.requestFrom(mpu_addr, 6, 1); 
 
     // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
-    gyrox1 = Wire.read(); 
-    gyrox2 = Wire.read();
-    gyroy1 = Wire.read();
-    gyroy2 = Wire.read();
-    gyroz1 = Wire.read();
-    gyroz2 = Wire.read();
 
-    GyroX = (double) (((gyrox1 << 8) | gyrox2) / 131.0);
-    GyroY = (double) (((gyroy1 << 8) | gyroy2) / 131.0);
-    GyroZ = (double) (((gyroz1 << 8) | gyroz2) / 131.0);
-
+    GyroX = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
+    GyroY = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
+    GyroZ = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
     // Correct the outputs with the calculated error values
     GyroX = GyroX - GyroErrorX; 
     GyroY = GyroY - GyroErrorY; 
@@ -146,7 +113,7 @@ void mpu6050::update(){
 
     gyroAngleX = gyroAngleX + GyroX * elapsedTime; 
     gyroAngleY = gyroAngleY + GyroY * elapsedTime;
-    yaw = yaw + GyroZ * elapsedTime;
+    yaw = (yaw + (GyroZ * elapsedTime));
 
     // Complementary filter
     roll = 0.98 * gyroAngleX + 0.02 * accAngleX;
@@ -183,12 +150,4 @@ double mpu6050::getRawYGyro(){
 
 double mpu6050::getRawZGyro(){
     return GyroZ;
-}
-
-int8_t mpu6050::getgyrox1(){
-  return gyrox1;
-}
-
-int8_t mpu6050::getgyrox2(){
-  return gyrox2;
 }

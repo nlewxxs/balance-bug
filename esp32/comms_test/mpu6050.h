@@ -17,8 +17,6 @@ class mpu6050 {
         double getRawXGyro();
         double getRawYGyro();
         double getRawZGyro();
-        int8_t getgyrox1();
-        int8_t getgyrox2();
 };
 
 #endif

@@ -35,7 +35,11 @@ void setup() {
 void loop() {
 
   mpu.update();
-  Serial.println(mpu.getPitch());
+  Serial.print(mpu.getPitch());
+  Serial.print(" | ");
+  Serial.print(mpu.getRoll());
+  Serial.print(" | ");
+  Serial.println(mpu.getYaw());
   delay(10);
 
   // SerialBT.println("Sending 125,000 bytes ...");
