@@ -12,7 +12,7 @@ int fpga_cs = 4;  // fpga "chip select" - selects the FPGA as the slave
 int buf = 0;  // recv buffer
 
 BluetoothSerial SerialBT;
-// mpu6050 mpu = mpu6050();
+mpu6050 mpu = mpu6050();
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! please run 'make menuconfig' to enable it
@@ -20,42 +20,52 @@ BluetoothSerial SerialBT;
 
 void setup() {
 
-  pinMode(fpga_cs, OUTPUT);
-  SPI.begin();
+  // pinMode(fpga_cs, OUTPUT);
+  // SPI.begin();
 
-  SerialBT.begin();
+  //SerialBT.begin();
+  Serial.begin(115200);
 
-  // mpu.init();
-  // mpu.calibrate();
-  // delay(200);
+  mpu.init();
+  mpu.calibrate();
+  delay(2000);
 
 }
 
 void loop() {
 
-  SerialBT.println("Sending 125,000 bytes ...");
-
-  digitalWrite(fpga_cs, LOW); // SPI is active-low
+  mpu.update();
+  Serial.println(mpu.getPitch());
   delay(10);
 
-  double oldtime = millis();
+  // SerialBT.println("Sending 125,000 bytes ...");
 
-  for (int i = 0; i < 125000; i++){
-    buf = SPI.transfer(0xFF);
-    // SerialBT.print("MISO: ");
-    // SerialBT.println(buf);
-    // delay(sckdelay);
-  }
+  // digitalWrite(fpga_cs, LOW); // SPI is active-low
+  // delay(10);
 
-  double timetaken = millis() - oldtime;
+  // double oldtime = millis();
 
-  digitalWrite(fpga_cs, HIGH); // stop FPGA sending
-  delay(10);
+  // for (int j = 0; j < 100; j++){
+  //   for (int i = 0; i < 125; i++){
+  //     buf = SPI.transfer(0xFF);
+  //     // SerialBT.print("MISO: ");
+  //     // SerialBT.println(buf);
+  //     // delay(sckdelay);
+  //   }
+  //   mpu.update();
+  //   // SerialBT.print(mpu.getPitch());
+  // }
 
-  SerialBT.print("time taken for 1Mb: ");
-  SerialBT.print(timetaken);
-  SerialBT.println("ms");
-  delay(3000);
+  // double timetaken = millis() - oldtime;
+
+  // digitalWrite(fpga_cs, HIGH); // stop FPGA sending
+  // delay(10);
+
+  // SerialBT.print("time taken for 1Mb: ");
+  // SerialBT.print(timetaken);
+  // SerialBT.println("ms");
+  // SerialBT.println("(with mpu readings every 125 bytes)");
+  // delay(3000);
 
   // SerialBT.print("MOSI: ");
   // SerialBT.println(MOSI);
@@ -65,8 +75,6 @@ void loop() {
   // SerialBT.println(SCK);
   // SerialBT.print("SS: ");
   // SerialBT.println(SS);
-
-  // mpu.update();
   // SerialBT.print("IMU Pitch: ");
   // SerialBT.println(mpu.getRawXGyro());
   // SerialBT.print("IMU Roll: ");
