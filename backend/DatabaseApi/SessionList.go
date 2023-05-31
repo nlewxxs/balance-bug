@@ -14,10 +14,10 @@ import (
 )
 
 type SessionListStruct struct {
-	TimeStamp    	  	string `json:"TimeStamp"`
-	BugName      		string  `json:"BugName"`
-	SessionId 			string  `json:"SessionId"`
-
+	TimeStamp      	string  `json:"TimeStamp"`
+	BugName         string  `json:"BugName"`
+	SessionId 	string  `json:"SessionId"`
+	SessionName     string  `json:"SessionName"`
 }
 
 // CRUD: Create Read Update Delete API Format
@@ -37,7 +37,7 @@ func DisplaySessionList(c *gin.Context) {
 		for rows.Next() {
 			// Individual row processing
 			SessionListRow := SessionListStruct{}
-			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId); err != nil {
+			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId, &SessionListRow.SessionName); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
@@ -56,14 +56,17 @@ func AddSession(c *gin.Context) {
 	TimeStampNew := c.Query("TimeStamp")
 	BugNameNew := c.Query("BugName")
 	SessionIdNew := uuid.New().String()
+	SessionNameNew := c.Query("SessionName")
 
 	// Validate entry
 	if len(TimeStampNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
 	} else if len(BugNameNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.bugname"})
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.BugName"})
 	} else if len(SessionIdNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionIdNew"})
+	} else if len(SessionNameNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionName"})
 	} else {
 		// Create todo item
 		var SessionListNew SessionListStruct
@@ -71,9 +74,10 @@ func AddSession(c *gin.Context) {
 		SessionListNew.TimeStamp = TimeStampNew
 		SessionListNew.BugName = BugNameNew
 		SessionListNew.SessionId = SessionIdNew
+		SessionListNew.SessionName = SessionNameNew
 
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`) VALUES(?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId)
+		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`, `SessionName`) VALUES(?, ?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId, SessionListNew.SessionName)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
