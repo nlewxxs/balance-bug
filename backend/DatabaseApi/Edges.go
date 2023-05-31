@@ -85,7 +85,6 @@ func DisplayAllEdges(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
-			EdgeListRow.NodeId = strings.TrimSpace(EdgeListRow.NodeId)
 			EdgeLists = append(EdgeLists, EdgeListRow)
 		}
 	}

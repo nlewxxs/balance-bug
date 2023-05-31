@@ -43,7 +43,6 @@ func DisplaySessionList(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
-			SessionListRow.SessionId = strings.TrimSpace(SessionListRow.SessionId)
 			SessionLists = append(SessionLists, SessionListRow)
 		}
 	}

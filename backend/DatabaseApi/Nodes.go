@@ -69,7 +69,6 @@ func DisplayAllNodes(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
-			NodeListRow.NodeId = strings.TrimSpace(NodeListRow.NodeId)
 			NodeLists = append(NodeLists, NodeListRow)
 		}
 	}

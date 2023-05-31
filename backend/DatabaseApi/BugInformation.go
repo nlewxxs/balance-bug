@@ -47,7 +47,6 @@ func DisplayBugInformation(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
-			BugInformationRow.BugId = strings.TrimSpace(BugInformationRow.BugId)
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
@@ -192,8 +191,6 @@ func OnlineBugInformation(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
-			BugInformationRow.BugId = strings.TrimSpace(BugInformationRow.BugId)
-			// BugInformationRow.BugName = strings.TrimSpace(BugInformationRow.BugName)
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
