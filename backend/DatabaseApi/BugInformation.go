@@ -15,9 +15,14 @@ import (
 )
 
 type BugInformationStruct struct {
-	BugId  string `json:"BugId"`
+	BugId    string `json:"BugId"`
 	BugName  string `json:"BugName"`
 	LastSeen string `json:"LastSeen"`
+}
+
+type BugNameIdStruct struct {
+	BugId    string `json:"BugId"`
+	BugName  string `json:"BugName"`
 }
 
 // CRUD: Create Read Update Delete API Format
@@ -162,28 +167,33 @@ func OnlineBugInformation(c *gin.Context) {
 
 	t := time.Now()
 	CurrentTime := t.Format("2006-01-02 15:04:05")
+	fmt.Println(CurrentTime, Timeout)
 
 	// read from DB
-	rows, err := db.Query("SELECT BugName FROM testdb.BugInformation WHERE (SELECT TIMESTAMPDIFF(SECOND, LastSeen, ?) FROM testdb.BugInformation)<?;", CurrentTime, Timeout)
+	rows, err := db.Query(`SELECT BugId, BugName
+	                       FROM testdb.BugInformation 
+			       WHERE TIMESTAMPDIFF(SECOND, LastSeen, ?) < ?`,
+			       CurrentTime, Timeout)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 	}
 
 	// Get all rows and add into SessionListStructs
-	BugInformationList := make([]string, 0)
+	BugInformationList := make([]BugNameIdStruct, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			BugInformationRow := ""
-			if err := rows.Scan(&BugInformationRow); err != nil {
+			BugInformationRow := BugNameIdStruct{}
+			if err := rows.Scan(&BugInformationRow.BugName, &BugInformationRow.BugId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
-			BugInformationRow = strings.TrimSpace(BugInformationRow)
+			BugInformationRow.BugId = strings.TrimSpace(BugInformationRow.BugId)
+			// BugInformationRow.BugName = strings.TrimSpace(BugInformationRow.BugName)
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
