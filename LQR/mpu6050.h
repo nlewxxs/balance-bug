@@ -17,6 +17,9 @@ class mpu6050 {
         double getRawXGyro();
         double getRawYGyro();
         double getRawZGyro();
+        double getGyroErrorX();
+        double getGyroErrorY();
+        double getGyroErrorZ();
 };
 
 #endif
