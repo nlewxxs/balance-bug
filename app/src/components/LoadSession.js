@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SessionList from './SessionList';
-import fetchData from './FetchData.js';
+import {fetchData, usePoll} from './Utils.js';
 
 function LoadSession() {
     const [sessions, setSessions] = useState(null);
     const [isLoading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-//    {name: "bug1", id: "123", date: "2023-05-10 18:00:00.00"},
-//    {name: "bug2", id: "403", date: "2023-05-11 18:00:00.00"},
-//    {name: "bug3", id: "101", date: "2023-05-12 18:00:00.00"}
-//    ]);
 
-    const url = "http://localhost:8081/Session/DisplayAll"
     useEffect( () => {
         setLoading(true);
+        getSessions();
+    }, [] );
+
+//    usePoll( () => {
+//        getSessions();  
+//    }, 1000); 
+    
+    const url = "http://192.168.68.126:8081/Session/DisplayAll"
+    const getSessions = () => {
         fetchData(url)
         .then(response => {
             console.log(response);
@@ -23,10 +27,11 @@ function LoadSession() {
             if (!response.data && !response.error) {
                 setError("No sessions are currently listed");
             }
-            setTimeout(() => {setLoading(response.isLoading); }, 300);
+            setLoading(response.isLoading);
+            // setTimeout(() => {setLoading(response.isLoading); }, 300);
         })
         .catch(error => console.log(error));
-    }, [] );
+    }
 
     return (
         <div>
@@ -45,7 +50,7 @@ function LoadSession() {
             <div className="btn_container">
               <div className="add_btn">
                   <button className="btn">
-                      <Link to="/Add" className="btn_link">Add New Session</Link>
+                      <Link to="/Add" className="btn_link">New Session</Link>
                   </button>
               </div>
               <div className="back_btn">

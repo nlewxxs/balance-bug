@@ -16,6 +16,9 @@ COPY . .
 # Install react-router-dom dependency
 RUN npm install react-router-dom
 
+# Install react-select dependency
+RUN npm install react-select
+
 # Expose port 3000 for the React development server
 EXPOSE 3000
 

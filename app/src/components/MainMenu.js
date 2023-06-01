@@ -32,7 +32,7 @@ function MainMenu() {
         <div className="btn_container">
             <div className="add_btn">
               <button className="btn">
-               <Link to="/Add" className="btn_link">Add New Session</Link>
+               <Link to="/Add" className="btn_link">New Session</Link>
               </button>
             </div>
             <div className="load_btn">
