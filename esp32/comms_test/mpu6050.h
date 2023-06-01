@@ -9,14 +9,14 @@ class mpu6050 {
         void init();
         void update();
         void calibrate();
-        double getPitch();
-        double getRoll();
-        double getYaw();
-        double getRawXAccel();
-        double getRawYAccel();
-        double getRawXGyro();
-        double getRawYGyro();
-        double getRawZGyro();
+        float getPitch();
+        float getRoll();
+        float getYaw();
+        float getRawXAccel();
+        float getRawYAccel();
+        float getRawXGyro();
+        float getRawYGyro();
+        float getRawZGyro();
 };
 
 #endif
