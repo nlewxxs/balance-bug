@@ -20,8 +20,8 @@ type BugInformationStruct struct {
 }
 
 type BugNameIdStruct struct {
-	BugId    string `json:"BugId"`
 	BugName  string `json:"BugName"`
+	BugId    string `json:"BugId"`
 }
 
 // CRUD: Create Read Update Delete API Format
@@ -57,22 +57,22 @@ func DisplayBugInformation(c *gin.Context) {
 }
 
 func AddBugInformation(c *gin.Context) {
-	var BugInformationNew BugInformationStruct
 
-	BugInformationNew.BugId = c.Query("BugId")
-	BugInformationNew.BugName = c.Query("BugName")
-
-	t := time.Now()
-	BugInformationNew.LastSeen = t.Format("2006-01-02 15:04:05")
+	BugIdNew := c.Query("BugId")
+	BugNameNew := c.Query("BugName")
+	LastSeenNew := time.Now()
 
 	// Validate entry
-	if len(BugInformationNew.BugId) == 0 {
+	if len(BugIdNew) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
+	} else  if len(BugNameNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
 	} else {
-		
-		if len(BugInformationNew.BugName) == 0 {
-			BugInformationNew.BugName = BugInformationNew.BugId
-		}
+		var BugInformationNew BugInformationStruct
+
+		BugInformationNew.BugId = BugIdNew
+		BugInformationNew.BugName = BugNameNew
+		BugInformationNew.LastSeen = LastSeenNew.Format("2006-01-02 15:04:05")
 
 		// Insert item to DB
 		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
@@ -168,7 +168,7 @@ func OnlineBugInformation(c *gin.Context) {
 	fmt.Println(CurrentTime, Timeout)
 
 	// read from DB
-	rows, err := db.Query(`SELECT BugId, BugName
+	rows, err := db.Query(`SELECT BugName, BugId
 	                       FROM testdb.BugInformation 
 			       WHERE TIMESTAMPDIFF(SECOND, LastSeen, ?) < ?`,
 			       CurrentTime, Timeout)
