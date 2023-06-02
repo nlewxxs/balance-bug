@@ -3,10 +3,6 @@
 // 5/20/2013 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/i2cdevlib
 //
-// Changelog:
-//  2021/09/27 - split implementations out of header files, finally
-//  2019/07/08 - merged all DMP Firmware configuration items into the dmpMemory array
-//             - Simplified dmpInitialize() to accomidate the dmpmemory array alterations
 
 /* ============================================
 I2Cdev device library code is placed under the MIT license

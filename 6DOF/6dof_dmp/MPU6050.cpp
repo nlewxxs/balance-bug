@@ -3,14 +3,6 @@
 // 8/24/2011 by Jeff Rowberg <jeff@rowberg.net>
 // Updates should (hopefully) always be available at https://github.com/jrowberg/i2cdevlib
 //
-// Changelog:
-//  2021-09-27 - split implementations out of header files, finally
-//  2019-07-08 - Added Auto Calibration routine
-//     ... - ongoing debug release
-
-// NOTE: THIS IS ONLY A PARIAL RELEASE. THIS DEVICE CLASS IS CURRENTLY UNDERGOING ACTIVE
-// DEVELOPMENT AND IS STILL MISSING SOME IMPORTANT FEATURES. PLEASE KEEP THIS IN MIND IF
-// YOU DECIDE TO USE THIS PARTICULAR CODE FOR ANYTHING.
 
 /* ============================================
 I2Cdev device library code is placed under the MIT license
