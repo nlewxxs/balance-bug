@@ -9,7 +9,7 @@ void setup(){
   mpu.init();
 
   delay(100);
-  
+
   mpu.calibrate();
 
   delay(100);
@@ -18,13 +18,14 @@ void setup(){
 
 void loop(){
 
-  Serial.print("GyroErrorX: ");
-  Serial.println(mpu.getGyroErrorX());
-  Serial.print("GyroErrorY: ");
-  Serial.println(mpu.getGyroErrorY());
-  Serial.print("GyroErrorZ: ");
-  Serial.println(mpu.getGyroErrorZ());
+  mpu.update();
 
-  delay(5000);
+  Serial.print("GyroX: ");
+  Serial.println(mpu.getRawXGyro());
+  Serial.print("GyroY: ");
+  Serial.println(mpu.getRawYGyro());
+  Serial.print("GyroZ: ");
+  Serial.println(mpu.getRawZGyro());
+  delay(10);
 
 }

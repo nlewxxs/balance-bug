@@ -105,15 +105,15 @@ void mpu6050::update(){
 
     // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
 
-    Wire.read();
-    Wire.read();
-    // GyroX = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
+    // Wire.read();
+    // Wire.read();
+    GyroX = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
     GyroY = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
     GyroZ = ((((int8_t) Wire.read()) << 8) | (int8_t) Wire.read()) / 131.0;
     // Correct the outputs with the calculated error values
     // GyroX = GyroX - GyroErrorX; 
-    GyroY = GyroY - GyroErrorY; 
-    GyroZ = GyroZ - GyroErrorZ; 
+    // GyroY = GyroY - GyroErrorY; 
+    // GyroZ = GyroZ - GyroErrorZ; 
 
     // gyroAngleX = gyroAngleX + GyroX * elapsedTime; 
     gyroAngleY = gyroAngleY + GyroY * elapsedTime;

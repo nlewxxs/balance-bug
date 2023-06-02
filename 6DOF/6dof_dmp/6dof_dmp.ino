@@ -81,7 +81,8 @@ void setup() {
     Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
 
-    // supply your own gyro offsets here, scaled for min sensitivity
+    // gyro offsets, I tried with these and it seems perfect. Tried the calibrate.ino sketch after and the 
+    // raw values were being consistently returned as 0
     mpu.setXGyroOffset(220);
     mpu.setYGyroOffset(76);
     mpu.setZGyroOffset(-85);
@@ -96,20 +97,8 @@ void setup() {
         // turn on the DMP, now that it's ready
         Serial.println(F("Enabling DMP..."));
         mpu.setDMPEnabled(true);
-
-        // enable Arduino interrupt detection
-        // Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
-        // Serial.print(digitalPinToInterrupt(INTERRUPT_PIN));
-        // Serial.println(F(")..."));
-        // attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
-        // mpuIntStatus = mpu.getIntStatus();
-
-        // set our DMP Ready flag so the main loop() function knows it's okay to use it
-        Serial.println(F("DMP ready! Waiting for first interrupt..."));
         dmpReady = true;
 
-        // get expected DMP packet size for later comparison
-        packetSize = mpu.dmpGetFIFOPacketSize();
     } else {
         // ERROR!
         // 1 = initial memory load failed
@@ -120,12 +109,6 @@ void setup() {
         Serial.println(F(")"));
     }
 }
-
-
-
-// ================================================================
-// ===                    MAIN PROGRAM LOOP                     ===
-// ================================================================
 
 void loop() {
 
@@ -164,12 +147,12 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
-            Serial.print("\t");
+            Serial.print("pitch:\t");
             Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+            Serial.print("\troll:\t");
+            Serial.print(ypr[2] * 180/M_PI);
+            Serial.print("\tyaw:\t");
+            Serial.println(ypr[0] * 180/M_PI);
         #endif
 
     }
