@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+    "time"
+    "strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -99,7 +101,7 @@ func PingSession(c *gin.Context) {
 	SessionListNew.SessionId = c.Query("SessionId")
 
 	t := time.Now()
-	SessionListNew.LastSeen = t.Format("2003-09-18 02:00:00")
+	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
 	if len(SessionListNew.SessionId) == 0 {
