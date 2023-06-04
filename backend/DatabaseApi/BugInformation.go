@@ -68,7 +68,7 @@ func AddBugInformation(c *gin.Context) {
 		return
 	}
 
-    t := time.Now().In(location)
+    LastSeenNew := time.Now().In(location)
 
 	// Validate entry
 	if len(BugIdNew) == 0 {
