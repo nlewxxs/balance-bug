@@ -60,7 +60,15 @@ func AddBugInformation(c *gin.Context) {
 
 	BugIdNew := c.Query("BugId")
 	BugNameNew := c.Query("BugName")
-	LastSeenNew := time.Now()
+	
+    location, err := time.LoadLocation("Europe/London")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+		return
+	}
+
+    t := time.Now().In(location)
 
 	// Validate entry
 	if len(BugIdNew) == 0 {
@@ -96,7 +104,14 @@ func PingBugInformation(c *gin.Context) {
 
 	BugInformationNew.BugId = c.Query("BugId")
 
-	t := time.Now()
+	location, err := time.LoadLocation("Europe/London")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+		return
+	}
+
+    t := time.Now().In(location)
 	BugInformationNew.LastSeen = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
@@ -163,7 +178,14 @@ func OnlineBugInformation(c *gin.Context) {
 		Timeout = TimeoutExtracted
 	}
 
-	t := time.Now()
+	location, err := time.LoadLocation("Europe/London")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+		return
+	}
+
+    t := time.Now().In(location)
 	CurrentTime := t.Format("2006-01-02 15:04:05")
 	fmt.Println(CurrentTime, Timeout)
 

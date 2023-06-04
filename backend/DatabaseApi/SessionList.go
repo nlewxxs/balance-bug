@@ -106,7 +106,7 @@ func PingSession(c *gin.Context) {
 		return
 	}
 
-        t := time.Now().In(location)
+    t := time.Now().In(location)
 	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
