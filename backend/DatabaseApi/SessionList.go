@@ -54,10 +54,18 @@ func DisplaySessionList(c *gin.Context) {
 }
 
 func AddSession(c *gin.Context) {
-	TimeStampNew := c.Query("TimeStamp")
 	BugNameNew := c.Query("BugName")
 	SessionIdNew := uuid.New().String()
 	SessionNameNew := c.Query("SessionName")
+
+	location, err := time.LoadLocation("Europe/London")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+		return
+	}
+
+    TimeStampNew := time.Now().In(location)
 
 	// Validate entry
 	if len(TimeStampNew) == 0 {
