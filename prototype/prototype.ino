@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <SPI.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 
@@ -13,6 +14,10 @@ const char* password = "dvasc4xppp";
 String serverName = "http://192.168.1.16:8081";  // local ip of the backend host (NOT localhost)
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
+
+int sckdelay = 0.001;  // arbitrary number tbh can tweak this
+int fpga_cs = 4;  // fpga "chip select" - selects the FPGA as the slave
+int buf = 0;  // recv buffer
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
 
@@ -67,6 +72,10 @@ void setup() {
 
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
+
+  // configure SPI
+  pinMode(fpga_cs, OUTPUT);
+  SPI.begin();
 
   // initialize device
   mpu.initialize();
@@ -171,17 +180,20 @@ void loop() {
 
   // -------- OUTPUTS ---------- // 
 
-  Serial.print("Wheel inputs: ");
+  Serial.print("Wheel inputs:\t");
   Serial.print(leftWheelDrive);
-  Serial.print(" / ");
+  Serial.print("\t / \t");
   Serial.print(rightWheelDrive);
 
-  Serial.print("| pitch:  ");
+  Serial.print("\t| \tpitch:\t");
   Serial.print(ypr[1] * 180/M_PI);
-  Serial.print("  roll:  ");
+  Serial.print("\troll:\t");
   Serial.print(ypr[2] * 180/M_PI);
-  Serial.print("  yaw:  ");
-  Serial.println(ypr[0] * 180/M_PI);
+  Serial.print("\tyaw:\t");
+  Serial.print(ypr[0] * 180/M_PI);
+
+  Serial.print("\t| MISO: \t");
+  Serial.println(buf);
 
   delay(10);
 
@@ -193,59 +205,81 @@ float getPosition() {  //unsure of how this reading will work - needs to be 1D (
 }
 
 void communicationCode(void* pvParameters) {
+
+  for(;;){
+    recvSPIbytes();
+    delay(50);
+  }
   // Serial.println(xPortGetCoreID());
 
   // wifi setup
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print("Attempting WiFi connection...");
-  }
+  // WiFi.begin(ssid, password);
+  // Serial.println("Connecting");
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(500);
+  //   Serial.print("Attempting WiFi connection...");
+  // }
   
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
+  // Serial.println("");
+  // Serial.print("Connected to WiFi network with IP Address: ");
+  // Serial.println(WiFi.localIP());
 
-  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+  // Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 
-  // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
-  for (;;) {
-    if (millis() - lastTime > 5000) {
-      //Check WiFi connection status
-      if (WiFi.status() == WL_CONNECTED) {
-        // WiFiClient client;
-        HTTPClient http;
+  // // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
+  // for (;;) {
+  //   if (millis() - lastTime > 5000) {
+  //     //Check WiFi connection status
+  //     if (WiFi.status() == WL_CONNECTED) {
+  //       // WiFiClient client;
+  //       HTTPClient http;
 
-        // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-        String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
-        // Serial.println(serverPath);
+  //       // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
+  //       String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
+  //       // Serial.println(serverPath);
 
-        // Your Domain name with URL path or IP address with path
-        http.begin(serverPath.c_str());
+  //       // Your Domain name with URL path or IP address with path
+  //       http.begin(serverPath.c_str());
 
-        // HTTP GET request
-        int httpResponseCode = http.GET();
+  //       // HTTP GET request
+  //       int httpResponseCode = http.GET();
 
-        if (httpResponseCode > 0) {
-          Serial.print("HTTP Response code: ");
-          Serial.println(httpResponseCode);  // HTTP response code e.g. 200
-          String payload = http.getString();
-          Serial.println(payload);  // HTTP response package e..g JSON object
-        } else {
-          Serial.print("Error code: ");
-          Serial.println(httpResponseCode);
-        }
+  //       if (httpResponseCode > 0) {
+  //         Serial.print("HTTP Response code: ");
+  //         Serial.println(httpResponseCode);  // HTTP response code e.g. 200
+  //         String payload = http.getString();
+  //         Serial.println(payload);  // HTTP response package e..g JSON object
+  //       } else {
+  //         Serial.print("Error code: ");
+  //         Serial.println(httpResponseCode);
+  //       }
 
-        // Free resources
-        http.end();
-      } else {
-        Serial.println("WiFi Disconnected");
-      }
-      // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
-      // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
-      lastTime = millis();
+  //       // Free resources
+  //       http.end();
+  //     } else {
+  //       Serial.println("WiFi Disconnected");
+  //     }
+  //     // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
+  //     // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
+  //     lastTime = millis();
+  //   }
+  //   vTaskDelay(20);
+  // }
+}
+
+void recvSPIbytes(){  // receives 128 bytes of SPI
+
+  digitalWrite(fpga_cs, LOW); // SPI is active-low
+  delay(10);
+
+  for (int j = 0; j < 16; j++){
+    for (int i = 0; i < 8; i++){
+      buf = SPI.transfer(0xFF);
+      // Serial.println(buf);
     }
-    vTaskDelay(20);
+    delay(10); // this can be decreased
   }
+
+  digitalWrite(fpga_cs, HIGH); // stop FPGA sending
+  delay(10);
 }
