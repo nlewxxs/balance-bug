@@ -60,15 +60,14 @@ func AddBugInformation(c *gin.Context) {
 
 	BugIdNew := c.Query("BugId")
 	BugNameNew := c.Query("BugName")
-	
-    location, err := time.LoadLocation("Europe/London")
+	location, err := time.LoadLocation("Europe/London")
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
 		return
 	}
 
-    LastSeenNew := time.Now().In(location)
+	LastSeenNew := time.Now().In(location)
 
 	// Validate entry
 	if len(BugIdNew) == 0 {
