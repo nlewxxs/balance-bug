@@ -68,17 +68,6 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
 
-  //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
-  xTaskCreatePinnedToCore(
-    communicationCode, // Task function.
-    "communication",   // name of task.
-    20000,             // Stack size of task 
-    NULL,              // parameter of the task, not 
-    1,                 // priority of the task 
-    &communication,    // Task handle to keep track of created task 
-    0);                // pin task to core 0 -- by default we pin to core 1 
-  delay(500);
-
   // initialize device
   mpu.initialize();
   Serial.println(F("Testing device connections..."));
@@ -114,13 +103,26 @@ void setup() {
       Serial.print(devStatus);
       Serial.println(F(")"));
   }
-  delay(2000);
+
+  //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
+  xTaskCreatePinnedToCore(
+    communicationCode, // Task function.
+    "communication",   // name of task.
+    20000,             // Stack size of task 
+    NULL,              // parameter of the task, not 
+    1,                 // priority of the task 
+    &communication,    // Task handle to keep track of created task 
+    0);                // pin task to core 0 -- by default we pin to core 1 
+  delay(1000);
 }
 
 void loop() {
 
   if (!dmpReady) return;  // hang program if programming did not work
+
   // Serial.println(xPortGetCoreID());
+
+  // -------- READ FROM IMU ---------- // 
 
   if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)){
     mpu.dmpGetQuaternion(&q, fifoBuffer);
@@ -130,6 +132,8 @@ void loop() {
 
   float iteration_time = (millis() - oldMillis) / 1000.0;
   oldMillis = millis();
+
+  // -------- PID CONTROLLER ---------- // 
 
   // position control first
   float positionReading = getPosition();  // example I used for the controller has position read from rotary encoders - this value is total distance travelled
@@ -165,6 +169,8 @@ void loop() {
   float leftWheelDrive = T_out - H_out;  // voltage / pwm that will actually drive the wheels
   float rightWheelDrive = T_out + H_out;
 
+  // -------- OUTPUTS ---------- // 
+
   Serial.print("Wheel inputs: ");
   Serial.print(leftWheelDrive);
   Serial.print(" / ");
@@ -177,7 +183,7 @@ void loop() {
   Serial.print("  yaw:  ");
   Serial.println(ypr[0] * 180/M_PI);
 
-  delay(40);
+  delay(10);
 
 }
 
@@ -188,14 +194,13 @@ float getPosition() {  //unsure of how this reading will work - needs to be 1D (
 
 void communicationCode(void* pvParameters) {
   // Serial.println(xPortGetCoreID());
-  // void communicationCode() {
 
   // wifi setup
   WiFi.begin(ssid, password);
   Serial.println("Connecting");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    Serial.print("Attempting WiFi connection...");
   }
   
   Serial.println("");
