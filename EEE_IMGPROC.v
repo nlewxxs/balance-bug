@@ -329,15 +329,15 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 			msg_buf_wr = 1'b0;
 		end
 		2'b01: begin
-			msg_buf_in = `RED_BOX_MSG_ID;	//Message ID
+			msg_buf_in = "TL TR BL BR";	//Message ID
 			msg_buf_wr = 1'b1;
 		end
 		2'b10: begin
-			msg_buf_in = {5'b0, tl_x_min, 5'b0, tl_y_min};	//Top left coordinate
+			msg_buf_in = {tl_x_min, tl_y_min, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min};	//Top left coordinate
 			msg_buf_wr = 1'b1;
 		end
 		2'b11: begin
-			msg_buf_in = {5'b0, tl_x_max, 5'b0, tl_y_max}; //Bottom right coordinate
+			msg_buf_in = {tl_x_max, tl_y_max, tr_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max}; //Bottom right coordinate
 			msg_buf_wr = 1'b1;
 		end
 	endcase
@@ -355,7 +355,7 @@ MSG_FIFO	MSG_FIFO_inst (
 	.q (msg_buf_out),
 	.usedw (msg_buf_size),
 	.empty (msg_buf_empty)
-	);
+);
 
 
 //Streaming registers to buffer video signal
