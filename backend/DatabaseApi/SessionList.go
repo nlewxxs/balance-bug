@@ -16,7 +16,7 @@ import (
 type SessionListStruct struct {
 	TimeStamp      	string  `json:"TimeStamp"`
 	BugName         string  `json:"BugName"`
-	SessionId 	string  `json:"SessionId"`
+	SessionId   	string  `json:"SessionId"`
 	SessionName     string  `json:"SessionName"`
 }
 
@@ -92,3 +92,33 @@ func AddSession(c *gin.Context) {
 		c.JSON(http.StatusCreated, &SessionListNew)
 	}
 }
+
+func PingSession(c *gin.Context) {
+	var SessionListNew SessionListStruct
+
+	SessionListNew.SessionId = c.Query("SessionId")
+
+	t := time.Now()
+	SessionListNew.LastSeen = t.Format("2003-09-18 02:00:00")
+
+	// Validate entry
+	if len(SessionListNew.SessionId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
+	} else {
+		// Insert item to DB
+        _, err := db.Query("UPDATE testdb.SessionList SET `TimeStamp`=? WHERE SessionId=?;", SessionListNew.TimeStamp, SessionListNew.SessionId)
+		if err != nil {
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		}
+
+		// Log message
+		log.Println("updated SessionList entry", SessionListNew)
+
+		// Return success response
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+		c.JSON(http.StatusOK, &SessionListNew)
+	}
+}
+
