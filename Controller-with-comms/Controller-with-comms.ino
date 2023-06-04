@@ -149,37 +149,41 @@ void communicationCode(void* pvParameters) {
 
   // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
   for (;;) {
-    //Check WiFi connection status
-    if (WiFi.status() == WL_CONNECTED) {
-      // WiFiClient client;
-      HTTPClient http;
+    if (millis() - lastTime > 5000) {
+      //Check WiFi connection status
+      if (WiFi.status() == WL_CONNECTED) {
+        // WiFiClient client;
+        HTTPClient http;
 
+        // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
+        String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
+        // Serial.println(serverPath);
 
-      // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-      String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
-      // Serial.println(serverPath);
+        // Your Domain name with URL path or IP address with path
+        http.begin(serverPath.c_str());
 
-      // Your Domain name with URL path or IP address with path
-      http.begin(serverPath.c_str());
+        // HTTP GET request
+        int httpResponseCode = http.GET();
 
-      // HTTP GET request
-      int httpResponseCode = http.GET();
+        if (httpResponseCode > 0) {
+          Serial.print("HTTP Response code: ");
+          Serial.println(httpResponseCode);  // HTTP response code e.g. 200
+          String payload = http.getString();
+          Serial.println(payload);  // HTTP response package e..g JSON object
+        } else {
+          Serial.print("Error code: ");
+          Serial.println(httpResponseCode);
+        }
 
-      if (httpResponseCode > 0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);  // HTTP response code e.g. 200
-        String payload = http.getString();
-        Serial.println(payload);  // HTTP response package e..g JSON object
+        // Free resources
+        http.end();
       } else {
-        Serial.print("Error code: ");
-        Serial.println(httpResponseCode);
+        Serial.println("WiFi Disconnected");
       }
-
-      // Free resources
-      http.end();
-    } else {
-      Serial.println("WiFi Disconnected");
+      // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
+      // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
+      lastTime = millis();
     }
-    vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
+    vTaskDelay(20);
   }
 }
