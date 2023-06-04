@@ -66,7 +66,7 @@ func AddSession(c *gin.Context) {
 	}
 
 	t := time.Now().In(location)
-	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
+	TimeStampNew := t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
 	if len(TimeStampNew) == 0 {
@@ -81,6 +81,7 @@ func AddSession(c *gin.Context) {
 		// Create todo item
 		var SessionListNew SessionListStruct
 
+		SessionListNew.TimeStamp = TimeStampNew
 		SessionListNew.BugName = BugNameNew
 		SessionListNew.SessionId = SessionIdNew
 		SessionListNew.SessionName = SessionNameNew
