@@ -262,7 +262,7 @@ always@(posedge clk) begin
 end
 
 //Process bounding box at the end of the frame.
-reg [1:0] msg_state;
+reg [3:0] msg_state;
 reg [10:0] tl_left, tl_right, tl_top, tl_bottom;
 reg [10:0] tr_left, tr_right, tr_top, tr_bottom;
 reg [10:0] bl_left, bl_right, bl_top, bl_bottom;
@@ -300,16 +300,22 @@ always@(posedge clk) begin
 		frame_count <= frame_count - 1;
 		
 		if (frame_count == 0 && msg_buf_size < MESSAGE_BUF_MAX - 3) begin
-			msg_state <= 2'b01;
+			msg_state <= 3'b001;
 			frame_count <= MSG_INTERVAL-1;
 		end
 	end
 	
 	//Cycle through message writer states once started
-	if (msg_state != 2'b00) msg_state <= msg_state + 2'b01;
-
+	if (msg_state != 4'b0000) begin
+		if(msg_state == 4'b1001) begin
+			msg_state <= 4'b0000;
+		end
+		else begin
+			msg_state <= msg_state + 4'b01;
+		end
+	end
 end
-	
+
 
 //TODO GENERATE OUTPUT MESSAGES
 //Generate output messages for CPU
@@ -320,26 +326,54 @@ wire msg_buf_rd, msg_buf_flush;
 wire [7:0] msg_buf_size;
 wire msg_buf_empty;
 
-`define RED_BOX_MSG_ID "RBB"
+`define RED_BOX_MSG_ID "NB"
 
 always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BOX HERE
 	case(msg_state)
-		2'b00: begin
+		4'b0000: begin
 			msg_buf_in = 32'b0;
 			msg_buf_wr = 1'b0;
 		end
-		2'b01: begin
-			msg_buf_in = "TL TR BL BR";	//Message ID
+		4'b0001: begin
+			msg_buf_in = `RED_BOX_MSG_ID;	//Message ID
 			msg_buf_wr = 1'b1;
 		end
-		2'b10: begin
-			msg_buf_in = {tl_x_min, tl_y_min, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min};	//Top left coordinate
+		4'b0010: begin
+			msg_buf_in = {5'b0, tl_x_min, 5'b0, tl_y_min};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		2'b11: begin
-			msg_buf_in = {tl_x_max, tl_y_max, tr_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max}; //Bottom right coordinate
+		4'b0011: begin
+			msg_buf_in = {5'b0, tr_x_min, 5'b0, tr_y_min};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
+		4'b0100: begin
+			msg_buf_in = {5'b0, bl_x_min, 5'b0, bl_y_min};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+			msg_buf_wr = 1'b1;
+		end
+		4'b0101: begin
+			msg_buf_in = {5'b0, br_x_min, 5'b0, br_y_min};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+			msg_buf_wr = 1'b1;
+		end
+		4'b0110: begin
+			msg_buf_in = {5'b0, tl_x_max, 5'b0, tl_x_max};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+			msg_buf_wr = 1'b1;
+		end
+		4'b0111: begin
+			msg_buf_in = {5'b0, tr_x_max, 5'b0, tr_x_max};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+			msg_buf_wr = 1'b1;
+		end
+		4'b1000: begin
+			msg_buf_in = {5'b0, bl_x_max, 5'b0, bl_y_max};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+			msg_buf_wr = 1'b1;
+		end
+		4'b1001: begin
+			msg_buf_in = {5'b0, br_x_max, 5'b0, br_y_max};	//Top left coordinate //, tr_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+			msg_buf_wr = 1'b1;
+		end
+		// 2'b111: begin
+		// 	msg_buf_in = {tl_x_max, tl_y_max, tr_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max}; //Bottom right coordinate
+		// 	msg_buf_wr = 1'b1;
+		// end
 	endcase
 end
 
@@ -452,4 +486,3 @@ assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_addres
 
 
 endmodule
-
