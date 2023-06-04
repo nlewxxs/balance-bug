@@ -3,7 +3,6 @@ package main
 import (
 	// "BalanceBugServer/backend/api"
 	"net/http"
-	"time"
 
 	"BalanceBugServer/backend/DatabaseApi"
 	api "BalanceBugServer/backend/DatabaseApi"
@@ -26,16 +25,16 @@ func SetupRoutes() *gin.Engine {
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	// config.AddAllowMethods = []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"}
-	// router.Use(cors.New(config))
-	router.Use(cors.New(cors.Config{
-		AllowAllOrigins: true,
-		AllowMethods: []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"},
-		AllowHeaders: []string{"Origin"},
-		ExposeHeaders: []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:12 * time.Hour,
-	}))
+	config.AllowMethods = []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"}
+	router.Use(cors.New(config))
+	// router.Use(cors.New(cors.Config{
+	// 	AllowAllOrigins: true,
+	// 	AllowMethods: []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"},
+	// 	AllowHeaders: []string{"Origin"},
+	// 	ExposeHeaders: []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// 	MaxAge:12 * time.Hour,
+	// }))
 
 	// Set route for index
 	router.GET("/", indexView)
