@@ -1,11 +1,10 @@
 package DatabaseApi
 
 import (
-	"fmt"
-	"log"
-	"net/http"
+    "fmt"
+    "log"
+    "net/http"
     "time"
-    "strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -100,7 +99,14 @@ func PingSession(c *gin.Context) {
 
 	SessionListNew.SessionId = c.Query("SessionId")
 
-	t := time.Now()
+	location, err := time.LoadLocation("Europe/London")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+		return
+	}
+
+        t := time.Now().In(location)
 	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
@@ -112,6 +118,7 @@ func PingSession(c *gin.Context) {
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		// Log message
@@ -119,7 +126,7 @@ func PingSession(c *gin.Context) {
 
 		// Return success response
 		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusOK, &SessionListNew)
 	}
 }

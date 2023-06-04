@@ -24,6 +24,7 @@ func SetupRoutes() *gin.Engine {
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
+	config.AddAllowMethods = []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"}
 	router.Use(cors.New(config))
 
 	// Set route for index
@@ -34,7 +35,7 @@ func SetupRoutes() *gin.Engine {
 
 	//DatabaseApi Paths
 	router.GET("/Session/Add", DatabaseApi.AddSession)
-    router.PUT("/Session/Ping", DatabaseApi.PingSession)
+	router.PATCH("/Session/Ping", DatabaseApi.PingSession)
 	router.GET("/Session/DisplayAll", DatabaseApi.DisplaySessionList)
 
 	router.GET("/Nodes/Add", DatabaseApi.AddNode)
