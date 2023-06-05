@@ -8,6 +8,9 @@
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
 
+// #define ENABLE_HTTP_SERVER
+#define OUTPUT_DEBUG
+
 TaskHandle_t communication;  // task on core 2 for communications
 const char* ssid = "CommunityFibre10Gb_AF5A8";
 const char* password = "dvasc4xppp";
@@ -61,9 +64,10 @@ float H_integral[2], P_integral[2], T_integral[2] = { 0, 0 };  //stores current 
 float iteration_time;
 unsigned long oldMillis = 0;
 
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
+float leftWheelDrive;
+float rightWheelDrive;
 
-float running_total = 0;
+// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
 
 void setup() {
 
@@ -175,26 +179,24 @@ void loop() {
   H_integral[0] = H_integral[1];  // time shift integral readings after out calculated
   H_error[0] = H_error[1];
 
-  float leftWheelDrive = T_out - H_out;  // voltage / pwm that will actually drive the wheels
-  float rightWheelDrive = T_out + H_out;
+  leftWheelDrive = T_out - H_out;  // voltage / pwm that will actually drive the wheels
+  rightWheelDrive = T_out + H_out;
 
   // -------- OUTPUTS ---------- // 
-
-  Serial.print("Wheel inputs:\t");
-  Serial.print(leftWheelDrive);
-  Serial.print("\t / \t");
-  Serial.print(rightWheelDrive);
-
-  Serial.print("\t| \tpitch:\t");
-  Serial.print(ypr[1] * 180/M_PI);
-  Serial.print("\troll:\t");
-  Serial.print(ypr[2] * 180/M_PI);
-  Serial.print("\tyaw:\t");
-  Serial.print(ypr[0] * 180/M_PI);
-
-  Serial.print("\t| MISO: \t");
-  Serial.println(buf);
-
+  #ifdef OUTPUT_DEBUG
+    Serial.print("Wheel inputs:\t");
+    Serial.print(leftWheelDrive);
+    Serial.print("\t / \t");
+    Serial.print(rightWheelDrive);
+    Serial.print("\t| \tpitch:\t");
+    Serial.print(ypr[1] * 180/M_PI);
+    Serial.print("\troll:\t");
+    Serial.print(ypr[2] * 180/M_PI);
+    Serial.print("\tyaw:\t");
+    Serial.print(ypr[0] * 180/M_PI);
+    Serial.print("\t| MISO: \t");
+    Serial.println(buf);
+  #endif
   delay(10);
 
 }
@@ -205,66 +207,63 @@ float getPosition() {  //unsure of how this reading will work - needs to be 1D (
 }
 
 void communicationCode(void* pvParameters) {
-
-  for(;;){
-    recvSPIbytes();
-    delay(50);
-  }
   // Serial.println(xPortGetCoreID());
 
-  // wifi setup
-  // WiFi.begin(ssid, password);
-  // Serial.println("Connecting");
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(500);
-  //   Serial.print("Attempting WiFi connection...");
-  // }
-  
-  // Serial.println("");
-  // Serial.print("Connected to WiFi network with IP Address: ");
-  // Serial.println(WiFi.localIP());
+  #ifdef ENABLE_HTTP_SERVER
+    wifi setup
+    WiFi.begin(ssid, password);
+    Serial.println("Connecting");
 
-  // Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print("Attempting WiFi connection...");
+    }
 
-  // // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
-  // for (;;) {
-  //   if (millis() - lastTime > 5000) {
-  //     //Check WiFi connection status
-  //     if (WiFi.status() == WL_CONNECTED) {
-  //       // WiFiClient client;
-  //       HTTPClient http;
+    Serial.println("");
+    Serial.print("Connected to WiFi network with IP Address: ");
+    Serial.println(WiFi.localIP());
+    Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+  #endif
 
-  //       // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-  //       String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
-  //       // Serial.println(serverPath);
+    // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
+  for (;;) {
+    #ifdef ENABLE_HTTP_SERVER
+      if (millis() - lastTime > 5000) {
+        //Check WiFi connection status
+        if (WiFi.status() == WL_CONNECTED) {
+          // WiFiClient client;
+          HTTPClient http;
+          // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
+          String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
+          // Serial.println(serverPath);
+          // Your Domain name with URL path or IP address with path
+          http.begin(serverPath.c_str());
+          // HTTP GET request
+          int httpResponseCode = http.GET();
 
-  //       // Your Domain name with URL path or IP address with path
-  //       http.begin(serverPath.c_str());
+          if (httpResponseCode > 0) {
+            Serial.print("HTTP Response code: ");
+            Serial.println(httpResponseCode);  // HTTP response code e.g. 200
+            String payload = http.getString();
+            Serial.println(payload);  // HTTP response package e..g JSON object
+          } else {
+            Serial.print("Error code: ");
+            Serial.println(httpResponseCode);
+          }
 
-  //       // HTTP GET request
-  //       int httpResponseCode = http.GET();
-
-  //       if (httpResponseCode > 0) {
-  //         Serial.print("HTTP Response code: ");
-  //         Serial.println(httpResponseCode);  // HTTP response code e.g. 200
-  //         String payload = http.getString();
-  //         Serial.println(payload);  // HTTP response package e..g JSON object
-  //       } else {
-  //         Serial.print("Error code: ");
-  //         Serial.println(httpResponseCode);
-  //       }
-
-  //       // Free resources
-  //       http.end();
-  //     } else {
-  //       Serial.println("WiFi Disconnected");
-  //     }
-  //     // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
-  //     // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
-  //     lastTime = millis();
-  //   }
-  //   vTaskDelay(20);
-  // }
+          // Free resources
+          http.end();
+        } else {
+          Serial.println("WiFi Disconnected");
+        }
+        // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
+        // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
+        lastTime = millis();
+      }
+    #endif
+    recvSPIbytes();
+    vTaskDelay(20);
+  }
 }
 
 void recvSPIbytes(){  // receives 128 bytes of SPI
