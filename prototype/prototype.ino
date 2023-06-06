@@ -4,6 +4,7 @@
 #include <SPI.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include <AccelStepper.h>
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
@@ -11,7 +12,8 @@
 // #define ENABLE_HTTP_SERVER
 #define OUTPUT_DEBUG
 
-TaskHandle_t communication;  // task on core 2 for communications
+TaskHandle_t communication;  // task on core 0 for communication
+
 const char* ssid = "CommunityFibre10Gb_AF5A8";
 const char* password = "dvasc4xppp";
 String serverName = "http://192.168.1.16:8081";  // local ip of the backend host (NOT localhost)
@@ -28,7 +30,22 @@ int buf = 0;  // recv buffer
 // ----------------- CORE 1 DEFINITIONS ----------------- //
 
 #define HEADING_SETPOINT 0
-#define POSITION_SETPOINT 0
+#define POSITION_SETPOINT 1
+
+// Define pin connections
+const int leftDirPin = 32;
+const int leftStepPin = 33;
+// Define pin connections
+const int rightDirPin = 25;
+const int rightStepPin = 26;
+
+// Define motor interface type
+#define motorInterfaceType 1
+#define stepsPerRevolution 200
+
+// Creates an instance
+AccelStepper leftStepper(motorInterfaceType, leftStepPin, leftDirPin);
+AccelStepper rightStepper(motorInterfaceType, rightStepPin, rightDirPin);
 
 MPU6050 mpu;
 bool dmpReady = false;  
@@ -42,19 +59,30 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 // heading PD controller
-float Kp_heading = 0.8;
+float Kp_heading = 0; //0.8
 float Ki_heading = 0;
-float Kd_heading = 0.2;
+float Kd_heading = 0; //0.2
 
 // position PD controller
-float Kp_position = 0.0005;
+// float Kp_position = 12;
+float Kp_position = 0;
 float Ki_position = 0;
-float Kd_position = 0.75;
+float Kd_position = 0;
+// float Kp_position = -0.00135;
+// float Ki_position = -0.000002;
+// float Kd_position = -0.227;
+// float Kp_position = 0.0005;
+// float Ki_position = 0;
+// float Kd_position = 0.75;
 
 // balance PID controller
-float Kp_tilt = 5;        //175
-float Ki_tilt = 0.75;     //5
-float Kd_tilt = 1;        //8.5
+float Kp_tilt = 75;        //175
+float Ki_tilt = 0;     //5
+float Kd_tilt = 5;        //8.5
+// float Kp_tilt = 2;        //175
+// float Ki_tilt = 0.0075;     //5
+// float Kd_tilt = 2;        //8.5
+
 float balanceCenter = 0;  // whatever tilt value is balanced
 float P_bias, T_bias, H_bias = 0;
 
@@ -78,8 +106,8 @@ void setup() {
   Wire.setClock(400000); // 400kHz I2C clock
 
   // configure SPI
-  pinMode(fpga_cs, OUTPUT);
-  SPI.begin();
+  // pinMode(fpga_cs, OUTPUT);
+  // SPI.begin();
 
   // initialize device
   mpu.initialize();
@@ -126,6 +154,12 @@ void setup() {
     1,                 // priority of the task 
     &communication,    // Task handle to keep track of created task 
     0);                // pin task to core 0 -- by default we pin to core 1 
+  
+	leftStepper.setMaxSpeed(200);
+	leftStepper.setAcceleration(1000);
+	rightStepper.setMaxSpeed(200);
+	rightStepper.setAcceleration(1000);
+  
   delay(1000);
 }
 
@@ -179,25 +213,34 @@ void loop() {
   H_integral[0] = H_integral[1];  // time shift integral readings after out calculated
   H_error[0] = H_error[1];
 
-  leftWheelDrive = T_out - H_out;  // voltage / pwm that will actually drive the wheels
-  rightWheelDrive = T_out + H_out;
+  leftWheelDrive = T_out + H_out;  // voltage / pwm that will actually drive the wheels
+  rightWheelDrive = T_out - H_out;
 
-  // -------- OUTPUTS ---------- // 
-  #ifdef OUTPUT_DEBUG
-    Serial.print("Wheel inputs:\t");
-    Serial.print(leftWheelDrive);
-    Serial.print("\t / \t");
-    Serial.print(rightWheelDrive);
-    Serial.print("\t| \tpitch:\t");
-    Serial.print(ypr[1] * 180/M_PI);
-    Serial.print("\troll:\t");
-    Serial.print(ypr[2] * 180/M_PI);
-    Serial.print("\tyaw:\t");
-    Serial.print(ypr[0] * 180/M_PI);
-    Serial.print("\t| MISO: \t");
-    Serial.println(buf);
-  #endif
-  delay(10);
+  leftWheelDrive = -leftWheelDrive;
+  rightWheelDrive = -rightWheelDrive;
+
+  
+	// Move the motor one step
+  if (leftWheelDrive > 0) {
+    leftStepper.moveTo(leftStepper.currentPosition() + 20000);
+  } else {
+    leftStepper.moveTo(leftStepper.currentPosition() - 20000);
+  }
+  leftStepper.setSpeed(leftWheelDrive);
+	leftStepper.run();
+  if (rightWheelDrive > 0) {
+    rightStepper.moveTo(rightStepper.currentPosition() + 20000);
+  } else {
+    rightStepper.moveTo(rightStepper.currentPosition() - 20000);
+  }
+  rightStepper.setSpeed(rightWheelDrive);
+	rightStepper.run();
+	// leftStepper.run();  
+	// leftStepper.setSpeed(200);
+	// rightStepper.run();  
+	// rightStepper.setSpeed(200);
+
+  delayMicroseconds(1000);
 
 }
 
@@ -206,79 +249,98 @@ float getPosition() {  //unsure of how this reading will work - needs to be 1D (
   return 0;
 }
 
+
+
 void communicationCode(void* pvParameters) {
-  // Serial.println(xPortGetCoreID());
-
-  #ifdef ENABLE_HTTP_SERVER
-    wifi setup
-    WiFi.begin(ssid, password);
-    Serial.println("Connecting");
-
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      Serial.print("Attempting WiFi connection...");
-    }
-
-    Serial.println("");
-    Serial.print("Connected to WiFi network with IP Address: ");
-    Serial.println(WiFi.localIP());
-    Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
-  #endif
-
-    // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
+  // -------- OUTPUTS ---------- //
   for (;;) {
-    #ifdef ENABLE_HTTP_SERVER
-      if (millis() - lastTime > 5000) {
-        //Check WiFi connection status
-        if (WiFi.status() == WL_CONNECTED) {
-          // WiFiClient client;
-          HTTPClient http;
-          // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-          String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
-          // Serial.println(serverPath);
-          // Your Domain name with URL path or IP address with path
-          http.begin(serverPath.c_str());
-          // HTTP GET request
-          int httpResponseCode = http.GET();
-
-          if (httpResponseCode > 0) {
-            Serial.print("HTTP Response code: ");
-            Serial.println(httpResponseCode);  // HTTP response code e.g. 200
-            String payload = http.getString();
-            Serial.println(payload);  // HTTP response package e..g JSON object
-          } else {
-            Serial.print("Error code: ");
-            Serial.println(httpResponseCode);
-          }
-
-          // Free resources
-          http.end();
-        } else {
-          Serial.println("WiFi Disconnected");
-        }
-        // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
-        // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
-        lastTime = millis();
-      }
-    #endif
-    recvSPIbytes();
-    vTaskDelay(20);
+    Serial.print("L: ");
+    Serial.print(leftWheelDrive);
+    Serial.print(" R: ");
+    Serial.print(rightWheelDrive);
+    Serial.print("  pitch: ");
+    Serial.print(ypr[1] * 180/M_PI);
+    Serial.print(" roll: ");
+    Serial.print(ypr[2] * 180/M_PI);
+    Serial.print(" yaw: ");
+    Serial.println(ypr[0] * 180/M_PI);
+    vTaskDelay(50);
   }
 }
 
-void recvSPIbytes(){  // receives 128 bytes of SPI
+// void communicationCode(void* pvParameters) {
+//   // Serial.println(xPortGetCoreID());
 
-  digitalWrite(fpga_cs, LOW); // SPI is active-low
-  delay(10);
+//   #ifdef ENABLE_HTTP_SERVER
+//     wifi setup
+//     WiFi.begin(ssid, password);
+//     Serial.println("Connecting");
 
-  for (int j = 0; j < 16; j++){
-    for (int i = 0; i < 8; i++){
-      buf = SPI.transfer(0xFF);
-      // Serial.println(buf);
-    }
-    delay(10); // this can be decreased
-  }
+//     while (WiFi.status() != WL_CONNECTED) {
+//       delay(500);
+//       Serial.print("Attempting WiFi connection...");
+//     }
 
-  digitalWrite(fpga_cs, HIGH); // stop FPGA sending
-  delay(10);
-}
+//     Serial.println("");
+//     Serial.print("Connected to WiFi network with IP Address: ");
+//     Serial.println(WiFi.localIP());
+//     Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+//   #endif
+
+//     // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
+//   for (;;) {
+//     #ifdef ENABLE_HTTP_SERVER
+//       if (millis() - lastTime > 5000) {
+//         //Check WiFi connection status
+//         if (WiFi.status() == WL_CONNECTED) {
+//           // WiFiClient client;
+//           HTTPClient http;
+//           // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
+//           String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
+//           // Serial.println(serverPath);
+//           // Your Domain name with URL path or IP address with path
+//           http.begin(serverPath.c_str());
+//           // HTTP GET request
+//           int httpResponseCode = http.GET();
+
+//           if (httpResponseCode > 0) {
+//             Serial.print("HTTP Response code: ");
+//             Serial.println(httpResponseCode);  // HTTP response code e.g. 200
+//             String payload = http.getString();
+//             Serial.println(payload);  // HTTP response package e..g JSON object
+//           } else {
+//             Serial.print("Error code: ");
+//             Serial.println(httpResponseCode);
+//           }
+
+//           // Free resources
+//           http.end();
+//         } else {
+//           Serial.println("WiFi Disconnected");
+//         }
+//         // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
+//         // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
+//         lastTime = millis();
+//       }
+//     #endif
+//     recvSPIbytes();
+//     vTaskDelay(20);
+//   }
+// }
+
+// void recvSPIbytes(){  // receives 128 bytes of SPI
+
+//   digitalWrite(fpga_cs, LOW); // SPI is active-low
+//   delay(10);
+
+//   for (int j = 0; j < 16; j++){
+//     for (int i = 0; i < 8; i++){
+//       buf = SPI.transfer(0xFF);
+//       // Serial.println(buf);
+//     }
+//     delay(10); // this can be decreased
+//   }
+
+//   digitalWrite(fpga_cs, HIGH); // stop FPGA sending
+//   delay(10);
+// }
