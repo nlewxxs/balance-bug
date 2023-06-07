@@ -82,8 +82,8 @@ wire blue_detect;
 
 
 assign yellow_detect = red[7] & green[7] & !blue[7] & !blue[6];
-assign red_detect = red[7] & !green[7] & !blue[7] & !blue[6]  & !green[6]; //& !blue[5]
-assign blue_detect = !red[7] & !green[7] & blue[7] & blue[6]; //& !blue[5]
+assign red_detect = red[7] & !green[7] & !blue[7] & !blue[6] & !green[6]; //& !blue[5]
+assign blue_detect = !red[7:6] & !green[7] & blue[7] & green[6]; //& !blue[5]
 
 // Find boundary of cursor box
 
@@ -162,30 +162,34 @@ end
 
 
 always@(posedge clk) begin
-	if ((red_detect || yellow_detect) & in_valid) begin	//Update bounds when the pixel is red     || blue_detect
-		if (x < x_min) begin
-			x_min <= x;
-			if(red_detect) x_min_col <= 3'b001;
-			else if (yellow_detect) x_min_col <= 3'b010;
-			
-			// else if (blue_detect) x_min_col <= 3'b100;
+	if ((red_detect || yellow_detect || blue_detect) & in_valid) begin	//Update bounds when the pixel is red     
+		if ((x > 120) & (x < 360) & (y < 120)) begin
+			if ((x < x_min) & (x < 480) & (x > 160)) begin
+				x_min <= x;
+				if(red_detect) x_min_col <= 3'b001;
+				else if (yellow_detect) x_min_col <= 3'b010;
+				
+				else if (blue_detect) x_min_col <= 3'b100;
+			end
+			if ((x > x_max) & (x < 480) & (x > 160)) begin 
+				x_max <= x;
+				if(red_detect) x_max_col <= 3'b001;
+				else if (yellow_detect) x_max_col <= 3'b010;
+				else if (blue_detect) x_max_col <= 3'b100;
+			end
+			if ((y < y_min) & (y < 120)) begin
+				y_min <= y;
+				if(red_detect) y_min_col <= 3'b001;
+				else if (yellow_detect) y_min_col <= 3'b010;
+				else if (blue_detect) y_min_col <= 3'b100;
+			end
+			if(y < 120) begin
+				y_max <= y;
+				if(red_detect) y_max_col <= 3'b001;
+				else if (yellow_detect) y_max_col <= 3'b010;
+				else if (blue_detect) y_max_col <= 3'b100;
+			end
 		end
-		if (x > x_max) begin 
-			x_max <= x;
-			if(red_detect) x_max_col <= 3'b001;
-			else if (yellow_detect) x_max_col <= 3'b010;
-			// else if (blue_detect) x_max_col <= 3'b100;
-		end
-		if (y < y_min) begin
-			y_min <= y;
-			if(red_detect) y_min_col <= 3'b001;
-			else if (yellow_detect) y_min_col <= 3'b010;
-			// else if (blue_detect) y_min_col <= 3'b100;
-		end
-		y_max <= y;
-		if(red_detect) y_max_col <= 3'b001;
-		else if (yellow_detect) y_max_col <= 3'b010;
-		// else if (blue_detect) y_max_col <= 3'b100;
 
 	end
 	if (sop & in_valid) begin	//Reset bounds on start of packet
@@ -255,7 +259,7 @@ always@(*) begin	//Write words to FIFO as state machine advances
 			msg_buf_wr = 1'b1;
 		end
 		2'b10: begin
-			msg_buf_in = {x_min_col, 2'b0, x_min, 5'b0, y_min};	//Top left coordinate
+			msg_buf_in = {x_max_col, 2'b0, x_min, 5'b0, y_min};	//Top left coordinate
 			msg_buf_wr = 1'b1;
 		end
 		2'b11: begin
