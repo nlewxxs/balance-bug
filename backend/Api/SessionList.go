@@ -1,4 +1,4 @@
-package DatabaseApi
+package Api
 
 import (
     "fmt"

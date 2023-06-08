@@ -4,8 +4,9 @@ import (
 	// "BalanceBugServer/backend/api"
 	"net/http"
 
-	"BalanceBugServer/backend/DatabaseApi"
-	api "BalanceBugServer/backend/DatabaseApi"
+	api "BalanceBugServer/backend/Api"
+	// "BalanceBugServer/backend/api/Databaseapi"
+	// // api "BalanceBugServer/backend/api"
 
 	//"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ import (
 func indexView(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-	c.JSON(http.StatusOK, gin.H{"message": "Balance Bug API"})
+	c.JSON(http.StatusOK, gin.H{"message": "Balance Bug api"})
 }
 
 // Setup Gin Routes
@@ -39,27 +40,27 @@ func SetupRoutes() *gin.Engine {
 	// Set route for index
 	router.GET("/", indexView)
 
-	// Set routes for API
+	// Set routes for api
 	// Update to POST, UPDATE, DELETE etc
 
-	//DatabaseApi Paths
-	router.GET("/Session/Add", DatabaseApi.AddSession)
-	router.PATCH("/Session/Ping", DatabaseApi.PingSession)
-	router.GET("/Session/DisplayAll", DatabaseApi.DisplaySessionList)
+	//api Paths
+	router.GET("/Session/Add", api.AddSession)
+	router.PATCH("/Session/Ping", api.PingSession)
+	router.GET("/Session/DisplayAll", api.DisplaySessionList)
 
-	router.GET("/Nodes/Add", DatabaseApi.AddNode)
-	router.GET("/Nodes/DisplayAll", DatabaseApi.DisplayAllNodes)
-	router.GET("/Nodes/CreateTable", DatabaseApi.CreateNodeTable)
+	router.GET("/Nodes/Add", api.AddNode)
+	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
+	router.GET("/Nodes/CreateTable", api.CreateNodeTable)
 
-	router.GET("/Edges/Add", DatabaseApi.AddEdge)
-	router.GET("/Edges/DisplayAll", DatabaseApi.DisplayAllEdges)
-	router.GET("/Edges/CreateTable", DatabaseApi.CreateEdgeTable)
+	router.GET("/Edges/Add", api.AddEdge)
+	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
+	router.GET("/Edges/CreateTable", api.CreateEdgeTable)
 
-	router.GET("/BugInformation/Add", DatabaseApi.AddBugInformation)
-	router.GET("/BugInformation/Ping", DatabaseApi.PingBugInformation)
-	router.GET("/BugInformation/Online", DatabaseApi.OnlineBugInformation)
-	router.GET("/BugInformation/DisplayAll", DatabaseApi.DisplayBugInformation)
-	router.GET("/BugInformation/UpdateBugName", DatabaseApi.UpdateBugNameBugInformation)
+	router.GET("/BugInformation/Add", api.AddBugInformation)
+	router.GET("/BugInformation/Ping", api.PingBugInformation)
+	router.GET("/BugInformation/Online", api.OnlineBugInformation)
+	router.GET("/BugInformation/DisplayAll", api.DisplayBugInformation)
+	router.GET("/BugInformation/UpdateBugName", api.UpdateBugNameBugInformation)
 
 	/*
 		SessionId.Edges
