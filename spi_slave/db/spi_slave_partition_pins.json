@@ -12,6 +12,10 @@
 					"strict" : false
 				},
 				{
+					"name" : "MOSI",
+					"strict" : false
+				},
+				{
 					"name" : "SCK",
 					"strict" : false
 				},

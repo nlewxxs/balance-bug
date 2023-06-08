@@ -1,13 +1,4 @@
 |spi_slave
-clk => index[0].CLK
-clk => index[1].CLK
-clk => index[2].CLK
-clk => index[3].CLK
-clk => index[4].CLK
-clk => count[0].CLK
-clk => count[1].CLK
-clk => count[2].CLK
-clk => count[3].CLK
 clk => byte_to_send[0].CLK
 clk => byte_to_send[1].CLK
 clk => byte_to_send[2].CLK
@@ -16,6 +7,18 @@ clk => byte_to_send[4].CLK
 clk => byte_to_send[5].CLK
 clk => byte_to_send[6].CLK
 clk => byte_to_send[7].CLK
+clk => count[0].CLK
+clk => count[1].CLK
+clk => count[2].CLK
+clk => count[3].CLK
+clk => byte_received[0].CLK
+clk => byte_received[1].CLK
+clk => byte_received[2].CLK
+clk => byte_received[3].CLK
+clk => byte_received[4].CLK
+clk => byte_received[5].CLK
+clk => byte_received[6].CLK
+clk => byte_received[7].CLK
 clk => SSr[0].CLK
 clk => SSr[1].CLK
 clk => SCKr[0].CLK
@@ -23,6 +26,7 @@ clk => SCKr[1].CLK
 clk => SCKr[2].CLK
 SCK => SCKr[0].DATAIN
 MISO <= byte_to_send[7].DB_MAX_OUTPUT_PORT_TYPE
+MOSI => byte_received.DATAB
 SS => SSr[0].DATAIN
 
 
