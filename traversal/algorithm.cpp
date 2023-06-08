@@ -36,15 +36,15 @@ struct Node {
 struct Edge {
     Node* curr;
     Node* prev;
-    int angle;
-    int length;
-    
+    float angle;
+    int   length;
+
     Edge(Node* _curr = NULL, Node* _prev = NULL, int _angle = 0, int _length = 0)
         : curr(_curr), prev(_prev), angle(_angle), length(_length) {}
 };
 
 struct Range {
-    int min; 
+    int min;
     int max;
 };
 
@@ -54,18 +54,18 @@ const float offsetDistance = 0.1;
 //double leftWallMinY = 240;
 //double leftWallMaxX = 400;
 //double leftWallMaxY = 480;
-const int leftWallBounds[4] = {0,240,640,480};
+const int leftWallBounds[4] = {0,240,320,480};
 
 //double rightWallMinX = 480;
 //double rightWallMinY = 240;
 //double rightWallMaxX = 640;
 //double rightWallMaxY = 480;
-const int rightWallBounds[4] = {0,240,640,480};
+const int rightWallBounds[4] = {320,240,640,480};
 
 //double middlePathMinX = 240;
-//double middlePathMinY = 240; 
+//double middlePathMinY = 240;
 //double middlePathMaxX = 400;
-//double middlePathMaxY = 480; 
+//double middlePathMaxY = 480;
 const int middlePathBounds[4] = {240,240,400,480};
 
 //double leftPathMinX = 0;
@@ -94,7 +94,7 @@ float currAngle = 0;
 int totalDistance = 0;
 
 // [ [xMin, yMin, xMax, yMax] ]
-std::vector<std::vector<int>> boundsGrid; 
+std::vector<std::vector<int>> boundsGrid;
 
 ///////////////////////////////////////////
 ///////////       OUTPUTS       ///////////
@@ -107,10 +107,10 @@ float targetAngle = 0;
 float targetDistance = 0;
 
 // [x,y]
-Node node; 
+Node node;
 
 // [currNode, prevNode, angle, length]
-Edge edgeNodes; 
+Edge edgeNodes;
 
 ///////////////////////////////////////////
 ///////////    DEBUG OUTPUTS    ///////////
@@ -134,7 +134,7 @@ bool rightTurn = false;
 double prevNodeDistance = 0;
 
 std::vector<float> pathAngles;
-std::vector<float> beaconAngles; // [Red, Blue, Yellow] 
+std::vector<float> beaconAngles = {-1, -1, -1}; // [Red, Blue, Yellow]
 
 std::vector<Range> blockedRanges;
 
@@ -155,15 +155,15 @@ void printGrid(std::vector<std::vector<int>> grid) {
         for (int j = 0; j < 4; j++) {
             if ( j != 0 ) { std::cout<<" "; }
             std::cout<<grid[i][j];
-            if ( j != 3 ) { std::cout<<","; } 
+            if ( j != 3 ) { std::cout<<","; }
             arrLength += std::to_string(grid[i][j]).length();
-            //std::cout<<"i: "<<i<<"j: "<<j<<"value: "<<grid[i][j];        
+            //std::cout<<"i: "<<i<<"j: "<<j<<"value: "<<grid[i][j];
         }
         std::cout<<"}";
         if ( (i+1)%4 == 0 && i != 0) { std::cout<<std::endl; }
         else {
             std::cout<<",";
-            for (int arrLength; arrLength < 12; arrLength++) { 
+            for (int arrLength; arrLength < 12; arrLength++) {
                 std::cout<<" ";
             }
         }
@@ -190,17 +190,17 @@ void drawGrid(std::vector<std::vector<int>> grid){
                     break;
                 }
           }
-            if (isCorner) { std::cout<<"+"; } 
+            if (isCorner) { std::cout<<"+"; }
             else if (isVertical) { std::cout<<"¦"; }
             else if (isHorizontal) { std::cout<<"-"; }
             else { std::cout<< " "; }
-        } 
+        }
         std::cout << std::endl;
     }
 }
 
 void printDebug() {
-    if ( isNode && isPath ) { std::cout << "BIG ERROR, DETECTING BOTH PATH & NODE"<<std::endl; } 
+    if ( isNode && isPath ) { std::cout << "BIG ERROR, DETECTING BOTH PATH & NODE"<<std::endl; }
     std::cout<<"\nisNode:   "<<isNode<<" isEnd:     "<<isEnd<<" isPath:    "<<isPath<<std::endl;
     std::cout<<"isClear:  "<<isClear<<" leftTurn:  "<<leftTurn<<" rightTurn: "<<rightTurn<<std::endl;
     std::cout<<"leftWall: "<<leftWall<<" rightWall: "<<rightWall<<std::endl;
@@ -208,16 +208,16 @@ void printDebug() {
     std::cout<<"\nPrevious Node Distance: "<<prevNodeDistance<<std::endl;
 
     std::cout<<"\nPath Angles:"<<std::endl;
-    for (auto &angle : pathAngles) { 
+    for (auto &angle : pathAngles) {
         std::cout<<" > "<<angle<<std::endl;
     }
     std::cout<<"\nBeacon Angles:"<<std::endl;
-    for (auto &angle : beaconAngles) { 
-        std::cout<<" > "<<angle<<std::endl;
-    }
-   
-    std::cout<<"\nBeacon Angles:"<<std::endl;
-    for (auto &range : blockedRanges) { 
+    std::cout<<" > Red:    "<<beaconAngles[0]<<std::endl;
+    std::cout<<" > Blue:   "<<beaconAngles[1]<<std::endl;
+    std::cout<<" > Yellow: "<<beaconAngles[2]<<std::endl;
+
+    std::cout<<"\nBlocked Angles:"<<std::endl;
+    for (auto &range : blockedRanges) {
         std::cout<<" > min: "<<range.min<<" max: "<<range.max<<std::endl;
     }
 
@@ -228,16 +228,16 @@ void printDebug() {
             std::cout<<"  > "<<angle<<std::endl;
         }
     }
-    
+
     std::cout<<"\nNode Stack:"<<std::endl;
-    std::stack<Node> tempNodeStack = nodeStack; 
+    std::stack<Node> tempNodeStack = nodeStack;
     while (!tempNodeStack.empty()) {
         std::cout<< " > "<<tempNodeStack.top().x<<","<<tempNodeStack.top().y;
         tempNodeStack.pop();
     }
 
     std::cout<<"\nPath Stack:"<<std::endl;
-    std::stack<float> tempPathStack = pathStack; 
+    std::stack<float> tempPathStack = pathStack;
     while (!tempPathStack.empty()) {
         std::cout<< " > "<<tempPathStack.top();
         tempPathStack.pop();
@@ -245,7 +245,7 @@ void printDebug() {
 }
 
 ///////////////////////////////////////////
-///////////   CLASSIFY ELEMENT  ///////////
+//////////   CLASSIFY ELEMENT   ///////////
 ///////////////////////////////////////////
 
 bool outsideBounds(std::vector<int> box, const int bound[4]) {
@@ -255,11 +255,13 @@ bool outsideBounds(std::vector<int> box, const int bound[4]) {
     return outX || outY;
 }
 
-bool isWall(std::vector<int> lower, std::vector<int> upper, int min, int max) {
+bool isWall(std::vector<int> lower, std::vector<int> upper, const int bound[4]) {
     // {xMin, yMin, xMax, yMax}
-    bool lowerWall = ( (lower[1] == 360) && (lower[3] >= max) );
-    bool upperWall = ( (upper[1] <= min) && (upper[3] == 360) );
-    return (lowerWall && upperWall);
+    bool lowerWall  = ( (lower[3] >= bound[3]) && (lower[1] == 360) );
+    bool upperWall  = ( (upper[1] <= bound[1]) && (upper[3] == 360) );
+    bool lowerCross = ( (lower[0] <= bound[2]) && (lower[2] >= bound[0]));
+    bool upperCross = ( (upper[0] <= bound[2]) && (upper[2] >= bound[0]));
+    return (lowerWall && upperWall && lowerCross && upperCross);
 }
 
 // FIGURE OUT LATER FOR LANES
@@ -269,7 +271,7 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
     // Left Turn
     if (outsideBounds(grid[8], leftPathBounds) &&
         outsideBounds(grid[9], leftPathBounds)) {
-        std::cout << "LEFT JUNCTION"<<std::endl; 
+        std::cout << "LEFT JUNCTION"<<std::endl;
         leftTurn = true;
     } else {
         leftTurn = false;
@@ -277,16 +279,16 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
     // Right Turn
     if (outsideBounds(grid[11], rightPathBounds) &&
         outsideBounds(grid[10], rightPathBounds)) {
-        std::cout << "RIGHT JUNCTION"<<std::endl; 
+        std::cout << "RIGHT JUNCTION"<<std::endl;
         rightTurn = true;
     } else {
         rightTurn = false;
     }
-   
+
     // Path or End
-    if (outsideBounds(grid[9],  middlePathBounds) && 
-        outsideBounds(grid[10], middlePathBounds) && 
-        outsideBounds(grid[13], middlePathBounds) && 
+    if (outsideBounds(grid[9],  middlePathBounds) &&
+        outsideBounds(grid[10], middlePathBounds) &&
+        outsideBounds(grid[13], middlePathBounds) &&
         outsideBounds(grid[14], middlePathBounds) ){
         std::cout << "PATH AHEAD"<<std::endl;
         isClear = true;
@@ -297,16 +299,20 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
         isEnd  = true;
     }
 
+    // Left Wall
     // Check if within x axis later
-    if (isWall(grid[12], grid[8], leftWallBounds[1], leftWallBounds[3])) { 
+    if (isWall(grid[12], grid[8], leftWallBounds) ||
+        isWall(grid[13], grid[9], leftWallBounds)) {
         std::cout << "LEFT WALL"<<std::endl;
         leftWall = true;
     } else {
         leftWall = false;
     }
 
+    // Right Wall
     // Check if within x axis later
-    if (isWall(grid[15], grid[11], rightWallBounds[0], rightWallBounds[2])) { 
+    if (isWall(grid[15], grid[11], rightWallBounds) || 
+        isWall(grid[14], grid[10], rightWallBounds)) {
         std::cout << "RIGHT WALL"<<std::endl;
         rightWall = true;
     } else {
@@ -314,12 +320,12 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
     }
 
     isNode = isEnd   || leftTurn || rightTurn;
-    isPath = isClear && leftWall && rightWall; 
+    isPath = isClear && leftWall && rightWall;
 
     if (!isPath && !isNode) {
         std::cout<<"Currently at Node, looking for paths..."<<std::endl;
     }
-} 
+}
 
 ///////////////////////////////////////////
 ///////////    MAZE TRAVERSAL   ///////////
@@ -330,7 +336,7 @@ bool isBlocked(float angle) {
         if ((angle >= range.min) && (angle <= range.max)) {
             return true;
         }
-    } 
+    }
     return false;
 }
 
@@ -342,31 +348,51 @@ void nodeScanner(int endAngle) {
     bool scanningRed    = false;
     bool scanningBlue   = false;
     bool scanningYellow = false;
-    
+
     // Testing
     blockedRanges.push_back({0,20});
     for (float currAngle; currAngle <= endAngle; currAngle++) {
-        if ((currAngle >= 0) && (currAngle <= 30)) { isPath = true; isRed = true; }
-        else { isPath = false; }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//        if ((currAngle >= min) && (currAngle <= max)) { }
-//    while (currAngle != endAngle) {
-        scanningPath   = isPath   ? true : scanningPath;
+        if ((currAngle >= 0) && (currAngle <= 31)) {
+            isPath  = true;
+            isClear = true;
+            isRed = true;
+        } else if (currAngle <= 69) { 
+            isRed = false;
+        } else if (currAngle <= 124) { 
+            isPath  = false;
+            isClear = false;
+        } else if (currAngle <= 205) { 
+            isPath  = true;
+            isClear = true;
+        } else if (currAngle <= 223) { 
+            isBlue = true;
+        } else if (currAngle <= 268) { 
+            isPath  = false; 
+            isClear = false;
+            isBlue  = false;
+        } else if (currAngle <= 280) { 
+            isPath  = true;
+            isClear = false;
+        } else if (currAngle <= 342) { 
+            isPath  = false;
+            isClear = false;
+        } else if (currAngle <= 352) { 
+            isYellow = true; 
+        } else {
+            isYellow = false;
+        }
+    // Testing
+    //while (currAngle != endAngle) {
+        scanningPath   = isClear   ? true : scanningPath; //try isPath later
         scanningRed    = isRed    ? true : scanningRed;
         scanningBlue   = isBlue   ? true : scanningBlue;
         scanningYellow = isYellow ? true : scanningYellow;
-
-        if (scanningPath && isPath) { pathRange.push_back(currAngle); } 
+        
+        //try isPath
+        if (scanningPath && isClear) { pathRange.push_back(currAngle); }
         else if (scanningPath) {
-            int n = pathRange.size()-1;   
-            int angle = (pathRange[0] + pathRange[n]) / 2;
+            int n = pathRange.size()-1;
+            float angle = (pathRange[0] + pathRange[n]) / 2;
 
             if (!isBlocked(angle)) {
                 pathAngles.push_back(angle);
@@ -374,43 +400,43 @@ void nodeScanner(int endAngle) {
                 std::cout<<"PATH BLOCKED: "<<angle<<std::endl;
             }
             pathRange.clear();
-            scanningPath = false; 
+            scanningPath = false;
         }
-        
+
         if (scanningRed && isRed) { beaconRange.push_back(currAngle); }
         else if (scanningRed) {
-            int n = beaconRange.size()-1;   
-            int angle = (beaconRange[0] + beaconRange[n]) / 2;
+            int n = beaconRange.size()-1;
+            float angle = float(beaconRange[0] + beaconRange[n]) / 2;
 
             beaconRange.clear();
-            scanningRed = false; 
+            scanningRed = false;
             beaconAngles[0] = angle;
         }
 
         if (scanningBlue && isBlue) { beaconRange.push_back(currAngle); }
         else if (scanningBlue) {
-            int n = beaconRange.size()-1;   
-            int angle = (beaconRange[0] + beaconRange[n]) / 2;
+            int n = beaconRange.size()-1;
+            float angle = float(beaconRange[0] + beaconRange[n]) / 2;
 
             beaconRange.clear();
-            scanningBlue = false; 
+            scanningBlue = false;
             beaconAngles[1] = angle;
         }
 
         if (scanningYellow && isYellow) { beaconRange.push_back(currAngle); }
         else if (scanningYellow) {
-            int n = beaconRange.size()-1;   
-            int angle = (beaconRange[0] + beaconRange[n]) / 2;
+            int n = beaconRange.size()-1;
+            float angle = float(beaconRange[0] + beaconRange[n]) / 2;
 
             beaconRange.clear();
-            scanningYellow = false; 
+            scanningYellow = false;
             beaconAngles[2] = angle;
         }
     }
 }
 
 void nodeResponse() {
-    
+
 }
 
 void backTrack() {
@@ -421,27 +447,20 @@ void dfs() {
 
 }
 
-
-
-
-
-
-
-
 int main() {
     // [1] is a dummy for now
-    boundsGrid = { 
+    boundsGrid = {
     {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
     {0,140,130,240} , {240,120,320,160}, {320,140,410,240}, {500,120,640,200},
     {0,260,60,360}  , {0,0,0,0}        , {430,240,460,360}, {0,0,0,0},
-    {0,0,0,0}       , {0,0,0,0}        , {450,360,480,440}, {480,420,530,480},
+    {0,0,0,0}       , {0,0,0,0}        , {450,360,480,480}, {480,420,530,480},
     };
 //    printGrid(boundsGrid);
     drawGrid(boundsGrid);
 
     classifyMazeElement(boundsGrid);
 
-    nodeScanner(359); 
+    nodeScanner(359);
 
     printDebug();
 //    printOutputs();
@@ -449,7 +468,7 @@ int main() {
 }
 
 
-/* GRIDS 
+/* GRIDS
 
 GRID TEST 1.
 
@@ -475,7 +494,7 @@ GRID TEST 3
     {90,240,160,360}, {0,0,0,0}        , {460,340,480,360}, {480,240,520,360},
     {0,0,0,0}       , {160,360,320,470}, {320,360,480,470}, {0,0,0,0},
 
-    PASS 
+    PASS
 
 GRID TEST 4
     {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
