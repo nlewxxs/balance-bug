@@ -351,6 +351,7 @@ void nodeScanner(int endAngle) {
 
     // Testing
     blockedRanges.push_back({0,20});
+    blockedRanges.push_back({129,231});
     for (float currAngle; currAngle <= endAngle; currAngle++) {
         if ((currAngle >= 0) && (currAngle <= 31)) {
             isPath  = true;
@@ -392,7 +393,7 @@ void nodeScanner(int endAngle) {
         if (scanningPath && isClear) { pathRange.push_back(currAngle); }
         else if (scanningPath) {
             int n = pathRange.size()-1;
-            float angle = (pathRange[0] + pathRange[n]) / 2;
+            float angle = float(pathRange[0] + pathRange[n]) / 2;
 
             if (!isBlocked(angle)) {
                 pathAngles.push_back(angle);
