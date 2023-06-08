@@ -1,10 +1,3 @@
-# Hardware changes facilitating UART comms!
-Couple pin mapping changes. We need to use the second set of UART pins to avoid collisions. 
-```.uart_0_rx_tx_rxd	(ARDUINO_IO[8]),
-.uart_0_rx_tx_txd	(ARDUINO_IO[9])```
-> These changes are made in lines 181 and 182 of the top .v file.
-In order for the regular RX and TX pins to not suck up the uart signal, we need to unassign them in the pin planner.  
-
 
 # Bounding Box Output
 Each output is 32 segment
@@ -36,4 +29,13 @@ Each output is 32 segment
 | 23          | fourteen_x_max[8:0], fourteen_y_max, fifteen_x_max, fifteen_y_max[10]          |
 | 24          | fifteen_y_max[9:0], sixteen_x_max, sixteen_y_max |
 
+# Hardware changes facilitating UART comms!
+Couple pin mapping changes. We need to use the second set of UART pins to avoid collisions. 
+```verilog
+.uart_0_rx_tx_rxd	(ARDUINO_IO[8]), 
+.uart_0_rx_tx_txd	(ARDUINO_IO[9]) 
+```
 
+> These changes are made in lines 181 and 182 of the top .v file.
+
+In order for the regular RX and TX pins to not suck up the uart signal, we also need to unassign them in the pin planner. 
