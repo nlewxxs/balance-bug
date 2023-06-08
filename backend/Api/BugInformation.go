@@ -73,7 +73,7 @@ func AddBugInformation(c *gin.Context) {
 	if len(BugIdNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
 	} else  if len(BugNameNew) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
 	} else {
 		var BugInformationNew BugInformationStruct
 

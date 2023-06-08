@@ -8,72 +8,24 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	"sql"
-
+	"database/sql"
 )
 
-
-// CRUD: Create Read Update Delete API Format
-// //DISPLAY SESSION IDs
-// func DisplayAllNodes(c *gin.Context) {
-// 	SessionId := c.Query("SessionId")
-	
-// 	if len(SessionId) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a valid SessionId!"})
-// 	}
-
-// 	SqlQuery := fmt.Sprintf("SELECT * FROM testdb.%s_nodes", SessionId)
-// 	rows, err := db.QueryRow(SqlQuery)
-// 	if err != nil {
-// 		fmt.Println(err.Error())
-// 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB, maybe the appropriate table hasn't been created yet"})
-// 	}
-
-// 	// Get all rows and add into SessionListStructs
-// 	NodeLists := make([]NodeStruct, 0)
-
-// 	if rows != nil {
-// 		defer rows.Close()
-// 		for rows.Next() {
-// 			// Individual row processing
-// 			NodeListRow := NodeStruct{}
-// 			if err := rows.Scan(&NodeListRow.NodeId, &NodeListRow.XCoord, &NodeListRow.YCoord); err != nil {
-// 				fmt.Println(err.Error())
-// 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-// 				break
-// 			}
-// 			NodeLists = append(NodeLists, NodeListRow)
-// 		}
-// 	}
-
-// 	// Return JSON object of all rows
-// 	c.Header("Access-Control-Allow-Origin", "*")
-// 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-// 	c.JSON(http.StatusOK, &NodeLists)
-// }
-
 func TurnOn(c *gin.Context) {
-	//var BeaconOnNew BeaconOnStruct
 	BugId := c.Query("BugId")
-
-// 	row := db.QueryRow(sqlStatement, 3)
-// switch err := row.Scan(&id, &email); err {
-// case sql.ErrNoRows:
-//   fmt.Println("No rows were returned!")
-// case nil:
-//   fmt.Println(id, email)
-// default:
-//   panic(err)
-// }
-
 
 	if(len(BugId) == 0){
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a BugId"})
 	} else {
-		var BugName string;
+		var BugName 	string;
+		var SessionId 	string;
+		var OnExists 	string;
+		var On 			string;
+		var ChargeStatus		string;
 
 
-		BugNameQuery := db.QueryRow("SELECT `BugName` FROM testdb.BugInformation WHERE BugId=?;", BugId);
+
+		BugNameQuery := db.QueryRow("SELECT `BugName` FROM testdb.BugInformation WHERE `BugId`=?;", BugId);
 		switch err := BugNameQuery.Scan(&BugName); err {
 		case sql.ErrNoRows:
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugId-BugName Translation"})
@@ -84,65 +36,76 @@ func TurnOn(c *gin.Context) {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
-	
-		
 
-		SessionIdQuery, errSessionId := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE BugName=?;", BugNameQuery);
-		if (errSessionId != nil) {
+		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE `BugName`=?;", BugName);
+		switch err := SessionIdQuery.Scan(&SessionId); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with SessionId-BugName Translation"})
+			return
+		case nil:
+			fmt.Println(SessionId)
+		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-			return
-		} else if (len(SessionIdQuery) == 0) {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugName-SessionId Translation"})
-			return
 		}
 
+		TurnOnExistsQuery := db.QueryRow("SELECT `SessionId` FROM testdb.BeaconOn WHERE `SessionId`=?;", SessionId);
 
-
-
-		TurnOnExistsQuery, errTurnOnExists := db.QueryRow("SELECT `SessionId` FROM testdb.BeaconOn WHERE SessionId=?;", SessionIdQuery);
-		if (errSessionId != nil) {
-			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-			return
-		} else if (len(TurnOnExistsQuery) == 0) {
+		switch err := TurnOnExistsQuery.Scan(&OnExists); err {
+		case sql.ErrNoRows:
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 			c.JSON(http.StatusOK, "0")
 			return
-		}
-
-		OnQuery, errOn := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE SessionId=?;", SessionIdQuery);
-		if (errOn != nil) {
+		case nil:
+			fmt.Println(OnExists)
+			
+		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-			return
 		}
 
-		if (OnQuery == "1") {
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-			c.JSON(http.StatusOK, "2")
+		OnQuery := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE SessionId=?;", SessionId);
+		switch err := OnQuery.Scan(&On); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with On query"})
 			return
+		case nil:
+			fmt.Println(On)
+			if (On == "1") {
+				c.Header("Access-Control-Allow-Origin", "*")
+				c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+				c.JSON(http.StatusOK, "2")
+				return
+			}
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
+
+		ChargeQuery := db.QueryRow("SELECT `ChargeStatus` FROM testdb.BeaconCharge WHERE `SessionId`=?;", SessionId);
+
+		switch err := ChargeQuery.Scan(&ChargeStatus); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with Charge Status query"})
+			return
+		case nil:
+			fmt.Println(ChargeStatus)
+			if (ChargeStatus == "0") {
+				c.Header("Access-Control-Allow-Origin", "*")
+				c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+				c.JSON(http.StatusOK, "1")
+				return
+			}
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		}
+
 		
 
-		ChargeQuery, errOn := db.QueryRow("SELECT `Charged` FROM testdb.BeaconCharge WHERE SessionId=?;", SessionIdQuery);
-		if (errOn != nil) {
-			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-			return
-		}
-
-		if (ChargeQuery == "0") {
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-			c.JSON(http.StatusOK, "1")
-			return
-		}
-
 		// Update DB
-		_, err := db.QueryRow("UPDATE testdb.Charge SET `Charged`=?;", "1")
+		_, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "1")
 		if (err != nil) {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})

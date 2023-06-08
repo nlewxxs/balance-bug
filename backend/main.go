@@ -62,6 +62,9 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/BugInformation/DisplayAll", api.DisplayBugInformation)
 	router.GET("/BugInformation/UpdateBugName", api.UpdateBugNameBugInformation)
 
+	router.GET("/Beacon/TurnOn", api.TurnOn)
+	router.GET("/Beacon/BeaconPing", api.BeaconPing)
+
 	/*
 		SessionId.Edges
 			- Foreign keys
