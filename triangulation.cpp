@@ -1,8 +1,4 @@
-#include <exception>
 #include <iostream>
-#include <vector>
-#include <map>
-#include <stack>
 #include <cmath>
 
 
@@ -65,7 +61,6 @@ Node triangulate (const Angle &input, const float &offset) {
 
     //y-triangulation
     yBR = YDIST - (YDIST / (tan(modifiedAngle.blue) + tan(modifiedAngle.red)));
-    // yBY = (((YDIST * tan(modifiedAngle.blue)) - (XDIST /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
     yBY = ((YDIST * tan(modifiedAngle.red)) - (XDIST / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
     yRY = ((YDIST * tan(modifiedAngle.red)) - (XDIST / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
 
@@ -86,11 +81,11 @@ Node triangulate (const Angle &input, const float &offset) {
 
 
 int main() {
-    // Angle testAngle = {
-    //     180,          //yellow
-    //     45.0,           //red
-    //     315.0,          //blue
-    // };
+    Angle testAngle = {
+        180,          //yellow
+        45.0,           //red
+        315.0,          //blue
+    };
 
     // Angle testAngle = {
     //     138.814,          //yellow
@@ -98,11 +93,11 @@ int main() {
     //     345.964,          //blue
     // };
 
-    Angle testAngle = {
-        221.186,          //yellow
-        14.036,           //red
-        305.218,          //blue
-    };
+    // Angle testAngle = {
+    //     221.186,          //yellow
+    //     14.036,           //red
+    //     305.218,          //blue
+    // };
 
     float testOffset = 0;
 
