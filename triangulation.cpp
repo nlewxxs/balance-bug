@@ -8,6 +8,9 @@
 #define xDist 100
 #define yDist 100
 
+//TODO FIX X VALUE BASED OFF THE MATHS OF THE Y VALUE
+
+
 ///////////////////////////////////////////
 ///////////     DEFINITIONS     ///////////
 ///////////////////////////////////////////
@@ -51,7 +54,7 @@ Node triangulate (const Angle &input, const float &offset) {
     modifiedAngle.red  = (input.red - offset) * (M_PI/180);
     modifiedAngle.yellow = (180 - input.yellow - offset) * (M_PI/180);
 
-    std::cout << modifiedAngle.blue * (180/M_PI) << ", " << modifiedAngle.red * (180/M_PI) << ", " << modifiedAngle.yellow * (180/M_PI) << ", " << (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)) << std::endl;
+    std::cout << modifiedAngle.blue * (180/M_PI) << ", " << modifiedAngle.red * (180/M_PI) << ", " << modifiedAngle.yellow * (180/M_PI) << ", " << (tan(modifiedAngle.blue)) << std::endl;
 
     //x-triangulation
     xBR = (yDist * tan(modifiedAngle.blue)) / (tan(modifiedAngle.blue) + tan(modifiedAngle.red));
@@ -60,9 +63,22 @@ Node triangulate (const Angle &input, const float &offset) {
 
     //y-triangulation
     yBR = yDist - (yDist / (tan(modifiedAngle.blue) + tan(modifiedAngle.red)));
-    yBY = (((yDist * tan(modifiedAngle.blue)) - (xDist /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
+    // yBY = (((yDist * tan(modifiedAngle.blue)) - (xDist /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
     yRY = xDist / (tan(modifiedAngle.yellow) + tan(modifiedAngle.red));
-    
+    yBY = ((yDist * tan(modifiedAngle.blue)) - (xDist / 2)) / (tan(modifiedAngle.blue) - tan(modifiedAngle.yellow));
+
+    // if  (yBY < 0) {
+    //     yBY = 0- yBY;
+    // }
+
+    // if  (yBR < 0) {
+    //     yBR = 0- yBR;
+    // }
+
+    // if  (yRY < 0) {
+    //     yRY = 0- yRY;
+    // }
+
     std::cout << xBR << ", " << xBY << ", " << xBR << std::endl;
     std::cout << yBR << ", " << yBY << ", " << yBR << std::endl;
 
@@ -84,10 +100,16 @@ int main() {
     //     315.0,          //blue
     // };
 
+    // Angle testAngle = {
+    //     138.814,          //yellow
+    //     54.782,           //red
+    //     345.964,          //blue
+    // };
+
     Angle testAngle = {
-        159.444,          //yellow
-        54.782,           //red
-        345.964,          //blue
+        221.186,          //yellow
+        14.036,           //red
+        305.218,          //blue
     };
 
     float testOffset = 0;
