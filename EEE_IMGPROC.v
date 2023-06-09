@@ -64,7 +64,7 @@ input                         mode;
 //
 parameter IMAGE_W = 11'd640;
 parameter IMAGE_H = 11'd480;
-parameter MESSAGE_BUF_MAX = 256;
+parameter MESSAGE_BUF_MAX = 1024;
 parameter MSG_INTERVAL = 6;
 parameter BB_COL_DEFAULT = 24'h00ff00;
 
@@ -751,7 +751,7 @@ reg [31:0] msg_buf_in;
 wire [31:0] msg_buf_out;
 reg msg_buf_wr;
 wire msg_buf_rd, msg_buf_flush;
-wire [7:0] msg_buf_size;
+wire [9:0] msg_buf_size;
 wire msg_buf_empty;
 
 `define RED_BOX_MSG_ID "NB"
@@ -776,6 +776,7 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 		end
 		5'b00100: begin
 			msg_buf_in = {three_y_min[1:0], four_x_min, four_y_min, five_x_min[10:3]};	//8 from 5 xmin
+			msg_buf_wr = 1'b1;
 		end
 		5'b00101: begin
 			msg_buf_in = {five_x_min[2:0], five_y_min, six_x_min, six_y_min[10:4]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
@@ -820,6 +821,7 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 		end
 		5'b01111: begin
 			msg_buf_in = {three_y_max[1:0], four_x_max, four_y_max, five_x_max[10:3]};	//8 from 5 xmax
+			msg_buf_wr = 1'b1;
 		end
 		5'b10000: begin
 			msg_buf_in = {five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
@@ -936,7 +938,6 @@ end
 
 //Flush the message buffer if 1 is written to status register bit 4
 assign msg_buf_flush = (s_chipselect & s_write & (s_address == `REG_STATUS) & s_writedata[4]);
-
 
 // Process reads
 reg read_d; //Store the read signal for correct updating of the message buffer
