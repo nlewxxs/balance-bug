@@ -1,8 +1,8 @@
-#include <exception>
 #include <iostream>
 #include <vector>
 #include <map>
 #include <stack>
+#include <math.h>
 
 /*
 INPUTS
@@ -295,7 +295,7 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
         isEnd  = false;
     } else {
         std::cout << "DEAD END/ PATH BLOCKED"<<std::endl;
-        isPath = false;
+        isClear = false;
         isEnd  = true;
     }
 
@@ -311,7 +311,7 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
 
     // Right Wall
     // Check if within x axis later
-    if (isWall(grid[15], grid[11], rightWallBounds) || 
+    if (isWall(grid[15], grid[11], rightWallBounds) ||
         isWall(grid[14], grid[10], rightWallBounds)) {
         std::cout << "RIGHT WALL"<<std::endl;
         rightWall = true;
@@ -341,97 +341,140 @@ bool isBlocked(float angle) {
 }
 
 // endAngle = startAngle + 359
-void nodeScanner(int endAngle) {
-    std::vector<int> pathRange;
-    std::vector<int> beaconRange;
-    bool scanningPath   = false;
-    bool scanningRed    = false;
-    bool scanningBlue   = false;
-    bool scanningYellow = false;
+void nodeScanner(float startAngle, float endAngle) {
+    float pathStart    = -1;
+    float beaconStart  = -1;
+
+    bool scanningPath   = isClear; //isPath
+    bool scanningRed    = isRed;
+    bool scanningBlue   = isBlue;
+    bool scanningYellow = isYellow;
+
+    int cycle = 0;
+    int rotation = 0;
+    // int for storage space
+    int prevAngle = -1;
 
     // Testing
-    blockedRanges.push_back({0,20});
-    blockedRanges.push_back({129,231});
-    for (float currAngle; currAngle <= endAngle; currAngle++) {
+    //blockedRanges.push_back({0,20});
+    //blockedRanges.push_back({129,231});
+    blockedRanges.push_back({((int)currAngle+135)%360, ((int)currAngle+205)%360});
+    std::cout<<"\n";
+    for (float currAngle = startAngle; currAngle <= (endAngle - cycle); currAngle+=0.39) {
+        // modulo
+        if (currAngle >= 360) { currAngle -= 360; }
+        // expected test inputs
         if ((currAngle >= 0) && (currAngle <= 31)) {
             isPath  = true;
             isClear = true;
+        } else if (currAngle <= 69) {
             isRed = true;
-        } else if (currAngle <= 69) { 
-            isRed = false;
-        } else if (currAngle <= 124) { 
             isPath  = false;
             isClear = false;
-        } else if (currAngle <= 205) { 
+        } else if (currAngle <= 125) {
+            isRed   = false;
+        } else if (currAngle <= 205) {
             isPath  = true;
             isClear = true;
-        } else if (currAngle <= 223) { 
+        } else if (currAngle <= 223) {
             isBlue = true;
-        } else if (currAngle <= 268) { 
-            isPath  = false; 
-            isClear = false;
-            isBlue  = false;
-        } else if (currAngle <= 280) { 
-            isPath  = true;
-            isClear = false;
-        } else if (currAngle <= 342) { 
+        } else if (currAngle <= 268) {
             isPath  = false;
             isClear = false;
-        } else if (currAngle <= 352) { 
-            isYellow = true; 
+            isBlue  = false;
+        } else if (currAngle <= 280) {
+            isPath  = true;
+            isClear = true;
+        } else if (currAngle <= 342) {
+            isPath  = false;
+            isClear = false;
+        } else if (currAngle <= 352) {
+            isYellow = true;
         } else {
+            isRed    = true;
+            isPath   = true;
+            isClear  = true;
             isYellow = false;
         }
     // Testing
-    //while (currAngle != endAngle) {
-        scanningPath   = isClear   ? true : scanningPath; //try isPath later
-        scanningRed    = isRed    ? true : scanningRed;
-        scanningBlue   = isBlue   ? true : scanningBlue;
-        scanningYellow = isYellow ? true : scanningYellow;
-        
-        //try isPath
-        if (scanningPath && isClear) { pathRange.push_back(currAngle); }
-        else if (scanningPath) {
-            int n = pathRange.size()-1;
-            float angle = float(pathRange[0] + pathRange[n]) / 2;
+    //while (currAngle < endAngle) {
+        bool scanningBeacon = scanningRed || scanningBlue || scanningYellow;
 
-            if (!isBlocked(angle)) {
-                pathAngles.push_back(angle);
-            } else {
-                std::cout<<"PATH BLOCKED: "<<angle<<std::endl;
+        if (currAngle < prevAngle) { cycle += 360; }
+
+        if ( (currAngle == startAngle) && cycle ) {
+            rotation += 1;
+            pathStart   = scanningPath   ? pathStart   : -1;
+            beaconStart = scanningBeacon ? beaconStart : -1;
+        }
+
+        prevAngle = (int)currAngle;
+
+        // Path - try isPath for more accuracy
+        if (scanningPath != isClear) {
+            // Pos Edge
+            if (isClear && !rotation) { pathStart = currAngle; }
+            // Neg Edge
+            else if (pathStart != -1) {
+                // pathEnd = currAngle;
+                float angle;
+                if (currAngle < pathStart) { angle = fmod((pathStart + currAngle),360) / 2; }
+                else { angle = float(pathStart + currAngle) / 2;  }
+
+                std::cout<<"PATH:   "<<pathStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
+
+                if (!isBlocked(angle)) { pathAngles.push_back(angle); }
+                else { std::cout<<"PATH BLOCKED: "<<angle<<std::endl; }
             }
-            pathRange.clear();
-            scanningPath = false;
+            scanningPath = isClear;
         }
+        // Red
+        if (scanningRed != isRed) {
+            // Pos Edge
+            if (isRed && !rotation) { beaconStart = currAngle; }
+            // Neg Edge
+            else if (beaconStart != -1) {
+                // beaconEnd = currAngle;
+                float angle;
+                if (currAngle < beaconStart) { angle = fmod((beaconStart + currAngle),360) / 2; }
+                else { angle = float(beaconStart + currAngle) / 2;  }
 
-        if (scanningRed && isRed) { beaconRange.push_back(currAngle); }
-        else if (scanningRed) {
-            int n = beaconRange.size()-1;
-            float angle = float(beaconRange[0] + beaconRange[n]) / 2;
+                std::cout<<"RED:    "<<beaconStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
 
-            beaconRange.clear();
-            scanningRed = false;
-            beaconAngles[0] = angle;
+                beaconAngles[0] = angle;
+            }
+            scanningRed = isRed;
         }
+        // Blue
+        if (scanningBlue != isBlue) {
+            // Pos Edge
+            if (isBlue && !rotation) { beaconStart = currAngle; }
+            // Neg Edge
+            else if (beaconStart != -1) {
+                float angle;
+                if (currAngle < beaconStart) { angle = fmod((beaconStart + currAngle),360) / 2; }
+                else { angle = float(beaconStart + currAngle) / 2;  }
 
-        if (scanningBlue && isBlue) { beaconRange.push_back(currAngle); }
-        else if (scanningBlue) {
-            int n = beaconRange.size()-1;
-            float angle = float(beaconRange[0] + beaconRange[n]) / 2;
+                std::cout<<"BLUE:   "<<beaconStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
 
-            beaconRange.clear();
-            scanningBlue = false;
-            beaconAngles[1] = angle;
+                beaconAngles[1] = angle;
+            }
+            scanningBlue = isBlue;
         }
+        // Yellow
+        if (scanningYellow != isYellow) {
+            // Pos Edge
+            if (isYellow) { beaconStart = currAngle; }
+            // Neg Edge
+            else if (beaconStart != -1) {
+                float angle;
+                if (currAngle < beaconStart) { angle = fmod((beaconStart + currAngle),360) / 2; }
+                else { angle = float(beaconStart + currAngle) / 2;  }
 
-        if (scanningYellow && isYellow) { beaconRange.push_back(currAngle); }
-        else if (scanningYellow) {
-            int n = beaconRange.size()-1;
-            float angle = float(beaconRange[0] + beaconRange[n]) / 2;
-
-            beaconRange.clear();
-            scanningYellow = false;
-            beaconAngles[2] = angle;
+                std::cout<<"YELLOW: "<<beaconStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
+                beaconAngles[2] = angle;
+            }
+            scanningYellow = isYellow;
         }
     }
 }
@@ -440,11 +483,36 @@ void nodeResponse() {
 
 }
 
+Node nodeCoords() {
+    // use beaconAngles
+
+    return {0,0};
+}
+
 void backTrack() {
 
 }
 
 void dfs() {
+    // START IN CORNER
+    // RUN CODE TWICE
+    targetAngle = currAngle + 405;
+    // Set initial blocked angles e.g. 45+6...180-6
+    nodeScanner(currAngle, targetAngle);
+    Node currNode = nodeCoords();
+
+    // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN
+    // Send currNode to server API e.g. 1,1;
+
+    if (pathAngles.size() != 0) {
+        targetAngle = pathAngles[0];
+    } else {
+        std::cout<<"No Paths from Node: "<<currNode.x<<","<<currNode.y<<std::endl;
+        // SEND KILL SIGNAL IDK RN
+    }
+
+
+
 
 }
 
@@ -461,7 +529,10 @@ int main() {
 
     classifyMazeElement(boundsGrid);
 
-    nodeScanner(359);
+    isClear = true;
+    isRed = true;
+    currAngle = 280;
+    nodeScanner(280,280+405);
 
     printDebug();
 //    printOutputs();
