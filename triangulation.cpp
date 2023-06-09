@@ -58,7 +58,7 @@ Node triangulate (const Angle &input, const float &offset) {
 
     //x-triangulation
     xBR = (yDist * tan(modifiedAngle.blue)) / (tan(modifiedAngle.blue) + tan(modifiedAngle.red));
-    xBY = (yDist * tan(modifiedAngle.red)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue));
+    xBY = ((tan(modifiedAngle.blue) * (xDist / 2)) - (yDist * tan(modifiedAngle.blue) * tan(modifiedAngle.yellow))) / (tan(modifiedAngle.blue) - tan(modifiedAngle.yellow));
     xRY = xDist - ((yDist * tan(modifiedAngle.red)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.red)));
 
     //y-triangulation
@@ -79,13 +79,15 @@ Node triangulate (const Angle &input, const float &offset) {
     //     yRY = 0- yRY;
     // }
 
-    std::cout << xBR << ", " << xBY << ", " << xBR << std::endl;
-    std::cout << yBR << ", " << yBY << ", " << yBR << std::endl;
+    std::cout << xBR << ", " << xBY << ", " << xRY << std::endl;
+    std::cout << yBR << ", " << yBY << ", " << yRY << std::endl;
 
 
     output.x = (xBR + xBY + xRY) / 3;
     output.y = (yBR + yBY + yRY) / 3;
     
+    std::cout << output.x << ", " << output.y << std::endl;
+
     return output;
 }
 
