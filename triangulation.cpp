@@ -64,8 +64,8 @@ Node triangulate (const Angle &input, const float &offset) {
     //y-triangulation
     yBR = yDist - (yDist / (tan(modifiedAngle.blue) + tan(modifiedAngle.red)));
     // yBY = (((yDist * tan(modifiedAngle.blue)) - (xDist /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
-    yRY = xDist / (tan(modifiedAngle.yellow) + tan(modifiedAngle.red));
-    yBY = ((yDist * tan(modifiedAngle.blue)) - (xDist / 2)) / (tan(modifiedAngle.blue) - tan(modifiedAngle.yellow));
+    yBY = ((yDist * tan(modifiedAngle.red)) - (xDist / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
+    yRY = ((yDist * tan(modifiedAngle.red)) - (xDist / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
 
     // if  (yBY < 0) {
     //     yBY = 0- yBY;
