@@ -5,11 +5,14 @@
 #include <stack>
 #include <cmath>
 
-#define xDist 100
-#define yDist 100
 
-//TODO FIX X VALUE BASED OFF THE MATHS OF THE Y VALUE
+///////////////////////////////////////////
+///////////       MACROS        ///////////
+///////////////////////////////////////////
 
+#define XDIST 100
+#define YDIST 100
+#define DEBUG true
 
 ///////////////////////////////////////////
 ///////////     DEFINITIONS     ///////////
@@ -54,40 +57,27 @@ Node triangulate (const Angle &input, const float &offset) {
     modifiedAngle.red  = (input.red - offset) * (M_PI/180);
     modifiedAngle.yellow = (180 - input.yellow - offset) * (M_PI/180);
 
-    std::cout << modifiedAngle.blue * (180/M_PI) << ", " << modifiedAngle.red * (180/M_PI) << ", " << modifiedAngle.yellow * (180/M_PI) << ", " << (tan(modifiedAngle.blue)) << std::endl;
 
     //x-triangulation
-    xBR = (yDist * tan(modifiedAngle.blue)) / (tan(modifiedAngle.blue) + tan(modifiedAngle.red));
-    xBY = ((tan(modifiedAngle.blue) * (xDist / 2)) - (yDist * tan(modifiedAngle.blue) * tan(modifiedAngle.yellow))) / (tan(modifiedAngle.blue) - tan(modifiedAngle.yellow));
-    xRY = xDist - ((yDist * tan(modifiedAngle.red)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.red)));
+    xBR = (YDIST * tan(modifiedAngle.blue)) / (tan(modifiedAngle.blue) + tan(modifiedAngle.red));
+    xBY = ((tan(modifiedAngle.blue) * (XDIST / 2)) - (YDIST * tan(modifiedAngle.blue) * tan(modifiedAngle.yellow))) / (tan(modifiedAngle.blue) - tan(modifiedAngle.yellow));
+    xRY = (((XDIST / 2) * tan(modifiedAngle.red)) + (XDIST * tan(modifiedAngle.yellow)) - (YDIST * tan(modifiedAngle.red) * tan(modifiedAngle.yellow))) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.red));
 
     //y-triangulation
-    yBR = yDist - (yDist / (tan(modifiedAngle.blue) + tan(modifiedAngle.red)));
-    // yBY = (((yDist * tan(modifiedAngle.blue)) - (xDist /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
-    yBY = ((yDist * tan(modifiedAngle.red)) - (xDist / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
-    yRY = ((yDist * tan(modifiedAngle.red)) - (xDist / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
-
-    // if  (yBY < 0) {
-    //     yBY = 0- yBY;
-    // }
-
-    // if  (yBR < 0) {
-    //     yBR = 0- yBR;
-    // }
-
-    // if  (yRY < 0) {
-    //     yRY = 0- yRY;
-    // }
-
-    std::cout << xBR << ", " << xBY << ", " << xRY << std::endl;
-    std::cout << yBR << ", " << yBY << ", " << yRY << std::endl;
-
+    yBR = YDIST - (YDIST / (tan(modifiedAngle.blue) + tan(modifiedAngle.red)));
+    // yBY = (((YDIST * tan(modifiedAngle.blue)) - (XDIST /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
+    yBY = ((YDIST * tan(modifiedAngle.red)) - (XDIST / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
+    yRY = ((YDIST * tan(modifiedAngle.red)) - (XDIST / 2)) / (tan(modifiedAngle.red) + tan(modifiedAngle.yellow));
 
     output.x = (xBR + xBY + xRY) / 3;
     output.y = (yBR + yBY + yRY) / 3;
     
-    std::cout << output.x << ", " << output.y << std::endl;
-
+    if (DEBUG) {
+        std::cout << "XCoords: " << xBR << ", " << xBY << ", " << xRY << std::endl;
+        std::cout << "YCoords: " << yBR << ", " << yBY << ", " << yRY << std::endl;
+        std::cout << "Angles: " << modifiedAngle.blue * (180/M_PI) << ", " << modifiedAngle.red * (180/M_PI) << ", " << modifiedAngle.yellow * (180/M_PI) << ", " << (tan(modifiedAngle.blue)) << std::endl;
+        std::cout << "Outputs: " << output.x << ", " << output.y << std::endl;
+    }
     return output;
 }
 
