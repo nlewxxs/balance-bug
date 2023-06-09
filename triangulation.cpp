@@ -49,7 +49,9 @@ Node triangulate (const Angle &input, const float &offset) {
     //modify the modifiedAngle
     modifiedAngle.blue = (360 - (input.blue - offset)) * (M_PI/180);
     modifiedAngle.red  = (input.red - offset) * (M_PI/180);
-    modifiedAngle.yellow = (input.yellow - offset - 180) * (M_PI/180);
+    modifiedAngle.yellow = (180 - input.yellow - offset) * (M_PI/180);
+
+    std::cout << modifiedAngle.blue * (180/M_PI) << ", " << modifiedAngle.red * (180/M_PI) << ", " << modifiedAngle.yellow * (180/M_PI) << ", " << (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)) << std::endl;
 
     //x-triangulation
     xBR = (yDist * tan(modifiedAngle.blue)) / (tan(modifiedAngle.blue) + tan(modifiedAngle.red));
@@ -58,10 +60,11 @@ Node triangulate (const Angle &input, const float &offset) {
 
     //y-triangulation
     yBR = yDist - (yDist / (tan(modifiedAngle.blue) + tan(modifiedAngle.red)));
-    yBY = yDist - (xDist / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
+    yBY = (((yDist * tan(modifiedAngle.blue)) - (xDist /2)) / (tan(modifiedAngle.yellow) + tan(modifiedAngle.blue)));
     yRY = xDist / (tan(modifiedAngle.yellow) + tan(modifiedAngle.red));
-
+    
     std::cout << xBR << ", " << xBY << ", " << xBR << std::endl;
+    std::cout << yBR << ", " << yBY << ", " << yBR << std::endl;
 
 
     output.x = (xBR + xBY + xRY) / 3;
@@ -75,10 +78,16 @@ Node triangulate (const Angle &input, const float &offset) {
 
 
 int main() {
+    // Angle testAngle = {
+    //     180,          //yellow
+    //     45.0,           //red
+    //     315.0,          //blue
+    // };
+
     Angle testAngle = {
-        225.0,          //yellow
-        45.0,           //red
-        315.0,          //blue
+        159.444,          //yellow
+        54.782,           //red
+        345.964,          //blue
     };
 
     float testOffset = 0;
