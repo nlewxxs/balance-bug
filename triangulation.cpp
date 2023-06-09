@@ -8,6 +8,7 @@
 
 #define XDIST 100
 #define YDIST 100
+#define ERRMARGIN 5
 #define DEBUG true
 
 ///////////////////////////////////////////
@@ -31,9 +32,65 @@ struct Angle {
         : yellow(_yellow), red(_red), blue(_blue) {}
 };
 
+struct CoordAngle {
+    float BR;
+    float BY;
+    float RY;
+
+    CoordAngle(float _BR = 0, float _BY = 0, float _RY = 0)
+        : BR(_BR), BY(_BY), RY(_RY) {}
+};
+
+struct AngleBool {
+    bool aBR;
+    bool aBY;
+    bool aRY;
+
+    AngleBool(bool _aBR = false, bool _aBY = false, bool _aRY = false)
+        : aBR(_aBR), aBY(_aBY), aRY(_aRY) {}
+};
 ///////////////////////////////////////////
 ///////////      Functions      ///////////
 ///////////////////////////////////////////
+
+AngleBool detectAnomalie (const CoordAngle &input) {
+    bool aBRBY, aBRRY, aRYBY = false;
+
+    if(abs((input.BR - input.BY)) > ERRMARGIN){
+        aBRBY = true;
+    }
+    if(abs((input.BR - input.RY)) > ERRMARGIN){
+        aBRRY = true;
+    }
+    if(abs((input.RY - input.BY)) > ERRMARGIN){
+        aRYBY = true;
+    }
+
+
+    //TODO: TEST + FINISH IMPLEMENT
+    if(aBRBY && aBRRY && aRYBY){
+        return AngleBool{false, false, false};
+    }
+    if(aBRBY && aBRRY && !aRYBY){
+        return AngleBool{true, true, false};
+    }
+    if(aBRBY && !aBRRY && aRYBY){
+        return AngleBool{true, false, true};
+    }
+    if(!aBRBY && aBRRY && aRYBY){
+        return AngleBool{false, true, true};
+    }
+    if(!aBRBY && !aBRRY && aRYBY){
+        return AngleBool{false, false, false};
+    }
+    if(!aBRBY && aBRRY && !aRYBY){
+        return AngleBool{false, false, false};
+    }
+    if(aBRBY && !aBRRY && !aRYBY){
+        return AngleBool{false, false, false};
+    }
+    return AngleBool{false, false, false};
+}
 
 Node triangulate (const Angle &input, const float &offset) {
     //declarations
