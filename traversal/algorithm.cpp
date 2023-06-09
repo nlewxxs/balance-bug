@@ -360,7 +360,7 @@ void nodeScanner(float startAngle, float endAngle) {
     //blockedRanges.push_back({129,231});
     blockedRanges.push_back({((int)currAngle+135)%360, ((int)currAngle+205)%360});
     std::cout<<"\n";
-    for (float currAngle = startAngle; currAngle <= (endAngle - cycle); currAngle+=0.39) {
+    for (float currAngle = startAngle; currAngle <= (endAngle - cycle); currAngle+=0.4f) {
         // modulo
         if (currAngle >= 360) { currAngle -= 360; }
         // expected test inputs
@@ -368,7 +368,7 @@ void nodeScanner(float startAngle, float endAngle) {
             isPath  = true;
             isClear = true;
         } else if (currAngle <= 69) {
-            isRed = true;
+            isRed   = true;
             isPath  = false;
             isClear = false;
         } else if (currAngle <= 125) {
@@ -398,18 +398,14 @@ void nodeScanner(float startAngle, float endAngle) {
         }
     // Testing
     //while (currAngle < endAngle) {
-        bool scanningBeacon = scanningRed || scanningBlue || scanningYellow;
-
+        bool scanningBeacon = scanningRed || scanningBlue || scanningYellow; // check for modulo/overflow
         if (currAngle < prevAngle) { cycle += 360; }
-
-        if ( (currAngle == startAngle) && cycle ) {
+        // check for full rotation
+        if ( (prevAngle < startAngle) && (currAngle >= startAngle) && cycle ) {
             rotation += 1;
             pathStart   = scanningPath   ? pathStart   : -1;
             beaconStart = scanningBeacon ? beaconStart : -1;
         }
-
-        prevAngle = (int)currAngle;
-
         // Path - try isPath for more accuracy
         if (scanningPath != isClear) {
             // Pos Edge
@@ -425,6 +421,8 @@ void nodeScanner(float startAngle, float endAngle) {
 
                 if (!isBlocked(angle)) { pathAngles.push_back(angle); }
                 else { std::cout<<"PATH BLOCKED: "<<angle<<std::endl; }
+
+                pathStart = -1;
             }
             scanningPath = isClear;
         }
@@ -435,6 +433,7 @@ void nodeScanner(float startAngle, float endAngle) {
             // Neg Edge
             else if (beaconStart != -1) {
                 // beaconEnd = currAngle;
+                std::cout<<"rot:"<<rotation;
                 float angle;
                 if (currAngle < beaconStart) { angle = fmod((beaconStart + currAngle),360) / 2; }
                 else { angle = float(beaconStart + currAngle) / 2;  }
@@ -442,6 +441,8 @@ void nodeScanner(float startAngle, float endAngle) {
                 std::cout<<"RED:    "<<beaconStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
 
                 beaconAngles[0] = angle;
+
+                beaconStart = -1;
             }
             scanningRed = isRed;
         }
@@ -458,6 +459,8 @@ void nodeScanner(float startAngle, float endAngle) {
                 std::cout<<"BLUE:   "<<beaconStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
 
                 beaconAngles[1] = angle;
+
+                beaconStart = -1;
             }
             scanningBlue = isBlue;
         }
@@ -473,9 +476,13 @@ void nodeScanner(float startAngle, float endAngle) {
 
                 std::cout<<"YELLOW: "<<beaconStart<<" -> "<<currAngle<<" = "<<angle<<std::endl;
                 beaconAngles[2] = angle;
+
+                beaconStart = -1;
             }
             scanningYellow = isYellow;
         }
+
+        prevAngle = (int)currAngle;
     }
 }
 
@@ -493,27 +500,37 @@ void backTrack() {
 
 }
 
-void dfs() {
-    // START IN CORNER
+void setupDfs() {
     // RUN CODE TWICE
     targetAngle = currAngle + 405;
-    // Set initial blocked angles e.g. 45+6...180-6
+    // Might need classify inside nodeScanner not parallel
     nodeScanner(currAngle, targetAngle);
-    Node currNode = nodeCoords();
-
+    Node currNode = nodeCoords(/*beaconAngles*/);
     // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN
+
     // Send currNode to server API e.g. 1,1;
 
+    // Pick angle
     if (pathAngles.size() != 0) {
         targetAngle = pathAngles[0];
     } else {
         std::cout<<"No Paths from Node: "<<currNode.x<<","<<currNode.y<<std::endl;
         // SEND KILL SIGNAL IDK RN
     }
+    // Add ALL other paths to path stack -- figure out how thats gunna work with backtracking
 
+    // Classify
+    // Depends on classify either start or nodeResponse
+}
 
+void dfs() {
+    // START IN CORNER
+    setupDfs();
 
-
+    // Store init angle
+    // classifyMazeElement();
+    //
+    // Set initial blocked angles e.g. 45+6...180-6
 }
 
 int main() {
@@ -532,7 +549,7 @@ int main() {
     isClear = true;
     isRed = true;
     currAngle = 280;
-    nodeScanner(280,280+405);
+    nodeScanner(280,280+1205);
 
     printDebug();
 //    printOutputs();
