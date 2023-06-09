@@ -64,7 +64,7 @@ input                         mode;
 //
 parameter IMAGE_W = 11'd640;
 parameter IMAGE_H = 11'd480;
-parameter MESSAGE_BUF_MAX = 256;
+parameter MESSAGE_BUF_MAX = 1024;
 parameter MSG_INTERVAL = 6;
 parameter BB_COL_DEFAULT = 24'h00ff00;
 
@@ -751,7 +751,7 @@ reg [31:0] msg_buf_in;
 wire [31:0] msg_buf_out;
 reg msg_buf_wr;
 wire msg_buf_rd, msg_buf_flush;
-wire [7:0] msg_buf_size;
+wire [9:0] msg_buf_size;
 wire msg_buf_empty;
 
 `define RED_BOX_MSG_ID "NB"
