@@ -776,6 +776,7 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 		end
 		5'b00100: begin
 			msg_buf_in = {three_y_min[1:0], four_x_min, four_y_min, five_x_min[10:3]};	//8 from 5 xmin
+			msg_buf_wr = 1'b1;
 		end
 		5'b00101: begin
 			msg_buf_in = {five_x_min[2:0], five_y_min, six_x_min, six_y_min[10:4]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
@@ -820,6 +821,7 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 		end
 		5'b01111: begin
 			msg_buf_in = {three_y_max[1:0], four_x_max, four_y_max, five_x_max[10:3]};	//8 from 5 xmax
+			msg_buf_wr = 1'b1;
 		end
 		5'b10000: begin
 			msg_buf_in = {five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
@@ -936,7 +938,6 @@ end
 
 //Flush the message buffer if 1 is written to status register bit 4
 assign msg_buf_flush = (s_chipselect & s_write & (s_address == `REG_STATUS) & s_writedata[4]);
-
 
 // Process reads
 reg read_d; //Store the read signal for correct updating of the message buffer
