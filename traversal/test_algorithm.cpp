@@ -31,7 +31,7 @@ struct extractedCoords{
             if ( (i+1)%4 == 0 && i != 0) { std::cout<<std::endl; }
             else {
                 std::cout<<",";
-                for (int arrLength; arrLength < 12; arrLength++) {
+                for (int i = arrLength; i < 13; i++) {
                     std::cout<<" ";
                 }
             }

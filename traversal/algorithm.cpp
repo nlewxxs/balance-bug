@@ -509,11 +509,11 @@ void setupDfs() {
     // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN
 
     // Send currNode to server API e.g. 1,1;
-int main(int argc, char const *argv[])
-{
-    /* code */
-    return 0;
-}
+// int main(int argc, char const *argv[])
+// {
+//     /* code */
+//     return 0;
+// }
 
     // Pick angle
     if (pathAngles.size() != 0) {
