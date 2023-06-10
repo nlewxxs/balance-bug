@@ -94,7 +94,7 @@ float currAngle = 0;
 int totalDistance = 0;
 
 // [ [xMin, yMin, xMax, yMax] ]
-std::vector<std::vector<int>> boundsGrid;
+// std::vector<std::vector<int>> boundsGrid;
 
 ///////////////////////////////////////////
 ///////////       OUTPUTS       ///////////
@@ -509,6 +509,11 @@ void setupDfs() {
     // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN
 
     // Send currNode to server API e.g. 1,1;
+int main(int argc, char const *argv[])
+{
+    /* code */
+    return 0;
+}
 
     // Pick angle
     if (pathAngles.size() != 0) {
@@ -533,28 +538,28 @@ void dfs() {
     // Set initial blocked angles e.g. 45+6...180-6
 }
 
-int main() {
-    // [1] is a dummy for now
-    boundsGrid = {
-    {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {0,140,130,240} , {240,120,320,160}, {320,140,410,240}, {500,120,640,200},
-    {0,260,60,360}  , {0,0,0,0}        , {430,240,460,360}, {0,0,0,0},
-    {0,0,0,0}       , {0,0,0,0}        , {450,360,480,480}, {480,420,530,480},
-    };
-//    printGrid(boundsGrid);
-    drawGrid(boundsGrid);
+// int main() {
+//     // [1] is a dummy for now
+//     boundsGrid = {
+//     {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
+//     {0,140,130,240} , {240,120,320,160}, {320,140,410,240}, {500,120,640,200},
+//     {0,260,60,360}  , {0,0,0,0}        , {430,240,460,360}, {0,0,0,0},
+//     {0,0,0,0}       , {0,0,0,0}        , {450,360,480,480}, {480,420,530,480},
+//     };
+// //    printGrid(boundsGrid);
+//     drawGrid(boundsGrid);
 
-    classifyMazeElement(boundsGrid);
+//     classifyMazeElement(boundsGrid);
 
-    isClear = true;
-    isRed = true;
-    currAngle = 280;
-    nodeScanner(280,280+1205);
+//     isClear = true;
+//     isRed = true;
+//     currAngle = 280;
+//     nodeScanner(280,280+1205);
 
-    printDebug();
-//    printOutputs();
+//     printDebug();
+// //    printOutputs();
 
-}
+// }
 
 
 /* GRIDS
