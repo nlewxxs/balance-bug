@@ -105,7 +105,7 @@ void createBoundsGrid (const std::string filepath, testOutput &out){
  
 			while(getline(str, word, ','))
 				row.push_back(word);
-			content.push_back(row);
+			    content.push_back(row);
 		}
 	}
 	else
