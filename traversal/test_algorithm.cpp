@@ -115,10 +115,10 @@ void createBoundsGrid (const std::string filepath, testOutput &out){
         {
             for(int j=0;j<content[i].size();j++)
             {   
-                std::cout << "J is " << j << std::endl;
+                // std::cout << "J is " << j << std::endl;
                 switch (i){
                     case 0:
-                        std::cout << "GOT: " << content[i][j] << std::endl;
+                        // std::cout << "GOT: " << content[i][j] << std::endl;
                         if(j==0){
                             out.coords.currAngle = std::stof(content[i][j]);
                         } else {

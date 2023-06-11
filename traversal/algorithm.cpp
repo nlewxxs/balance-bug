@@ -269,8 +269,8 @@ bool encompassesBounds() {return false;}
 
 void classifyMazeElement(std::vector<std::vector<int>> grid) {
     // Left Turn
-    if (outsideBounds(grid[8], leftPathBounds) &&
-        outsideBounds(grid[9], leftPathBounds)) {
+    bool leftTurnCond1 = outsideBounds(grid[8], leftPathBounds) && outsideBounds(grid[9], leftPathBounds);
+    if (leftTurnCond1) {
         std::cout << "LEFT JUNCTION"<<std::endl;
         leftTurn = true;
     } else {
