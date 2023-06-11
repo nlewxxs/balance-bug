@@ -160,7 +160,32 @@ always begin
 	end
 end
 
+reg [2:0] col_out;
+reg out_uncertain;
 
+always begin
+	//4C3 = 4, so only 4 combinations required here
+	if ((x_min_col == x_max_col) & (x_min_col == y_max_col)) begin
+		col_out = x_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((x_min_col == x_max_col) && (x_min_col == y_min_col)) begin
+		col_out = x_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((x_min_col == y_min_col) && (y_max_col == y_min_col)) begin
+		col_out = x_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((y_max_col == x_max_col) && (y_max_col == y_min_col)) begin
+		col_out = x_max_col;
+		out_uncertain = 1'b0;
+	end
+	else begin
+		col_out = x_max_col;
+		out_uncertain = 1'b1;
+	end
+end
 always@(posedge clk) begin
 	if ((red_detect || yellow_detect || blue_detect) & in_valid) begin	//Update bounds when the pixel is red     
 		if ((x > 120) & (x < 360) & (y < 120)) begin
@@ -168,7 +193,6 @@ always@(posedge clk) begin
 				x_min <= x;
 				if(red_detect) x_min_col <= 3'b001;
 				else if (yellow_detect) x_min_col <= 3'b010;
-				
 				else if (blue_detect) x_min_col <= 3'b100;
 			end
 			if ((x > x_max) & (x < 480) & (x > 160)) begin 
@@ -188,7 +212,8 @@ always@(posedge clk) begin
 				if(red_detect) y_max_col <= 3'b001;
 				else if (yellow_detect) y_max_col <= 3'b010;
 				else if (blue_detect) y_max_col <= 3'b100;
-			end
+			end	
+			
 		end
 
 	end
@@ -203,6 +228,7 @@ always@(posedge clk) begin
 
 		x_max_col <= 3'b000;
 		y_max_col <= 3'b000;
+
 
 	end
 end
@@ -259,7 +285,7 @@ always@(*) begin	//Write words to FIFO as state machine advances
 			msg_buf_wr = 1'b1;
 		end
 		2'b10: begin
-			msg_buf_in = {x_max_col, 2'b0, x_min, 5'b0, y_min};	//Top left coordinate
+			msg_buf_in = {col_out, 1'b0, out_uncertain, x_min, 5'b0, y_min};	//Top left coordinate
 			msg_buf_wr = 1'b1;
 		end
 		2'b11: begin
@@ -377,4 +403,3 @@ assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_addres
 
 
 endmodule
-
