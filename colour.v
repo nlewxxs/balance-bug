@@ -169,15 +169,39 @@ always begin
 		col_out = x_min_col;
 		out_uncertain = 1'b0;
 	end
-	else if ((x_min_col == x_max_col) && (x_min_col == y_min_col)) begin
+	else if ((x_min_col == x_max_col) & (x_min_col == y_min_col)) begin
 		col_out = x_min_col;
 		out_uncertain = 1'b0;
 	end
-	else if ((x_min_col == y_min_col) && (y_max_col == y_min_col)) begin
+	else if ((x_min_col == y_min_col) & (y_max_col == y_min_col)) begin
 		col_out = x_min_col;
 		out_uncertain = 1'b0;
 	end
-	else if ((y_max_col == x_max_col) && (y_max_col == y_min_col)) begin
+	else if ((y_max_col == x_max_col) & (y_max_col == y_min_col)) begin
+		col_out = x_max_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((x_min_col == x_max_col) & (x_min_col != y_max_col) & (x_min_col != y_min_col)) begin
+		col_out = x_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((x_min_col == y_min_col) & (x_min_col != y_max_col) & (x_min_col != x_max_col)) begin
+		col_out = x_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((x_min_col == y_max_col) & (x_min_col != y_min_col) & (x_min_col != x_max_col)) begin
+		col_out = x_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((y_min_col == y_max_col) & (y_min_col != x_min_col) & (y_min_col != x_max_col)) begin
+		col_out = y_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((y_min_col == x_max_col) & (y_min_col != y_max_col) & (y_min_col != x_min_col)) begin
+		col_out = y_min_col;
+		out_uncertain = 1'b0;
+	end
+	else if ((x_max_col == y_max_col) & (x_max_col != x_min_col) & (x_max_col != y_min_col)) begin
 		col_out = x_max_col;
 		out_uncertain = 1'b0;
 	end
@@ -186,6 +210,7 @@ always begin
 		out_uncertain = 1'b1;
 	end
 end
+
 always@(posedge clk) begin
 	if ((red_detect || yellow_detect || blue_detect) & in_valid) begin	//Update bounds when the pixel is red     
 		if ((x > 120) & (x < 360) & (y < 120)) begin
