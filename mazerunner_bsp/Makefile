@@ -101,7 +101,7 @@ ACDS_VERSION := 18.0
 # BUILD_NUMBER: 614
 
 SETTINGS_FILE := settings.bsp
-SOPC_FILE := ../../Qsys.sopcinfo
+SOPC_FILE := ../Qsys.sopcinfo
 
 #-------------------------------------------------------------------------------
 #                             TOOL & COMMAND DEFINITIONS

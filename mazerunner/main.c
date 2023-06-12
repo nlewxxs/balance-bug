@@ -203,20 +203,20 @@ int main()
 
   while(1){
 
-       // touch KEY0 to trigger Auto focus
-	   if((IORD(KEY_BASE,0)&0x03) == 0x02){
+    //    // touch KEY0 to trigger Auto focus
+	  //  if((IORD(KEY_BASE,0)&0x03) == 0x02){
 
-    	   current_focus = Focus_Window(320,240);
-       }
-	   // touch KEY1 to ZOOM
-	         if((IORD(KEY_BASE,0)&0x03) == 0x01){
-	      	   if(bin_level == 3 )bin_level = 1;
-	      	   else bin_level ++;
-	      	   printf("set bin level to %d\n",bin_level);
-	      	   MIPI_BIN_LEVEL(bin_level);
-	      	 	usleep(500000);
+    // 	   current_focus = Focus_Window(320,240);
+    //    }
+	  //  // touch KEY1 to ZOOM
+	  //        if((IORD(KEY_BASE,0)&0x03) == 0x01){
+	  //     	   if(bin_level == 3 )bin_level = 1;
+	  //     	   else bin_level ++;
+	  //     	   printf("set bin level to %d\n",bin_level);
+	  //     	   MIPI_BIN_LEVEL(bin_level);
+	  //     	 	usleep(500000);
 
-	         }
+	  //        }
 
 
 	#if 0
