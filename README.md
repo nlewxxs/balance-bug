@@ -6,7 +6,6 @@ Each output is 32 segment
 | ----------- | ----------- |
 | 0           | 0          |
 | 1           | NB          |
-
 | 4           | 24'b0, five_x_min[10:3]          |
 | 5           | five_x_min[2:0], five_y_min, six_x_min, six_y_min[10:4]          |
 | 6           | six_y_min[3:0], seven_x_min, seven_y_min, eight_x_min[10:5]          |
