@@ -29,10 +29,10 @@ void read32bits(uint32_t *rx){
 
 Matrix Camera::getBoxMatrix(){
   Matrix boxMatrix;
-  boxMatrix.boxes[0][0] = Boxes.block_one.x_min; boxMatrix.boxes[0][1] = Boxes.block_one.y_min; boxMatrix.boxes[0][2] = Boxes.block_one.x_max; boxMatrix.boxes[0][3] = Boxes.block_one.y_max;
-  boxMatrix.boxes[1][0] = Boxes.block_two.x_min; boxMatrix.boxes[1][1] = Boxes.block_two.y_min; boxMatrix.boxes[1][2] = Boxes.block_two.x_max; boxMatrix.boxes[1][3] = Boxes.block_two.y_max;
-  boxMatrix.boxes[2][0] = Boxes.block_three.x_min; boxMatrix.boxes[2][1] = Boxes.block_three.y_min; boxMatrix.boxes[2][2] = Boxes.block_three.x_max; boxMatrix.boxes[2][3] = Boxes.block_three.y_max;
-  boxMatrix.boxes[3][0] = Boxes.block_four.x_min; boxMatrix.boxes[3][1] = Boxes.block_four.y_min; boxMatrix.boxes[3][2] = Boxes.block_four.x_max; boxMatrix.boxes[3][3] = Boxes.block_four.y_max;
+  // boxMatrix.boxes[0][0] = Boxes.block_one.x_min; boxMatrix.boxes[0][1] = Boxes.block_one.y_min; boxMatrix.boxes[0][2] = Boxes.block_one.x_max; boxMatrix.boxes[0][3] = Boxes.block_one.y_max;
+  // boxMatrix.boxes[1][0] = Boxes.block_two.x_min; boxMatrix.boxes[1][1] = Boxes.block_two.y_min; boxMatrix.boxes[1][2] = Boxes.block_two.x_max; boxMatrix.boxes[1][3] = Boxes.block_two.y_max;
+  // boxMatrix.boxes[2][0] = Boxes.block_three.x_min; boxMatrix.boxes[2][1] = Boxes.block_three.y_min; boxMatrix.boxes[2][2] = Boxes.block_three.x_max; boxMatrix.boxes[2][3] = Boxes.block_three.y_max;
+  // boxMatrix.boxes[3][0] = Boxes.block_four.x_min; boxMatrix.boxes[3][1] = Boxes.block_four.y_min; boxMatrix.boxes[3][2] = Boxes.block_four.x_max; boxMatrix.boxes[3][3] = Boxes.block_four.y_max;
   boxMatrix.boxes[4][0] = Boxes.block_five.x_min; boxMatrix.boxes[4][1] = Boxes.block_five.y_min; boxMatrix.boxes[4][2] = Boxes.block_five.x_max; boxMatrix.boxes[4][3] = Boxes.block_five.y_max;
   boxMatrix.boxes[5][0] = Boxes.block_six.x_min; boxMatrix.boxes[5][1] = Boxes.block_six.y_min; boxMatrix.boxes[5][2] = Boxes.block_six.x_max; boxMatrix.boxes[5][3] = Boxes.block_six.y_max;
   boxMatrix.boxes[6][0] = Boxes.block_seven.x_min; boxMatrix.boxes[6][1] = Boxes.block_seven.y_min; boxMatrix.boxes[6][2] = Boxes.block_seven.x_max; boxMatrix.boxes[6][3] = Boxes.block_seven.y_max;
@@ -58,21 +58,21 @@ void updateCoordinates(boxCoordinates *coords){
 
   // ---------------------------- MIN VALUES ---------------------------------- //
 
-  read32bits(&uart_rx);     // [31:21] = one_x_min[10:0], [20:10] = one_y_min[10:0], [9:0] = two_x_min[10:1]
-  coords->block_one.x_min =   (uart_rx & 0b11111111111000000000000000000000) >> 21;
-  coords->block_one.y_min =   (uart_rx & 0b00000000000111111111110000000000) >> 10;
-  tmp =                       (uart_rx & 0b00000000000000000000001111111111) << 1; 
+  // read32bits(&uart_rx);     // [31:21] = one_x_min[10:0], [20:10] = one_y_min[10:0], [9:0] = two_x_min[10:1]
+  // coords->block_one.x_min =   (uart_rx & 0b11111111111000000000000000000000) >> 21;
+  // coords->block_one.y_min =   (uart_rx & 0b00000000000111111111110000000000) >> 10;
+  // tmp =                       (uart_rx & 0b00000000000000000000001111111111) << 1; 
   
-  read32bits(&uart_rx);     // two_x_min[0], two_y_min, three_x_min, three_y_min[10:2]
-  coords->block_two.x_min =   tmp + ((uart_rx & 0b10000000000000000000000000000000) >> 31);
-  coords->block_two.y_min =   (uart_rx & 0b01111111111100000000000000000000) >> 20;
-  coords->block_three.x_min = (uart_rx & 0b00000000000011111111111000000000) >> 9;
-  tmp =                       (uart_rx & 0b00000000000000000000000111111111) << 2;
+  // read32bits(&uart_rx);     // two_x_min[0], two_y_min, three_x_min, three_y_min[10:2]
+  // coords->block_two.x_min =   tmp + ((uart_rx & 0b10000000000000000000000000000000) >> 31);
+  // coords->block_two.y_min =   (uart_rx & 0b01111111111100000000000000000000) >> 20;
+  // coords->block_three.x_min = (uart_rx & 0b00000000000011111111111000000000) >> 9;
+  // tmp =                       (uart_rx & 0b00000000000000000000000111111111) << 2;
 
   read32bits(&uart_rx);     // three_y_min[1:0], four_x_min, four_y_min, five_x_min[10:3]
-  coords->block_three.y_min = tmp + ((uart_rx & 0b11000000000000000000000000000000) >> 30);
-  coords->block_four.x_min =  (uart_rx & 0b00111111111110000000000000000000) >> 19;
-  coords->block_four.y_min =  (uart_rx & 0b00000000000001111111111100000000) >> 8;
+  // coords->block_three.y_min = tmp + ((uart_rx & 0b11000000000000000000000000000000) >> 30);
+  // coords->block_four.x_min =  (uart_rx & 0b00111111111110000000000000000000) >> 19;
+  // coords->block_four.y_min =  (uart_rx & 0b00000000000001111111111100000000) >> 8;
   tmp =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
 
   read32bits(&uart_rx);     // five_x_min[2:0], five_y_min, six_x_min, six_y_min[10:4]
@@ -124,21 +124,21 @@ void updateCoordinates(boxCoordinates *coords){
 
   // ---------------------------- MAX VALUES ---------------------------------- //
 
-  read32bits(&uart_rx);     // one_x_max, one_y_max, two_x_max[10:1]
-  coords->block_one.x_max =   (uart_rx & 0b11111111111000000000000000000000) >> 21;
-  coords->block_one.y_max =   (uart_rx & 0b00000000000111111111110000000000) >> 10;
-  tmp =                       (uart_rx & 0b00000000000000000000001111111111) << 1; 
+  // read32bits(&uart_rx);     // one_x_max, one_y_max, two_x_max[10:1]
+  // coords->block_one.x_max =   (uart_rx & 0b11111111111000000000000000000000) >> 21;
+  // coords->block_one.y_max =   (uart_rx & 0b00000000000111111111110000000000) >> 10;
+  // tmp =                       (uart_rx & 0b00000000000000000000001111111111) << 1; 
   
-  read32bits(&uart_rx);     // two_x_max[0], two_y_max, three_x_max, three_y_max[10:2]
-  coords->block_two.x_max =   tmp + ((uart_rx & 0b10000000000000000000000000000000) >> 31);
-  coords->block_two.y_max =   (uart_rx & 0b01111111111100000000000000000000) >> 20;
-  coords->block_three.x_max = (uart_rx & 0b00000000000011111111111000000000) >> 9;
-  tmp =                       (uart_rx & 0b00000000000000000000000111111111) << 2;
+  // read32bits(&uart_rx);     // two_x_max[0], two_y_max, three_x_max, three_y_max[10:2]
+  // coords->block_two.x_max =   tmp + ((uart_rx & 0b10000000000000000000000000000000) >> 31);
+  // coords->block_two.y_max =   (uart_rx & 0b01111111111100000000000000000000) >> 20;
+  // coords->block_three.x_max = (uart_rx & 0b00000000000011111111111000000000) >> 9;
+  // tmp =                       (uart_rx & 0b00000000000000000000000111111111) << 2;
 
   read32bits(&uart_rx);     // three_y_max[1:0], four_x_max, four_y_max, five_x_max[10:3]
-  coords->block_three.y_max = tmp + ((uart_rx & 0b11000000000000000000000000000000) >> 30);
-  coords->block_four.x_max =  (uart_rx & 0b00111111111110000000000000000000) >> 19;
-  coords->block_four.y_max =  (uart_rx & 0b00000000000001111111111100000000) >> 8;
+  // coords->block_three.y_max = tmp + ((uart_rx & 0b11000000000000000000000000000000) >> 30);
+  // coords->block_four.x_max =  (uart_rx & 0b00111111111110000000000000000000) >> 19;
+  // coords->block_four.y_max =  (uart_rx & 0b00000000000001111111111100000000) >> 8;
   tmp =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
 
   read32bits(&uart_rx);     // five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]
@@ -191,38 +191,38 @@ void updateCoordinates(boxCoordinates *coords){
 }
 
 void printCoordinates(boxCoordinates *coords){
-  Serial.print(" one_x_min: ");
-  Serial.print(coords->block_one.x_min);
-  Serial.print(" one_x_max: ");
-  Serial.print(coords->block_one.x_max);
-  Serial.print(" one_y_min: ");
-  Serial.print(coords->block_one.y_min);
-  Serial.print(" one_y_max: ");
-  Serial.print(coords->block_one.y_max);
-  Serial.print(" two_x_min: ");
-  Serial.print(coords->block_two.x_min);
-  Serial.print(" two_x_max: ");
-  Serial.print(coords->block_two.x_max);
-  Serial.print(" two_y_min: ");
-  Serial.print(coords->block_two.y_min);
-  Serial.print(" two_y_max: ");
-  Serial.println(coords->block_two.y_max);
-  Serial.print(" three_x_min: ");
-  Serial.print(coords->block_three.x_min);
-  Serial.print(" three_x_max: ");
-  Serial.print(coords->block_three.x_max);
-  Serial.print(" three_y_min: ");
-  Serial.print(coords->block_three.y_min);
-  Serial.print(" three_y_max: ");
-  Serial.print(coords->block_three.y_max);
-  Serial.print(" four_x_min: ");
-  Serial.print(coords->block_four.x_min);
-  Serial.print(" four_x_max: ");
-  Serial.print(coords->block_four.x_max);
-  Serial.print(" four_y_min: ");
-  Serial.print(coords->block_four.y_min);
-  Serial.print(" four_y_max: ");
-  Serial.println(coords->block_four.y_max);
+  // Serial.print(" one_x_min: ");
+  // Serial.print(coords->block_one.x_min);
+  // Serial.print(" one_x_max: ");
+  // Serial.print(coords->block_one.x_max);
+  // Serial.print(" one_y_min: ");
+  // Serial.print(coords->block_one.y_min);
+  // Serial.print(" one_y_max: ");
+  // Serial.print(coords->block_one.y_max);
+  // Serial.print(" two_x_min: ");
+  // Serial.print(coords->block_two.x_min);
+  // Serial.print(" two_x_max: ");
+  // Serial.print(coords->block_two.x_max);
+  // Serial.print(" two_y_min: ");
+  // Serial.print(coords->block_two.y_min);
+  // Serial.print(" two_y_max: ");
+  // Serial.println(coords->block_two.y_max);
+  // Serial.print(" three_x_min: ");
+  // Serial.print(coords->block_three.x_min);
+  // Serial.print(" three_x_max: ");
+  // Serial.print(coords->block_three.x_max);
+  // Serial.print(" three_y_min: ");
+  // Serial.print(coords->block_three.y_min);
+  // Serial.print(" three_y_max: ");
+  // Serial.print(coords->block_three.y_max);
+  // Serial.print(" four_x_min: ");
+  // Serial.print(coords->block_four.x_min);
+  // Serial.print(" four_x_max: ");
+  // Serial.print(coords->block_four.x_max);
+  // Serial.print(" four_y_min: ");
+  // Serial.print(coords->block_four.y_min);
+  // Serial.print(" four_y_max: ");
+  // Serial.println(coords->block_four.y_max);
 
   Serial.print(" five_x_min: ");
   Serial.print(coords->block_five.x_min);
