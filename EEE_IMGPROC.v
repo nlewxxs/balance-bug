@@ -513,94 +513,94 @@ always@(posedge clk) begin
 
 	if (sop & in_valid) begin	//Reset bounds on start of packet
 		//row 1
-		one_x_min <= IMAGE_W-11'h1;
+		one_x_min <= 0;
 		one_x_max <= 0;
-		one_y_min <= IMAGE_H-11'h1;
+		one_y_min <= 0;
 		one_y_max <= 0;
 
-		two_x_min <= IMAGE_W-11'h1;
+		two_x_min <= 0;
 		two_x_max <= 0;
-		two_y_min <= IMAGE_H-11'h1;
+		two_y_min <= 0;
 		two_y_max <= 0;
 
-		three_x_min <= IMAGE_W-11'h1;
+		three_x_min <= 0;
 		three_x_max <= 0;
-		three_y_min <= IMAGE_H-11'h1;
+		three_y_min <= 0;
 		three_y_max <= 0;
 
-		four_x_min <= IMAGE_W-11'h1;
+		four_x_min <= 0;
 		four_x_max <= 0;
-		four_y_min <= IMAGE_H-11'h1;
+		four_y_min <= 0;
 		four_y_max <= 0;
 
 
 
 		//////////////////////////
 		//row 2
-		five_x_min <= IMAGE_W-11'h1;
+		five_x_min <= 0;
 		five_x_max <= 0;
-		five_y_min <= IMAGE_H-11'h1;
+		five_y_min <= 0;
 		five_y_max <= 0;
 
-		six_x_min <= IMAGE_W-11'h1;
+		six_x_min <= 0;
 		six_x_max <= 0;
-		six_y_min <= IMAGE_H-11'h1;
+		six_y_min <= 0;
 		six_y_max <= 0;
 
-		seven_x_min <= IMAGE_W-11'h1;
+		seven_x_min <= 0;
 		seven_x_max <= 0;
-		seven_y_min <= IMAGE_H-11'h1;
+		seven_y_min <= 0;
 		seven_y_max <= 0;
 
-		eight_x_min <= IMAGE_W-11'h1;
+		eight_x_min <= 0;
 		eight_x_max <= 0;
-		eight_y_min <= IMAGE_H-11'h1;
+		eight_y_min <= 0;
 		eight_y_max <= 0;
 
 
 		/////////////////////////
 		//row 3
-		nine_x_min <= IMAGE_W-11'h1;
+		nine_x_min <= 0;
 		nine_x_max <= 0;
-		nine_y_min <= IMAGE_H-11'h1;
+		nine_y_min <= 0;
 		nine_y_max <= 0;
 
-		ten_x_min <= IMAGE_W-11'h1;
+		ten_x_min <= 0;
 		ten_x_max <= 0;
-		ten_y_min <= IMAGE_H-11'h1;
+		ten_y_min <= 0;
 		ten_y_max <= 0;
 
-		eleven_x_min <= IMAGE_W-11'h1;
+		eleven_x_min <= 0;
 		eleven_x_max <= 0;
-		eleven_y_min <= IMAGE_H-11'h1;
+		eleven_y_min <= 0;
 		eleven_y_max <= 0;
 
-		twelve_x_min <= IMAGE_W-11'h1;
+		twelve_x_min <= 0;
 		twelve_x_max <= 0;
-		twelve_y_min <= IMAGE_H-11'h1;
+		twelve_y_min <= 0;
 		twelve_y_max <= 0;
 
 
 		/////////////////////////
 		//row 4
-		thirteen_x_min <= IMAGE_W-11'h1;
+		thirteen_x_min <= 0;
 		thirteen_x_max <= 0;
-		thirteen_y_min <= IMAGE_H-11'h1;
+		thirteen_y_min <= 0;
 		thirteen_y_max <= 0;
 
-		fourteen_x_min <= IMAGE_W-11'h1;
+		fourteen_x_min <= 0;
 		fourteen_x_max <= 0;
-		fourteen_y_min <= IMAGE_H-11'h1;
+		fourteen_y_min <= 0;
 		fourteen_y_max <= 0;
 
-		fifteen_x_min <= IMAGE_W-11'h1;
+		fifteen_x_min <= 0;
 		fifteen_x_max <= 0;
-		fifteen_y_min <= IMAGE_H-11'h1;
+		fifteen_y_min <= 0;
 		fifteen_y_max <= 0;
 
-		sixteen_x_min <= IMAGE_W-11'h1;
+		sixteen_x_min <= 0;
 		sixteen_x_max <= 0;
-		sixteen_y_min <= IMAGE_H-11'h1;
+		sixteen_y_min <= 0;
 		sixteen_y_max <= 0;
 		
 	end
