@@ -64,7 +64,7 @@ input                         mode;
 //
 parameter IMAGE_W = 11'd640;
 parameter IMAGE_H = 11'd480;
-parameter MESSAGE_BUF_MAX = 1024;
+parameter MESSAGE_BUF_MAX = 2048;
 parameter MSG_INTERVAL = 18;
 parameter BB_COL_DEFAULT = 24'h00ff00;
 
@@ -734,9 +734,9 @@ always@(posedge clk) begin
 	end
 	
 	//Cycle through message writer states once started
-	if (msg_state != 5'b0000) begin
+	if (msg_state != 5'b00000) begin
 		if(msg_state == 5'b10111) begin
-			msg_state <= 5'b0000;
+			msg_state <= 5'b00000;
 		end
 		else begin
 			msg_state <= msg_state + 5'b00001;
@@ -751,7 +751,7 @@ reg [31:0] msg_buf_in;
 wire [31:0] msg_buf_out;
 reg msg_buf_wr;
 wire msg_buf_rd, msg_buf_flush;
-wire [9:0] msg_buf_size;
+wire [10:0] msg_buf_size;
 wire msg_buf_empty;
 
 `define RED_BOX_MSG_ID "NB"
