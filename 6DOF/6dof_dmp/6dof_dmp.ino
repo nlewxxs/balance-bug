@@ -41,7 +41,7 @@ MPU6050 mpu;  // default address 0x68 used
  * ========================================================================= */
 
 // Choose between OUTPUT_READABLE_EULER, OUTPUT_READABLE_QUATERNION, OUTPUT_READABLE_YAWPITCHROLL
-#define OUTPUT_READABLE_YAWPITCHROLL
+// #define OUTPUT_READABLE_YAWPITCHROLL
 // #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 
 // MPU control/status vars
@@ -58,6 +58,7 @@ VectorInt16 aa;         // [x, y, z]            accel sensor measurements
 VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
 VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
 VectorFloat gravity;    // [x, y, z]            gravity vector
+VectorInt16 gyro;       // [x, y, z]            angular velocity
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
@@ -116,6 +117,13 @@ void loop() {
 
     // read a packet from FIFO
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { 
+
+        mpu.dmpGetGyro(&gyro, fifoBuffer);
+        // char tmp[64];
+        // sprintf(tmp, "Gyro X: %f  | Gyro Y: %f  | Gyro Z: %f", gyro.x, gyro.y, gyro.z);
+        // Serial.println(tmp);
+        Serial.print("Gyro X: ");
+        Serial.println(gyro.x);
 
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
