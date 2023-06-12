@@ -65,7 +65,7 @@ input                         mode;
 parameter IMAGE_W = 11'd640;
 parameter IMAGE_H = 11'd480;
 parameter MESSAGE_BUF_MAX = 2048;
-parameter MSG_INTERVAL = 18;
+parameter MSG_INTERVAL = 30;
 parameter BB_COL_DEFAULT = 24'h00ff00;
 
 
@@ -978,6 +978,17 @@ MSG_FIFO	MSG_FIFO_inst (
 	.usedw (msg_buf_size),
 	.empty (msg_buf_empty)
 );
+
+// MSG_FIFO2	MSG_FIFO_inst (
+// 	.clock (clk),
+// 	.data (msg_buf_in),
+// 	.rdreq (msg_buf_rd),
+// 	.sclr (~reset_n | msg_buf_flush),
+// 	.wrreq (msg_buf_wr),
+// 	.q (msg_buf_out),
+// 	.usedw (msg_buf_size),
+// 	.empty (msg_buf_empty)
+// );
 
 
 //Streaming registers to buffer video signal
