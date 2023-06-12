@@ -269,8 +269,8 @@ bool encompassesBounds() {return false;}
 
 void classifyMazeElement(std::vector<std::vector<int>> grid) {
     // Left Turn
-    bool leftTurnCond1 = outsideBounds(grid[8], leftPathBounds) && outsideBounds(grid[9], leftPathBounds);
-    if (leftTurnCond1) {
+    if (outsideBounds(grid[8], leftPathBounds) &&
+        outsideBounds(grid[9], leftPathBounds)) {
         std::cout << "LEFT JUNCTION"<<std::endl;
         leftTurn = true;
     } else {
@@ -433,7 +433,6 @@ void nodeScanner(float startAngle, float endAngle) {
             // Neg Edge
             else if (beaconStart != -1) {
                 // beaconEnd = currAngle;
-                std::cout<<"rot:"<<rotation;
                 float angle;
                 if (currAngle < beaconStart) { angle = fmod((beaconStart + currAngle),360) / 2; }
                 else { angle = float(beaconStart + currAngle) / 2;  }
