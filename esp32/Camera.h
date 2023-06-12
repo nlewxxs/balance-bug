@@ -6,13 +6,13 @@
 #include <HardwareSerial.h>
 
 struct Matrix {
-  uint16_t boxes[16][4];
+  uint32_t boxes[16][4];
 };
 
 struct coordinate {
   uint16_t x_min;
-  uint16_t x_max;
   uint16_t y_min;
+  uint16_t x_max;
   uint16_t y_max;
 };
 
