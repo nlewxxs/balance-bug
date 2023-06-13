@@ -35,6 +35,7 @@ struct boxCoordinates {
   coordinate block_fifteen;
   coordinate block_sixteen;
 
+
 };
 
 class Camera {
@@ -43,6 +44,8 @@ class Camera {
     void update();
     Matrix getBoxMatrix();
     uint8_t getColours();
+  private:
+    bool initialised;
 };
 
 #endif
