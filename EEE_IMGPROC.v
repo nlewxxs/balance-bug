@@ -90,10 +90,10 @@ assign red_high  =  tl_detect ? {8'hff, 8'hff, 8'hff} : {grey, grey, grey};
 // Show bounding box
 wire [23:0] new_image;
 wire bb_active;
-assign bb_active = (x == two_left)  | (x == three_left)| (x == four_left)| (x == five_left)| (x == six_left)| (x == seven_left)| (x == eight_left)| (x == nine_left)| (x == ten_left)| (x == eleven_left)| (x == twelve_left)| (x == thirteen_left)| (x == fourteen_left)| (x == fifteen_left)| (x == sixteen_left)|
-				   	| (x == two_right)  | (x == three_right)| (x == four_right)| (x == five_right)| (x == six_right)| (x == seven_right)| (x == eight_right)| (x == nine_right)| (x == ten_right)| (x == eleven_right)| (x == twelve_right)| (x == thirteen_right)| (x == fourteen_right)| (x == fifteen_right)| (x == sixteen_right)|
-				   	| (y == two_top)  | (y == three_top)| (y == four_top)| (y == five_top)| (y == six_top)| (y == seven_top)| (y == eight_top)| (y == nine_top)| (y == ten_top)| (y == eleven_top)| (y == twelve_top)| (y == thirteen_top)| (y == fourteen_top)| (y == fifteen_top)| (y == sixteen_top)|
-					| (y == two_bottom)  | (y == three_bottom)| (y == four_bottom)| (y == five_bottom)| (y == six_bottom)| (y == seven_bottom)| (y == eight_bottom)| (y == nine_bottom)| (y == ten_bottom)| (y == eleven_bottom)| (y == twelve_bottom)| (y == thirteen_bottom)| (y == fourteen_bottom)| (y == fifteen_bottom)| (y == sixteen_bottom);
+assign bb_active = (x == five_left)| (x == six_left)| (x == seven_left)| (x == eight_left)| (x == nine_left)| (x == ten_left)| (x == eleven_left)| (x == twelve_left)| (x == thirteen_left)| (x == fourteen_left)| (x == fifteen_left)| (x == sixteen_left)|
+				   	| (x == five_right)| (x == six_right)| (x == seven_right)| (x == eight_right)| (x == nine_right)| (x == ten_right)| (x == eleven_right)| (x == twelve_right)| (x == thirteen_right)| (x == fourteen_right)| (x == fifteen_right)| (x == sixteen_right)|
+				   	|(y == five_top)| (y == six_top)| (y == seven_top)| (y == eight_top)| (y == nine_top)| (y == ten_top)| (y == eleven_top)| (y == twelve_top)| (y == thirteen_top)| (y == fourteen_top)| (y == fifteen_top)| (y == sixteen_top)|
+					| (y == five_bottom)| (y == six_bottom)| (y == seven_bottom)| (y == eight_bottom)| (y == nine_bottom)| (y == ten_bottom)| (y == eleven_bottom)| (y == twelve_bottom)| (y == thirteen_bottom)| (y == fourteen_bottom)| (y == fifteen_bottom)| (y == sixteen_bottom);
 assign new_image = bb_active ? bb_col : red_high;
 
 // Switch output pixels depending on mode switch
@@ -618,11 +618,6 @@ reg [10:0] processed_fourteen_x_min;
 reg [10:0] processed_fifteen_x_min;
 reg [10:0] processed_sixteen_x_min;
 
-reg [10:0] processed_one_y_min;
-reg [10:0] processed_two_y_min;
-reg [10:0] processed_three_y_min;
-reg [10:0] processed_four_y_min;
-
 reg [10:0] processed_five_y_min;
 reg [10:0] processed_six_y_min;
 reg [10:0] processed_seven_y_min;
@@ -650,14 +645,7 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 				msg_buf_in = `START_MSG_ID;	//Message ID
 				msg_buf_in2 = 32'b0;
 				msg_buf_wr = 1'b1;
-				if(one_x_min == 639) processed_one_x_min = 0;
-				else processed_one_x_min = one_x_min;
-				if(two_x_min == 639) processed_two_x_min = 0;
-				else processed_two_x_min = two_x_min;
-				if(three_x_min == 639) processed_three_x_min = 0;
-				else processed_three_x_min = three_x_min;
-				if((four_x_min == 639) & (four_x_max == 0)) processed_four_x_min = 0;
-				else processed_four_x_min = four_x_min;
+
 				if(five_x_min == 639) processed_five_x_min = 0;
 				else processed_five_x_min = five_x_min;
 				if(six_x_min == 639) processed_six_x_min = 0;
@@ -683,14 +671,6 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 				if((sixteen_x_min == 639) & (sixteen_x_max == 0)) processed_sixteen_x_min = 0;
 				else processed_sixteen_x_min = sixteen_x_min;
 
-				if(one_y_min == 479) processed_one_y_min = 0;
-				else processed_one_y_min = one_y_min;
-				if(two_y_min == 479) processed_two_y_min = 0;
-				else processed_two_y_min = two_y_min;
-				if(three_y_min == 479) processed_three_y_min = 0;
-				else processed_three_y_min = three_y_min;
-				if((four_y_min == 479) & (four_y_max == 0)) processed_four_y_min = 0;
-				else processed_four_y_min = four_y_min;
 				if(five_y_min == 479) processed_five_y_min = 0;
 				else processed_five_y_min = five_y_min;
 				if(six_y_min == 479) processed_six_y_min = 0;
