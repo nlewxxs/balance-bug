@@ -62,55 +62,28 @@ void updateCoordinates(boxCoordinates *coords){
   uint16_t tmpMin;
   uint16_t tmpMax;
 
-  // ---------------------------- MIN VALUES ---------------------------------- //
-
-  // read32bits(&uart_rx);     // [31:21] = one_x_min[10:0], [20:10] = one_y_min[10:0], [9:0] = two_x_min[10:1]
-  // coords->block_one.x_min =   (uart_rx & 0b11111111111000000000000000000000) >> 21;
-  // coords->block_one.y_min =   (uart_rx & 0b00000000000111111111110000000000) >> 10;
-  // tmp =                       (uart_rx & 0b00000000000000000000001111111111) << 1; 
-  
-  // read32bits(&uart_rx);     // two_x_min[0], two_y_min, three_x_min, three_y_min[10:2]
-  // coords->block_two.x_min =   tmp + ((uart_rx & 0b10000000000000000000000000000000) >> 31);
-  // coords->block_two.y_min =   (uart_rx & 0b01111111111100000000000000000000) >> 20;
-  // coords->block_three.x_min = (uart_rx & 0b00000000000011111111111000000000) >> 9;
-  // tmp =                       (uart_rx & 0b00000000000000000000000111111111) << 2;
-  read32bits(&uart_rx);
+  //remove the whitespace from the second MSG fifo
   read32bits(&uart_rx);
 
-  
-  // do{
-  //   read32bits(&uart_rx);
-  // }
-  // while(uart_rx == 0xFFFFFFFF);
-  // read32bits(&uart_rx);     // three_y_min[1:0], four_x_min, four_y_min, five_x_min[10:3]
-  
-  // coords->block_three.y_min = tmp + ((uart_rx & 0b11000000000000000000000000000000) >> 30);
-  // coords->block_four.x_min =  (uart_rx & 0b00111111111110000000000000000000) >> 19;
-  // coords->block_four.y_min =  (uart_rx & 0b00000000000001111111111100000000) >> 8;
+  //start processing bits
+  read32bits(&uart_rx);
   tmpMin =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
 
-
   read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // three_y_max[1:0], four_x_max, four_y_max, five_x_max[10:3]
-  // coords->block_three.y_max = tmp + ((uart_rx & 0b11000000000000000000000000000000) >> 30);
-  // coords->block_four.x_max =  (uart_rx & 0b00111111111110000000000000000000) >> 19;
-  // coords->block_four.y_max =  (uart_rx & 0b00000000000001111111111100000000) >> 8;
   tmpMax =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // five_x_min[2:0], five_y_min, six_x_min, six_y_min[10:4]
+
+
+  read32bits(&uart_rx);
   coords->block_five.x_min =  tmpMin + ((uart_rx & 0b11100000000000000000000000000000) >> 29);
   coords->block_five.y_min =  (uart_rx & 0b00011111111111000000000000000000) >> 18;
   coords->block_six.x_min =   (uart_rx & 0b00000000000000111111111110000000) >> 7;
   tmpMin =                       (uart_rx & 0b00000000000000000000000001111111) << 4;
 
-read32bits(&uart_rx);
   
-  // read32bits(&uart_rx);     // five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]
-  coords->block_five.x_max =  tmpMax + ((uart_rx & 0b11100000000000000000000000000000) >> 29);
+  read32bits(&uart_rx);
+    coords->block_five.x_max =  tmpMax + ((uart_rx & 0b11100000000000000000000000000000) >> 29);
   coords->block_five.y_max =  (uart_rx & 0b00011111111111000000000000000000) >> 18;
   coords->block_six.x_max =   (uart_rx & 0b00000000000000111111111110000000) >> 7;
   tmpMax =                       (uart_rx & 0b00000000000000000000000001111111) << 4;
@@ -119,35 +92,29 @@ read32bits(&uart_rx);
 
 
   read32bits(&uart_rx);
-  
-
-  // read32bits(&uart_rx);     // six_y_min[3:0], seven_x_min, seven_y_min, eight_x_min[10:5]
   coords->block_six.y_min =   tmpMin + ((uart_rx & 0b11110000000000000000000000000000) >> 28);
   coords->block_seven.x_min = (uart_rx & 0b00001111111111100000000000000000) >> 17;
   coords->block_seven.y_min = (uart_rx & 0b00000000000000011111111111000000) >> 6;
   tmpMin =                       (uart_rx & 0b00000000000000000000000000111111) << 5;
   
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // six_y_max[3:0], seven_x_max, seven_y_max, eight_x_max[10:5]
+  read32bits(&uart_rx);
   coords->block_six.y_max =   tmpMax + ((uart_rx & 0b11110000000000000000000000000000) >> 28);
   coords->block_seven.x_max = (uart_rx & 0b00001111111111100000000000000000) >> 17;
   coords->block_seven.y_max = (uart_rx & 0b00000000000000011111111111000000) >> 6;
   tmpMax =                       (uart_rx & 0b00000000000000000000000000111111) << 5;
 
-read32bits(&uart_rx);
 
-  // read32bits(&uart_rx);     // eight_x_min[4:0], eight_y_min, nine_x_min, nine_y_min[10:6]
+
+
+  read32bits(&uart_rx);
   coords->block_eight.x_min = tmpMin + ((uart_rx & 0b11111000000000000000000000000000) >> 27);
   coords->block_eight.y_min = (uart_rx & 0b00000111111111110000000000000000) >> 16;
   coords->block_nine.x_min =  (uart_rx & 0b00000000000000001111111111100000) >> 5;
   tmpMin =                       (uart_rx & 0b00000000000000000000000000011111) << 6;
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // eight_x_max[4:0], eight_y_max, nine_x_max, nine_y_max[10:6]
+  read32bits(&uart_rx);
   coords->block_eight.x_max = tmpMax + ((uart_rx & 0b11111000000000000000000000000000) >> 27);
   coords->block_eight.y_max = (uart_rx & 0b00000111111111110000000000000000) >> 16;
   coords->block_nine.x_max =  (uart_rx & 0b00000000000000001111111111100000) >> 5;
@@ -155,35 +122,33 @@ read32bits(&uart_rx);
 
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // nine_y_min[5:0], ten_x_min, ten_y_min, eleven_x_min[10:7]
+
+  read32bits(&uart_rx);
   coords->block_nine.y_min =  tmpMin + ((uart_rx & 0b11111100000000000000000000000000) >> 26);
   coords->block_ten.x_min =   (uart_rx & 0b00000011111111111000000000000000) >> 15;
   coords->block_ten.y_min =   (uart_rx & 0b00000000000000000111111111110000) >> 4;
   tmpMin =                       (uart_rx & 0b00000000000000000000000000001111) << 7;
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // nine_y_max[5:0], ten_x_max, ten_y_max, eleven_x_max[10:7]
+
+  read32bits(&uart_rx);
   coords->block_nine.y_max =  tmpMax + ((uart_rx & 0b11111100000000000000000000000000) >> 26);
   coords->block_ten.x_max =   (uart_rx & 0b00000011111111111000000000000000) >> 15;
   coords->block_ten.y_max =   (uart_rx & 0b00000000000000000111111111110000) >> 4;
   tmpMax =                       (uart_rx & 0b00000000000000000000000000001111) << 7;
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // eleven_x_min[6:0], eleven_y_min, twelve_x_min, twelve_y_min[10:8]
+
+
+  read32bits(&uart_rx);
   coords->block_eleven.x_min =  tmpMin + ((uart_rx & 0b11111110000000000000000000000000) >> 25);
   coords->block_eleven.y_min =  (uart_rx & 0b00000001111111111100000000000000) >> 14;
   coords->block_twelve.x_min =  (uart_rx & 0b00000000000000000011111111111000) >> 3;
   tmpMin =                         (uart_rx & 0b00000000000000000000000000000111) << 8;
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // eleven_x_max[6:0], eleven_y_max, twelve_x_max, twelve_y_max[10:8]
+
+
+  read32bits(&uart_rx);
   coords->block_eleven.x_max =  tmpMax + ((uart_rx & 0b11111110000000000000000000000000) >> 25);
   coords->block_eleven.y_max =  (uart_rx & 0b00000001111111111100000000000000) >> 14;
   coords->block_twelve.x_max =  (uart_rx & 0b00000000000000000011111111111000) >> 3;
@@ -192,18 +157,14 @@ read32bits(&uart_rx);
 
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // twelve_y_min[7:0], thirteen_x_min, thirteen_y_min, fourteen_x_min[10:9]
+  read32bits(&uart_rx);
   coords->block_twelve.y_min =    tmpMin + ((uart_rx & 0b11111111000000000000000000000000) >> 24);
   coords->block_thirteen.x_min =  (uart_rx & 0b00000000111111111110000000000000) >> 13;
   coords->block_thirteen.y_min =  (uart_rx & 0b00000000000000000001111111111100) >> 2;
   tmpMin =                           (uart_rx & 0b00000000000000000000000000000011) << 9;
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // twelve_y_max[7:0], thirteen_x_max, thirteen_y_max, fourteen_x_max[10:9]
+  read32bits(&uart_rx);
   coords->block_twelve.y_max =    tmpMax + ((uart_rx & 0b11111111000000000000000000000000) >> 24);
   coords->block_thirteen.x_max =  (uart_rx & 0b00000000111111111110000000000000) >> 13;
   coords->block_thirteen.y_max =  (uart_rx & 0b00000000000000000001111111111100) >> 2;
@@ -211,98 +172,36 @@ read32bits(&uart_rx);
 
 
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // fourteen_x_min[8:0], fourteen_y_min, fifteen_x_min, fifteen_y_min[10]
+
+  read32bits(&uart_rx);
   coords->block_fourteen.x_min =  tmpMin + ((uart_rx & 0b11111111100000000000000000000000) >> 23);
   coords->block_fourteen.y_min =  (uart_rx & 0b00000000011111111111000000000000) >> 12;
   coords->block_fifteen.x_min =   (uart_rx & 0b00000000000000000000111111111110) >> 1;
   tmpMin =                           (uart_rx & 0b00000000000000000000000000000001) << 10;
 
-read32bits(&uart_rx);
-  
-  // read32bits(&uart_rx);     // fourteen_x_max[8:0], fourteen_y_max, fifteen_x_max, fifteen_y_max[10]
+
+  read32bits(&uart_rx); 
   coords->block_fourteen.x_max =  tmpMax + ((uart_rx & 0b11111111100000000000000000000000) >> 23);
   coords->block_fourteen.y_max =  (uart_rx & 0b00000000011111111111000000000000) >> 12;
   coords->block_fifteen.x_max =   (uart_rx & 0b00000000000000000000111111111110) >> 1;
   tmpMax =                           (uart_rx & 0b00000000000000000000000000000001) << 10;
 
-read32bits(&uart_rx);
-  // Serial.print("Saw: ");
-  // Serial.println(uart_rx);
-  // read32bits(&uart_rx);     // fifteen_y_min[9:0], sixteen_x_min, sixteen_y_min
+
+
+
+  read32bits(&uart_rx);
   coords->block_fifteen.y_min =   tmpMin + ((uart_rx & 0b11111111110000000000000000000000) >> 22);
   coords->block_sixteen.x_min =   (uart_rx & 0b00000000001111111111100000000000) >> 11;
   coords->block_sixteen.y_min =   (uart_rx & 0b00000000000000000000011111111111);
 
-read32bits(&uart_rx);
-  
-  // Serial.println("GOT: ");
-  // char tmp2[32];
-  // sprintf(tmp2, "%.8X", uart_rx);
-  // Serial.println(tmp2);
-  // read32bits(&uart_rx);     // fifteen_y_max[9:0], sixteen_x_max, sixteen_y_max
+
+  read32bits(&uart_rx);
   coords->block_fifteen.y_max =   tmpMax + ((uart_rx & 0b11111111110000000000000000000000) >> 22);
   coords->block_sixteen.x_max =   (uart_rx & 0b00000000001111111111100000000000) >> 11;
   coords->block_sixteen.y_max =   (uart_rx & 0b00000000000000000000011111111111);
-  // ---------------------------- MAX VALUES ---------------------------------- //
-
-  // read32bits(&uart_rx);     // one_x_max, one_y_max, two_x_max[10:1]
-  // coords->block_one.x_max =   (uart_rx & 0b11111111111000000000000000000000) >> 21;
-  // coords->block_one.y_max =   (uart_rx & 0b00000000000111111111110000000000) >> 10;
-  // tmp =                       (uart_rx & 0b00000000000000000000001111111111) << 1; 
-  
-  // read32bits(&uart_rx);     // two_x_max[0], two_y_max, three_x_max, three_y_max[10:2]
-  // coords->block_two.x_max =   tmp + ((uart_rx & 0b10000000000000000000000000000000) >> 31);
-  // coords->block_two.y_max =   (uart_rx & 0b01111111111100000000000000000000) >> 20;
-  // coords->block_three.x_max = (uart_rx & 0b00000000000011111111111000000000) >> 9;
-  // tmp =                       (uart_rx & 0b00000000000000000000000111111111) << 2;
-
-  //TODO DO SOMETHING WITH THE END BIT IF REQUIRED  
-  // read32bits(&uart_rx);
-
-  // }
-  // while(uart_rx != 0x00454E44);
-  //TODO ADD A METHOD OF SKIPPING IF A COUNTER REACHES A MINIMUM VALUE TO CATCH ERROR IN THE TRANFER!!!!!, should do automatically though but test
-  //try implemented a start and end bit to look for in valid readings maybe, this could work but would require the buffer to be entirely moved around, test with potentially faster framerate but could lead to buffer overflowing, this definitely needs tuning, but higher is potentially better as it wont write if there is too little space to write to, but we need to ensure that the buffer is never empty in this case
-  //maybe add a switch, to write some values in one frame and some in another
-  //this would take time
 }
 
 void printCoordinates(boxCoordinates *coords){
-  // Serial.print(" one_x_min: ");
-  // Serial.print(coords->block_one.x_min);
-  // Serial.print(" one_x_max: ");
-  // Serial.print(coords->block_one.x_max);
-  // Serial.print(" one_y_min: ");
-  // Serial.print(coords->block_one.y_min);
-  // Serial.print(" one_y_max: ");
-  // Serial.print(coords->block_one.y_max);
-  // Serial.print(" two_x_min: ");
-  // Serial.print(coords->block_two.x_min);
-  // Serial.print(" two_x_max: ");
-  // Serial.print(coords->block_two.x_max);
-  // Serial.print(" two_y_min: ");
-  // Serial.print(coords->block_two.y_min);
-  // Serial.print(" two_y_max: ");
-  // Serial.println(coords->block_two.y_max);
-  // Serial.print(" three_x_min: ");
-  // Serial.print(coords->block_three.x_min);
-  // Serial.print(" three_x_max: ");
-  // Serial.print(coords->block_three.x_max);
-  // Serial.print(" three_y_min: ");
-  // Serial.print(coords->block_three.y_min);
-  // Serial.print(" three_y_max: ");
-  // Serial.print(coords->block_three.y_max);
-  // Serial.print(" four_x_min: ");
-  // Serial.print(coords->block_four.x_min);
-  // Serial.print(" four_x_max: ");
-  // Serial.print(coords->block_four.x_max);
-  // Serial.print(" four_y_min: ");
-  // Serial.print(coords->block_four.y_min);
-  // Serial.print(" four_y_max: ");
-  // Serial.println(coords->block_four.y_max);
-
   Serial.print(" five_x_min: ");
   Serial.print(coords->block_five.x_min);
   Serial.print(" five_x_max: ");
@@ -410,22 +309,10 @@ void Camera::init(){
 }
 
 void Camera::update(){
-
   if (SerialPortNios.available()) {
     do {
       read32bits(&uart_rx);
     } while(uart_rx != 0x00004E42);
-    // if (){ // NB start bit
-    // Serial.println("Starting");
     updateCoordinates(&Boxes);
-      // printCoordinates(&Boxes);
-    // }  
   }
 }
-
-//chars are being read/overwritten before being able to leave
-
-
-
-
-
