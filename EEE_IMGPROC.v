@@ -735,7 +735,7 @@ always@(posedge clk) begin
 	
 	//Cycle through message writer states once started
 	if (msg_state != 5'b00000) begin
-		if(msg_state == 5'b10111) begin
+		if(msg_state == 5'b10011) begin
 			msg_state <= 5'b00000;
 		end
 		else begin
@@ -805,8 +805,6 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 		5'b00001: begin
 			msg_buf_in = `RED_BOX_MSG_ID;	//Message ID
 			msg_buf_wr = 1'b1;
-		end
-		5'b00010: begin
 			if(one_x_min == 639) processed_one_x_min = 0;
 			else processed_one_x_min = one_x_min;
 			if(two_x_min == 639) processed_two_x_min = 0;
@@ -872,93 +870,76 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 			else processed_fifteen_y_min = fifteen_y_min;
 			if((sixteen_y_min == 479) & (sixteen_y_max == 0)) processed_sixteen_y_min = 0;
 			else processed_sixteen_y_min = sixteen_y_min;
-
-
-			msg_buf_in = {processed_one_x_min, processed_one_y_min, processed_two_x_min[10:1]};	//22 full 10 from two
+		end
+		5'b00010: begin
+			msg_buf_in = {24'b0, processed_five_x_min[10:3]};	//8 from 5 xmin
 			msg_buf_wr = 1'b1;
 		end
 		5'b00011: begin
-			msg_buf_in = {processed_two_x_min[0], processed_two_y_min, processed_three_x_min, processed_three_y_min[10:2]};	//1 from 2, 23 up until end, 9 from 3 ymin
-			msg_buf_wr = 1'b1;
-		end
-		5'b00100: begin
-			msg_buf_in = {processed_three_y_min[1:0], processed_four_x_min, processed_four_y_min, processed_five_x_min[10:3]};	//8 from 5 xmin
-			msg_buf_wr = 1'b1;
-		end
-		5'b00101: begin
 			msg_buf_in = {processed_five_x_min[2:0], processed_five_y_min, processed_six_x_min, processed_six_y_min[10:4]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b00110: begin
+		5'b00100: begin
 			msg_buf_in = {processed_six_y_min[3:0], processed_seven_x_min, processed_seven_y_min, processed_eight_x_min[10:5]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b00111: begin
+		5'b00101: begin
 			msg_buf_in = {processed_eight_x_min[4:0], processed_eight_y_min, processed_nine_x_min, processed_nine_y_min[10:6]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b01000: begin
+		5'b00110: begin
 			msg_buf_in = {processed_nine_y_min[5:0], processed_ten_x_min, processed_ten_y_min, processed_eleven_x_min[10:7]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b01001: begin
+		5'b00111: begin
 			msg_buf_in = {processed_eleven_x_min[6:0], processed_eleven_y_min, processed_twelve_x_min, processed_twelve_y_min[10:8]};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b01010: begin
+		5'b01000: begin
 			msg_buf_in = {processed_twelve_y_min[7:0], processed_thirteen_x_min, processed_thirteen_y_min, processed_fourteen_x_min[10:9]};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b01011: begin
+		5'b01001: begin
 			msg_buf_in = {processed_fourteen_x_min[8:0], processed_fourteen_y_min, processed_fifteen_x_min, processed_fifteen_y_min[10]};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-		5'b01100: begin
+		5'b01010: begin
 			msg_buf_in = {processed_fifteen_y_min[9:0], processed_sixteen_x_min, processed_sixteen_y_min};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
 			msg_buf_wr = 1'b1;
 		end
-
-		5'b01101: begin
-			msg_buf_in = {one_x_max, one_y_max, two_x_max[10:1]};	//22 full 10 from two
+		5'b01011: begin
+			msg_buf_in = {24'b0, five_x_max[10:3]};	//8 from 5 xmax
 			msg_buf_wr = 1'b1;
 		end
-		5'b01110: begin
-			msg_buf_in = {two_x_max[0], two_y_max, three_x_max, three_y_max[10:2]};	//1 from 2, 23 up until end, 9 from 3 ymax
-			msg_buf_wr = 1'b1;
-		end
-		5'b01111: begin
-			msg_buf_in = {three_y_max[1:0], four_x_max, four_y_max, five_x_max[10:3]};	//8 from 5 xmax
-			msg_buf_wr = 1'b1;
-		end
-		5'b10000: begin
+		5'b01100: begin
 			msg_buf_in = {five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10001: begin
+		5'b01101: begin
 			msg_buf_in = {six_y_max[3:0], seven_x_max, seven_y_max, eight_x_max[10:5]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10010: begin
+		5'b01110: begin
 			msg_buf_in = {eight_x_max[4:0], eight_y_max, nine_x_max, nine_y_max[10:6]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10011: begin
+		5'b01111: begin
 			msg_buf_in = {nine_y_max[5:0], ten_x_max, ten_y_max, eleven_x_max[10:7]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10100: begin
+		5'b10000: begin
 			msg_buf_in = {eleven_x_max[6:0], eleven_y_max, twelve_x_max, twelve_y_max[10:8]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10101: begin
+		5'b10001: begin
 			msg_buf_in = {twelve_y_max[7:0], thirteen_x_max, thirteen_y_max, fourteen_x_max[10:9]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10110: begin
+		5'b10010: begin
 			msg_buf_in = {fourteen_x_max[8:0], fourteen_y_max, fifteen_x_max, fifteen_y_max[10]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
-		5'b10111: begin
+		5'b10011: begin
 			msg_buf_in = {fifteen_y_max[9:0], sixteen_x_max, sixteen_y_max};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 			msg_buf_wr = 1'b1;
 		end
