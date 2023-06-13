@@ -77,19 +77,10 @@ wire [7:0]   red_out, green_out, blue_out;
 wire         sop, eop, in_valid, out_ready;
 ////////////////////////////////////////////////////////////////////////
 
-// Detect red areas
+// Detect path areas
 wire tl_detect;
 assign tl_detect = red[7] & green[7] & blue[7];
 
-// Find boundary of cursor box
-
-wire [1:0] state;
-reg [1:0] next_state;
-
-reg [9:0] x_ctr = 10'b0;
-reg [9:0] y_ctr = 10'b0;
-
-assign state = next_state;
 
 // Highlight detected areas
 wire [23:0] red_high;
@@ -99,10 +90,10 @@ assign red_high  =  tl_detect ? {8'hff, 8'hff, 8'hff} : {grey, grey, grey};
 // Show bounding box
 wire [23:0] new_image;
 wire bb_active;
-assign bb_active = (x == one_left) 		| (x == two_left)  | (x == three_left)| (x == four_left)| (x == five_left)| (x == six_left)| (x == seven_left)| (x == eight_left)| (x == nine_left)| (x == ten_left)| (x == eleven_left)| (x == twelve_left)| (x == thirteen_left)| (x == fourteen_left)| (x == fifteen_left)| (x == sixteen_left)|
-				   (x == one_right) 	| (x == two_right)  | (x == three_right)| (x == four_right)| (x == five_right)| (x == six_right)| (x == seven_right)| (x == eight_right)| (x == nine_right)| (x == ten_right)| (x == eleven_right)| (x == twelve_right)| (x == thirteen_right)| (x == fourteen_right)| (x == fifteen_right)| (x == sixteen_right)|
-				   (y == one_top) 		| (y == two_top)  | (y == three_top)| (y == four_top)| (y == five_top)| (y == six_top)| (y == seven_top)| (y == eight_top)| (y == nine_top)| (y == ten_top)| (y == eleven_top)| (y == twelve_top)| (y == thirteen_top)| (y == fourteen_top)| (y == fifteen_top)| (y == sixteen_top)|
-				   (y == one_bottom)    | (y == two_bottom)  | (y == three_bottom)| (y == four_bottom)| (y == five_bottom)| (y == six_bottom)| (y == seven_bottom)| (y == eight_bottom)| (y == nine_bottom)| (y == ten_bottom)| (y == eleven_bottom)| (y == twelve_bottom)| (y == thirteen_bottom)| (y == fourteen_bottom)| (y == fifteen_bottom)| (y == sixteen_bottom);
+assign bb_active = (x == two_left)  | (x == three_left)| (x == four_left)| (x == five_left)| (x == six_left)| (x == seven_left)| (x == eight_left)| (x == nine_left)| (x == ten_left)| (x == eleven_left)| (x == twelve_left)| (x == thirteen_left)| (x == fourteen_left)| (x == fifteen_left)| (x == sixteen_left)|
+				   	| (x == two_right)  | (x == three_right)| (x == four_right)| (x == five_right)| (x == six_right)| (x == seven_right)| (x == eight_right)| (x == nine_right)| (x == ten_right)| (x == eleven_right)| (x == twelve_right)| (x == thirteen_right)| (x == fourteen_right)| (x == fifteen_right)| (x == sixteen_right)|
+				   	| (y == two_top)  | (y == three_top)| (y == four_top)| (y == five_top)| (y == six_top)| (y == seven_top)| (y == eight_top)| (y == nine_top)| (y == ten_top)| (y == eleven_top)| (y == twelve_top)| (y == thirteen_top)| (y == fourteen_top)| (y == fifteen_top)| (y == sixteen_top)|
+					| (y == two_bottom)  | (y == three_bottom)| (y == four_bottom)| (y == five_bottom)| (y == six_bottom)| (y == seven_bottom)| (y == eight_bottom)| (y == nine_bottom)| (y == ten_bottom)| (y == eleven_bottom)| (y == twelve_bottom)| (y == thirteen_bottom)| (y == fourteen_bottom)| (y == fifteen_bottom)| (y == sixteen_bottom);
 assign new_image = bb_active ? bb_col : red_high;
 
 // Switch output pixels depending on mode switch
@@ -130,22 +121,6 @@ always@(posedge clk) begin
 	end
 end
 
-// reg exceeds;
-
-// always begin
-// 	if ((x_min == 320) & (x_max == 320) & (y_min ==240) & (y_max == 240)) begin
-// 		exceeds = 1;
-// 	end
-// 	else begin
-// 		exceeds = 0;
-// 	end
-// end
-//Find first and last red pixels
-reg [10:0] one_x_min, one_y_min, one_x_max, one_y_max;
-reg [10:0] two_x_min, two_y_min, two_x_max, two_y_max;
-reg [10:0] three_x_min, three_y_min, three_x_max, three_y_max;
-reg [10:0] four_x_min, four_y_min, four_x_max, four_y_max;
-
 reg [10:0] five_x_min, five_y_min, five_x_max, five_y_max;
 reg [10:0] six_x_min, six_y_min, six_x_max, six_y_max;
 reg [10:0] seven_x_min, seven_y_min, seven_x_max, seven_y_max;
@@ -166,38 +141,11 @@ reg [10:0] sixteen_x_min, sixteen_y_min, sixteen_x_max, sixteen_y_max;
 // reg [10:0] bl_x_min, bl_y_min, bl_x_max, bl_y_max;
 // reg [10:0] br_x_min, br_y_min, br_x_max, br_y_max;
 
-reg one_activate, two_activate, three_activate, four_activate;
 reg five_activate, six_activate, seven_activate, eight_activate;
 reg nine_activate, ten_activate, eleven_activate, twelve_activate;
 reg thirteen_activate, fourteen_activate, fifteen_activate, sixteen_activate;
 
 always begin
-	//row one
-	if(x >= 160 || y >= 120) begin
-		one_activate = 0;
-	end
-	else begin
-		one_activate = 1;
-	end
-	if(!((x >= 160) & (x < 320)) || y >= 120) begin
-		two_activate = 0;
-	end
-	else begin
-		two_activate = 1;
-	end
-	if(!((x >= 320) & (x < 480)) || y >= 120) begin
-		three_activate = 0;
-	end
-	else begin
-		three_activate = 1;
-	end
-	if((x < 480) || y >= 120) begin
-		four_activate = 0;
-	end
-	else begin
-		four_activate = 1;
-	end
-
 	//row two
 	if(x >= 160 || !((y >= 120) & (y < 240))) begin
 		five_activate = 0;
@@ -278,64 +226,6 @@ always begin
 end
 
 always@(posedge clk) begin
-	//row 1
-	if (tl_detect & in_valid & one_activate) begin	//Update bounds when the pixel is red  & (exceeds == 1'b0)
-		if((x < 160) & (x < one_x_min)) begin
-			one_x_min <= x;
-		end
-		if((x < 160) & (x > one_x_max)) begin
-			one_x_max <= x;
-		end
-		if((y < 120) & (y < one_y_min)) begin
-			one_y_min <= y;
-		end
-		if(y < 120) begin
-			one_y_max <= y;
-		end
-	end
-	if (tl_detect & in_valid & two_activate) begin	//Update bounds when the pixel is red  & (exceeds == 1'b0)
-		if((x >= 160) & (x < 320) & (x < two_x_min)) begin
-			two_x_min <= x;
-		end
-		if((x >= 160) & (x < 320) & (x > two_x_max)) begin
-			two_x_max <= x;
-		end
-		if((y < 120) & (y < two_y_min)) begin
-			two_y_min <= y;
-		end
-		if(y < 120) begin
-			two_y_max <= y;
-		end
-	end
-	if (tl_detect & in_valid & three_activate) begin	//Update bounds when the pixel is red  & (exceeds == 1'b0)
-		if((x >= 320) & (x < 480) & (x < three_x_min)) begin
-			three_x_min <= x;
-		end
-		if((x >= 320) & (x < 480) & (x > three_x_max)) begin
-			three_x_max <= x;
-		end
-		if((y < 120) & (y < three_y_min)) begin
-			three_y_min <= y;
-		end
-		if(y < 120) begin
-			three_y_max <= y;
-		end
-	end
-	if (tl_detect & in_valid & four_activate) begin	//Update bounds when the pixel is red  & (exceeds == 1'b0)
-		if((x >= 480) & (x < four_x_min)) begin
-			four_x_min <= x;
-		end
-		if((x >= 480) & (x > four_x_max)) begin
-			four_x_max <= x;
-		end
-		if((y < 120) & (y < four_y_min)) begin
-			four_y_min <= y;
-		end
-		if(y < 120) begin
-			four_y_max <= y;
-		end
-	end
-
 	//row two
 	if (tl_detect & in_valid & five_activate) begin	//Update bounds when the pixel is red  & (exceeds == 1'b0)
 		if((x < 160) & (x < five_x_min)) begin
@@ -511,29 +401,6 @@ always@(posedge clk) begin
 	end
 
 	if (sop & in_valid) begin	//Reset bounds on start of packet
-		//row 1
-		one_x_min <= IMAGE_W-11'h1;
-		one_x_max <= 0;
-		one_y_min <= IMAGE_H-11'h1;
-		one_y_max <= 0;
-
-		two_x_min <= IMAGE_W-11'h1;
-		two_x_max <= 0;
-		two_y_min <= IMAGE_H-11'h1;
-		two_y_max <= 0;
-
-		three_x_min <= IMAGE_W-11'h1;
-		three_x_max <= 0;
-		three_y_min <= IMAGE_H-11'h1;
-		three_y_max <= 0;
-
-		four_x_min <= IMAGE_W-11'h1;
-		four_x_max <= 0;
-		four_y_min <= IMAGE_H-11'h1;
-		four_y_max <= 0;
-
-
-
 		//////////////////////////
 		//row 2
 		five_x_min <= IMAGE_W-11'h1;
@@ -608,12 +475,6 @@ end
 //Process bounding box at the end of the frame.
 reg [4:0] msg_state;
 
-//row 1
-reg [10:0] one_left, one_right, one_top, one_bottom;
-reg [10:0] two_left, two_right, two_top, two_bottom;
-reg [10:0] three_left, three_right, three_top, three_bottom;
-reg [10:0] four_left, four_right, four_top, four_bottom;
-
 //row 2
 reg [10:0] five_left, five_right, five_top, five_bottom;
 reg [10:0] six_left, six_right, six_top, six_bottom;
@@ -638,28 +499,6 @@ reg finished_frame;
 
 always@(posedge clk) begin
 	if (eop & in_valid & packet_video) begin  //Ignore non-video packets
-		
-		//row1
-		one_left <= one_x_min;
-		one_right <= one_x_max;
-		one_top <= one_y_min;
-		one_bottom <= one_y_max;
-
-		two_left <= two_x_min;
-		two_right <= two_x_max;
-		two_top <= two_y_min;
-		two_bottom <= two_y_max;
-
-		three_left <= 	three_x_min;
-		three_right <= 	three_x_max;
-		three_top <= 	three_y_min;
-		three_bottom <= three_y_max;
-
-		four_left <= 	four_x_min;
-		four_right <= 	four_x_max;
-		four_top <=		four_y_min;
-		four_bottom <= 	four_y_max;
-
 		//row2
 		five_left <= 	five_x_min;
 		five_right <= 	five_x_max;
@@ -763,13 +602,6 @@ wire [9:0] msg_buf_size2;
 wire msg_buf_empty, msg_buf_empty2;
 
 `define START_MSG_ID "NB"
-// `define END_MSG_ID "END"
-
-
-reg [10:0] processed_one_x_min;
-reg [10:0] processed_two_x_min;
-reg [10:0] processed_three_x_min;
-reg [10:0] processed_four_x_min;
 
 reg [10:0] processed_five_x_min;
 reg [10:0] processed_six_x_min;
@@ -994,8 +826,8 @@ STREAM_REG #(.DATA_WIDTH(26)) out_reg (
 
 // Addresses
 `define REG_STATUS    			0
-`define READ_MSG    				1
-`define READ_ID    				2
+`define READ_MSG1    				1
+`define READ_MSG2    				2
 `define REG_BBCOL					3
 
 //Status register bits
@@ -1043,17 +875,17 @@ begin
 	
 	else if (s_chipselect & s_read) begin
 		if   (s_address == `REG_STATUS) s_readdata <= {16'b0,msg_buf_size, reg_status};
-		if   (s_address == `READ_MSG) s_readdata <= {msg_buf_out};
-		if   (s_address == `READ_ID) s_readdata <= {msg_buf_out2};
+		if   (s_address == `READ_MSG1) s_readdata <= {msg_buf_out};
+		if   (s_address == `READ_MSG2) s_readdata <= {msg_buf_out2};
 		if   (s_address == `REG_BBCOL) s_readdata <= {8'h0, bb_col};
 	end
 	
 	read_d <= s_read;
 end
 
-//Fetch next word from message buffer after read from READ_MSG
-assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_address == `READ_MSG);
-assign msg_buf_rd2 = s_chipselect & s_read & ~read_d & ~msg_buf_empty2 & (s_address == `READ_ID);
+//Fetch next word from message buffer after read from READ_MSG1 & READ_MSG2
+assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_address == `READ_MSG1);
+assign msg_buf_rd2 = s_chipselect & s_read & ~read_d & ~msg_buf_empty2 & (s_address == `READ_MSG2);
 
 
 endmodule
