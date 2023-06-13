@@ -30,14 +30,8 @@ void read32bits(uint64_t *rx){
   // Serial.println(tmp);
 }
 
-//TODO CHECK FOR FFFFFFFF AND IF SO IGNORE IT!
-
 Matrix Camera::getBoxMatrix(){
   Matrix boxMatrix;
-  // boxMatrix.boxes[0][0] = Boxes.block_one.x_min; boxMatrix.boxes[0][1] = Boxes.block_one.y_min; boxMatrix.boxes[0][2] = Boxes.block_one.x_max; boxMatrix.boxes[0][3] = Boxes.block_one.y_max;
-  // boxMatrix.boxes[1][0] = Boxes.block_two.x_min; boxMatrix.boxes[1][1] = Boxes.block_two.y_min; boxMatrix.boxes[1][2] = Boxes.block_two.x_max; boxMatrix.boxes[1][3] = Boxes.block_two.y_max;
-  // boxMatrix.boxes[2][0] = Boxes.block_three.x_min; boxMatrix.boxes[2][1] = Boxes.block_three.y_min; boxMatrix.boxes[2][2] = Boxes.block_three.x_max; boxMatrix.boxes[2][3] = Boxes.block_three.y_max;
-  // boxMatrix.boxes[3][0] = Boxes.block_four.x_min; boxMatrix.boxes[3][1] = Boxes.block_four.y_min; boxMatrix.boxes[3][2] = Boxes.block_four.x_max; boxMatrix.boxes[3][3] = Boxes.block_four.y_max;
   boxMatrix.boxes[4][0] = Boxes.block_five.x_min; boxMatrix.boxes[4][1] = Boxes.block_five.y_min; boxMatrix.boxes[4][2] = Boxes.block_five.x_max; boxMatrix.boxes[4][3] = Boxes.block_five.y_max;
   boxMatrix.boxes[5][0] = Boxes.block_six.x_min; boxMatrix.boxes[5][1] = Boxes.block_six.y_min; boxMatrix.boxes[5][2] = Boxes.block_six.x_max; boxMatrix.boxes[5][3] = Boxes.block_six.y_max;
   boxMatrix.boxes[6][0] = Boxes.block_seven.x_min; boxMatrix.boxes[6][1] = Boxes.block_seven.y_min; boxMatrix.boxes[6][2] = Boxes.block_seven.x_max; boxMatrix.boxes[6][3] = Boxes.block_seven.y_max;
