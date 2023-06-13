@@ -64,7 +64,7 @@ input                         mode;
 //
 parameter IMAGE_W = 11'd640;
 parameter IMAGE_H = 11'd480;
-parameter MESSAGE_BUF_MAX = 2048;
+parameter MESSAGE_BUF_MAX = 1024;
 parameter MSG_INTERVAL = 15;
 parameter BB_COL_DEFAULT = 24'h00ff00;
 
@@ -738,7 +738,7 @@ always@(posedge clk) begin
 	
 	//Cycle through message writer states once started
 	if (msg_state != 5'b00000) begin
-		if(msg_state == 5'b10011) begin
+		if(msg_state == 5'b01010) begin
 			msg_state <= 5'b00000;
 			finished_frame = 1'b0;
 		end
@@ -753,10 +753,14 @@ end
 //Generate output messages for CPU
 reg [31:0] msg_buf_in; 
 wire [31:0] msg_buf_out;
+reg [31:0] msg_buf_in2; 
+wire [31:0] msg_buf_out2;
 reg msg_buf_wr;
-wire msg_buf_rd, msg_buf_flush;
-wire [10:0] msg_buf_size;
-wire msg_buf_empty;
+wire msg_buf_rd, msg_buf_rd2, msg_buf_flush;
+wire [9:0] msg_buf_size;
+wire [9:0] msg_buf_size2;
+
+wire msg_buf_empty, msg_buf_empty2;
 
 `define START_MSG_ID "NB"
 // `define END_MSG_ID "END"
@@ -803,14 +807,16 @@ reg [10:0] processed_fifteen_y_min;
 reg [10:0] processed_sixteen_y_min;
 
 always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BOX HERE
-	if (finished_frame) begin
+	// if (finished_frame) begin
 		case(msg_state)
 			5'b00000: begin
 				msg_buf_in = 32'b0;
+				msg_buf_in2 = 32'b0;
 				msg_buf_wr = 1'b0;
 			end
 			5'b00001: begin
 				msg_buf_in = `START_MSG_ID;	//Message ID
+				msg_buf_in2 = 32'b0;
 				msg_buf_wr = 1'b1;
 				if(one_x_min == 639) processed_one_x_min = 0;
 				else processed_one_x_min = one_x_min;
@@ -880,82 +886,56 @@ always@(*) begin	//Write words to FIFO as state machine advances TODO:ADD NEW BO
 			end
 			5'b00010: begin
 				msg_buf_in = {24'b0, processed_five_x_min[10:3]};	//8 from 5 xmin
+				msg_buf_in2 = {24'b0, five_x_max[10:3]};	//8 from 5 xmax
 				msg_buf_wr = 1'b1;
 			end
 			5'b00011: begin
 				msg_buf_in = {processed_five_x_min[2:0], processed_five_y_min, processed_six_x_min, processed_six_y_min[10:4]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 				msg_buf_wr = 1'b1;
 			end
 			5'b00100: begin
 				msg_buf_in = {processed_six_y_min[3:0], processed_seven_x_min, processed_seven_y_min, processed_eight_x_min[10:5]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {six_y_max[3:0], seven_x_max, seven_y_max, eight_x_max[10:5]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 				msg_buf_wr = 1'b1;
 			end
 			5'b00101: begin
 				msg_buf_in = {processed_eight_x_min[4:0], processed_eight_y_min, processed_nine_x_min, processed_nine_y_min[10:6]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {eight_x_max[4:0], eight_y_max, nine_x_max, nine_y_max[10:6]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
+
 				msg_buf_wr = 1'b1;
 			end
 			5'b00110: begin
 				msg_buf_in = {processed_nine_y_min[5:0], processed_ten_x_min, processed_ten_y_min, processed_eleven_x_min[10:7]};	//Top left coordinate //, two_x_min, two_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {nine_y_max[5:0], ten_x_max, ten_y_max, eleven_x_max[10:7]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 				msg_buf_wr = 1'b1;
 			end
 			5'b00111: begin
 				msg_buf_in = {processed_eleven_x_min[6:0], processed_eleven_y_min, processed_twelve_x_min, processed_twelve_y_min[10:8]};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {eleven_x_max[6:0], eleven_y_max, twelve_x_max, twelve_y_max[10:8]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
+
 				msg_buf_wr = 1'b1;
 			end
 			5'b01000: begin
 				msg_buf_in = {processed_twelve_y_min[7:0], processed_thirteen_x_min, processed_thirteen_y_min, processed_fourteen_x_min[10:9]};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {twelve_y_max[7:0], thirteen_x_max, thirteen_y_max, fourteen_x_max[10:9]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
+
 				msg_buf_wr = 1'b1;
 			end
 			5'b01001: begin
 				msg_buf_in = {processed_fourteen_x_min[8:0], processed_fourteen_y_min, processed_fifteen_x_min, processed_fifteen_y_min[10]};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {fourteen_x_max[8:0], fourteen_y_max, fifteen_x_max, fifteen_y_max[10]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
 				msg_buf_wr = 1'b1;
 			end
 			5'b01010: begin
 				msg_buf_in = {processed_fifteen_y_min[9:0], processed_sixteen_x_min, processed_sixteen_y_min};	//Top left coordinate //, two_x_min, tr_y_min, bl_x_min, bl_y_min, br_x_min, br_y_min
+				msg_buf_in2 = {fifteen_y_max[9:0], sixteen_x_max, sixteen_y_max};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
+
 				msg_buf_wr = 1'b1;
 			end
-			5'b01011: begin
-				msg_buf_in = {24'b0, five_x_max[10:3]};	//8 from 5 xmax
-				msg_buf_wr = 1'b1;
-			end
-			5'b01100: begin
-				msg_buf_in = {five_x_max[2:0], five_y_max, six_x_max, six_y_max[10:4]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b01101: begin
-				msg_buf_in = {six_y_max[3:0], seven_x_max, seven_y_max, eight_x_max[10:5]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b01110: begin
-				msg_buf_in = {eight_x_max[4:0], eight_y_max, nine_x_max, nine_y_max[10:6]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b01111: begin
-				msg_buf_in = {nine_y_max[5:0], ten_x_max, ten_y_max, eleven_x_max[10:7]};	//Top left coordinate //, two_x_max, two_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b10000: begin
-				msg_buf_in = {eleven_x_max[6:0], eleven_y_max, twelve_x_max, twelve_y_max[10:8]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b10001: begin
-				msg_buf_in = {twelve_y_max[7:0], thirteen_x_max, thirteen_y_max, fourteen_x_max[10:9]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b10010: begin
-				msg_buf_in = {fourteen_x_max[8:0], fourteen_y_max, fifteen_x_max, fifteen_y_max[10]};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			5'b10011: begin
-				msg_buf_in = {fifteen_y_max[9:0], sixteen_x_max, sixteen_y_max};	//Top left coordinate //, two_x_max, tr_y_max, bl_x_max, bl_y_max, br_x_max, br_y_max
-				msg_buf_wr = 1'b1;
-			end
-			// 5'b10100: begin
-			// 	msg_buf_in = `END_MSG_ID;	//Message ID
-			// 	msg_buf_wr = 1'b1;
-			// end
+			
 		endcase
-	end
+	// end
 end
 
 
@@ -972,16 +952,16 @@ MSG_FIFO	MSG_FIFO_inst (
 	.empty (msg_buf_empty)
 );
 
-// MSG_FIFO2	MSG_FIFO_inst (
-// 	.clock (clk),
-// 	.data (msg_buf_in),
-// 	.rdreq (msg_buf_rd),
-// 	.sclr (~reset_n | msg_buf_flush),
-// 	.wrreq (msg_buf_wr),
-// 	.q (msg_buf_out),
-// 	.usedw (msg_buf_size),
-// 	.empty (msg_buf_empty)
-// );
+MSG_FIFO	MSG_FIFO_inst2 (
+	.clock (clk),
+	.data (msg_buf_in2),
+	.rdreq (msg_buf_rd2),
+	.sclr (~reset_n | msg_buf_flush),
+	.wrreq (msg_buf_wr),
+	.q (msg_buf_out2),
+	.usedw (msg_buf_size2),
+	.empty (msg_buf_empty2)
+);
 
 
 //Streaming registers to buffer video signal
@@ -1062,9 +1042,9 @@ begin
 	end
 	
 	else if (s_chipselect & s_read) begin
-		if   (s_address == `REG_STATUS) s_readdata <= {16'b0,msg_buf_size,reg_status};
+		if   (s_address == `REG_STATUS) s_readdata <= {16'b0,msg_buf_size, reg_status};
 		if   (s_address == `READ_MSG) s_readdata <= {msg_buf_out};
-		if   (s_address == `READ_ID) s_readdata <= 32'h1234EEE2;
+		if   (s_address == `READ_ID) s_readdata <= {msg_buf_out2};
 		if   (s_address == `REG_BBCOL) s_readdata <= {8'h0, bb_col};
 	end
 	
@@ -1073,7 +1053,7 @@ end
 
 //Fetch next word from message buffer after read from READ_MSG
 assign msg_buf_rd = s_chipselect & s_read & ~read_d & ~msg_buf_empty & (s_address == `READ_MSG);
-						
+assign msg_buf_rd2 = s_chipselect & s_read & ~read_d & ~msg_buf_empty2 & (s_address == `READ_ID);
 
 
 endmodule
