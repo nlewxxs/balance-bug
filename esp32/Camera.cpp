@@ -58,16 +58,11 @@ void updateCoordinates(boxCoordinates *coords){
 
   //remove the whitespace from the second MSG fifo
   read32bits(&uart_rx);
-
   //start processing bits
   read32bits(&uart_rx);
   tmpMin =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
-
   read32bits(&uart_rx);
   tmpMax =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
-
-
-
 
   read32bits(&uart_rx);
   coords->block_five.x_min =  tmpMin + ((uart_rx & 0b11100000000000000000000000000000) >> 29);
@@ -75,15 +70,11 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_six.x_min =   (uart_rx & 0b00000000000000111111111110000000) >> 7;
   tmpMin =                       (uart_rx & 0b00000000000000000000000001111111) << 4;
 
-  
   read32bits(&uart_rx);
     coords->block_five.x_max =  tmpMax + ((uart_rx & 0b11100000000000000000000000000000) >> 29);
   coords->block_five.y_max =  (uart_rx & 0b00011111111111000000000000000000) >> 18;
   coords->block_six.x_max =   (uart_rx & 0b00000000000000111111111110000000) >> 7;
   tmpMax =                       (uart_rx & 0b00000000000000000000000001111111) << 4;
-
-
-
 
   read32bits(&uart_rx);
   coords->block_six.y_min =   tmpMin + ((uart_rx & 0b11110000000000000000000000000000) >> 28);
@@ -91,15 +82,11 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_seven.y_min = (uart_rx & 0b00000000000000011111111111000000) >> 6;
   tmpMin =                       (uart_rx & 0b00000000000000000000000000111111) << 5;
   
-
   read32bits(&uart_rx);
   coords->block_six.y_max =   tmpMax + ((uart_rx & 0b11110000000000000000000000000000) >> 28);
   coords->block_seven.x_max = (uart_rx & 0b00001111111111100000000000000000) >> 17;
   coords->block_seven.y_max = (uart_rx & 0b00000000000000011111111111000000) >> 6;
   tmpMax =                       (uart_rx & 0b00000000000000000000000000111111) << 5;
-
-
-
 
   read32bits(&uart_rx);
   coords->block_eight.x_min = tmpMin + ((uart_rx & 0b11111000000000000000000000000000) >> 27);
@@ -107,15 +94,11 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_nine.x_min =  (uart_rx & 0b00000000000000001111111111100000) >> 5;
   tmpMin =                       (uart_rx & 0b00000000000000000000000000011111) << 6;
 
-
   read32bits(&uart_rx);
   coords->block_eight.x_max = tmpMax + ((uart_rx & 0b11111000000000000000000000000000) >> 27);
   coords->block_eight.y_max = (uart_rx & 0b00000111111111110000000000000000) >> 16;
   coords->block_nine.x_max =  (uart_rx & 0b00000000000000001111111111100000) >> 5;
   tmpMax =                       (uart_rx & 0b00000000000000000000000000011111) << 6;
-
-
-
 
   read32bits(&uart_rx);
   coords->block_nine.y_min =  tmpMin + ((uart_rx & 0b11111100000000000000000000000000) >> 26);
@@ -123,15 +106,11 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_ten.y_min =   (uart_rx & 0b00000000000000000111111111110000) >> 4;
   tmpMin =                       (uart_rx & 0b00000000000000000000000000001111) << 7;
 
-
   read32bits(&uart_rx);
   coords->block_nine.y_max =  tmpMax + ((uart_rx & 0b11111100000000000000000000000000) >> 26);
   coords->block_ten.x_max =   (uart_rx & 0b00000011111111111000000000000000) >> 15;
   coords->block_ten.y_max =   (uart_rx & 0b00000000000000000111111111110000) >> 4;
   tmpMax =                       (uart_rx & 0b00000000000000000000000000001111) << 7;
-
-
-
 
   read32bits(&uart_rx);
   coords->block_eleven.x_min =  tmpMin + ((uart_rx & 0b11111110000000000000000000000000) >> 25);
@@ -139,17 +118,11 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_twelve.x_min =  (uart_rx & 0b00000000000000000011111111111000) >> 3;
   tmpMin =                         (uart_rx & 0b00000000000000000000000000000111) << 8;
 
-
-
-
   read32bits(&uart_rx);
   coords->block_eleven.x_max =  tmpMax + ((uart_rx & 0b11111110000000000000000000000000) >> 25);
   coords->block_eleven.y_max =  (uart_rx & 0b00000001111111111100000000000000) >> 14;
   coords->block_twelve.x_max =  (uart_rx & 0b00000000000000000011111111111000) >> 3;
   tmpMax =                         (uart_rx & 0b00000000000000000000000000000111) << 8;
-
-
-
 
   read32bits(&uart_rx);
   coords->block_twelve.y_min =    tmpMin + ((uart_rx & 0b11111111000000000000000000000000) >> 24);
@@ -157,22 +130,17 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_thirteen.y_min =  (uart_rx & 0b00000000000000000001111111111100) >> 2;
   tmpMin =                           (uart_rx & 0b00000000000000000000000000000011) << 9;
 
-
   read32bits(&uart_rx);
   coords->block_twelve.y_max =    tmpMax + ((uart_rx & 0b11111111000000000000000000000000) >> 24);
   coords->block_thirteen.x_max =  (uart_rx & 0b00000000111111111110000000000000) >> 13;
   coords->block_thirteen.y_max =  (uart_rx & 0b00000000000000000001111111111100) >> 2;
   tmpMax =                           (uart_rx & 0b00000000000000000000000000000011) << 9;
 
-
-
-
   read32bits(&uart_rx);
   coords->block_fourteen.x_min =  tmpMin + ((uart_rx & 0b11111111100000000000000000000000) >> 23);
   coords->block_fourteen.y_min =  (uart_rx & 0b00000000011111111111000000000000) >> 12;
   coords->block_fifteen.x_min =   (uart_rx & 0b00000000000000000000111111111110) >> 1;
   tmpMin =                           (uart_rx & 0b00000000000000000000000000000001) << 10;
-
 
   read32bits(&uart_rx); 
   coords->block_fourteen.x_max =  tmpMax + ((uart_rx & 0b11111111100000000000000000000000) >> 23);
@@ -306,7 +274,7 @@ void Camera::update(){
   if (SerialPortNios.available()) {
     do {
       read32bits(&uart_rx);
-    } while(uart_rx != 0x00004E42);
+    } while (uart_rx != 0x00004E42);
     updateCoordinates(&Boxes);
   }
 }

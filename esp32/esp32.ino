@@ -2,17 +2,11 @@
 
 Camera D8M;
 
-#define INTERVAL 150
-
-long prevTime;
-
-
 void setup(){
   Serial.begin(115200);
   Serial.println("Starting camera");
   D8M.init();
   Serial.println("Started camera");
-  prevTime = 0;
 }
 
 void loop(){
