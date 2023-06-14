@@ -1,4 +1,3 @@
-
 # Bounding Box Output
 Each output is 32 segment
 
@@ -34,4 +33,4 @@ Couple pin mapping changes. We need to use the second set of UART pins to avoid 
 
 > These changes are made in lines 181 and 182 of the top .v file.
 
-In order for the regular RX and TX pins to not suck up the uart signal, we also need to unassign them in the pin planner. 
+In order for the regular RX and TX pins to not suck up the uart signal, we also need to unassign them in the pin planner.
