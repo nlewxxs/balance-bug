@@ -288,6 +288,7 @@ void Camera::update(){
   if (SerialPortNios.available()) {
     do {
       read32bits(&uart_rx);
+      Serial.println("Waiting");
     } while (uart_rx != 0x00004E42);
     updateCoordinates(&Boxes);
   }
