@@ -1,7 +1,6 @@
 version: '3'
 
 services:
-
   mysql:
     build: ./database
     container_name: mysql
@@ -14,9 +13,7 @@ services:
       - "3308:3306"
 
   go-api:
-    build: 
-      dockerfile: Dockerfile.dev
-      # context: ./backend
+    build: ./backend
     container_name: go-api
     ports:
     - 8081:8081
@@ -29,3 +26,16 @@ services:
     links:
       - mysql
     tty: true
+
+  app:
+      build: ./app 
+      container_name: reactapp_c
+      ports:
+        - 3000:3000
+      volumes:
+        - ./app:/app
+        - /app/node_modules 
+      stdin_open: true
+      links:
+        - go-api
+      tty: true

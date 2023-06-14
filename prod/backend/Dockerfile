@@ -6,4 +6,7 @@ RUN apt-get update
 WORKDIR /usr/src/app
 COPY . .
 
-RUN ./main
+EXPOSE 8081
+RUN ["chmod", "+x", "./main"]
+ENTRYPOINT ["./main"]
+
