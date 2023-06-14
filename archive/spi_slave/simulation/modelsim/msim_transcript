@@ -1,0 +1,22 @@
+# do spi_slave_run_msim_rtl_verilog.do
+# if {[file exists rtl_work]} {
+# 	vdel -lib rtl_work -all
+# }
+# vlib rtl_work
+# vmap work rtl_work
+# Model Technology ModelSim - Intel FPGA Edition vmap 2020.1 Lib Mapping Utility 2020.02 Feb 28 2020
+# vmap work rtl_work 
+# Copying /home/nik/intelFPGA/modelsim_ase/linuxaloem/../modelsim.ini to modelsim.ini
+# Modifying modelsim.ini
+# 
+# vlog -vlog01compat -work work +incdir+/home/nik/eie/balance-bug/spi_slave {/home/nik/eie/balance-bug/spi_slave/spi_slave.v}
+# Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+# Start time: 18:20:56 on May 29,2023
+# vlog -reportprogress 300 -vlog01compat -work work "+incdir+/home/nik/eie/balance-bug/spi_slave" /home/nik/eie/balance-bug/spi_slave/spi_slave.v 
+# -- Compiling module spi_slave
+# 
+# Top level modules:
+# 	spi_slave
+# End time: 18:20:56 on May 29,2023, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
