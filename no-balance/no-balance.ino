@@ -10,7 +10,8 @@
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
 
-BluetoothSerial SerialBT;
+// BluetoothSerial SerialBT;
+Camera D8M;
 
 // #define ENABLE_HTTP_SERVER
 #define OUTPUT_DEBUG
@@ -97,16 +98,18 @@ float rightDistance;
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
-void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
-  if(event == ESP_SPP_SRV_OPEN_EVT){
-    SerialBT.println("Client Connected");
-  }
-}
+// void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
+//   if(event == ESP_SPP_SRV_OPEN_EVT){
+//     SerialBT.println("Client Connected");
+//   }
+// }
 
 void setup() {
 
-  SerialBT.begin("MZRNR");
-  SerialBT.register_callback(callback);
+  Serial.begin(115200);
+  // Serial.register_callback(callback);
+
+  D8M.init();
 
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
@@ -119,11 +122,11 @@ void setup() {
   setColour(170, 0, 255); // purple
 
   mpu.initialize();
-  SerialBT.println(F("Testing device connections..."));
-  SerialBT.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+  Serial.println(F("Testing device connections..."));
+  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
   // load and configure the DMP
-  SerialBT.println(F("Initializing DMP..."));
+  Serial.println(F("Initializing DMP..."));
 
   devStatus = mpu.dmpInitialize();
 
@@ -140,7 +143,7 @@ void setup() {
       mpu.CalibrateGyro(6);
       mpu.PrintActiveOffsets();
       // turn on the DMP, now that it's ready
-      SerialBT.println(F("Enabling DMP..."));
+      Serial.println(F("Enabling DMP..."));
       mpu.setDMPEnabled(true);
       dmpReady = true;
       setColour(0, 255, 0); // bueno, set green 
@@ -150,9 +153,9 @@ void setup() {
   } else {
       // ERROR!
 
-    SerialBT.print(F("DMP Initialization failed (code "));
-    SerialBT.print(devStatus);
-    SerialBT.println(F(")"));
+    Serial.print(F("DMP Initialization failed (code "));
+    Serial.print(devStatus);
+    Serial.println(F(")"));
     setColour(255, 0, 0);
 
   }
@@ -180,13 +183,6 @@ void setup() {
 
 void loop() {
 
-  // while (!dmpReady) {
-  //   setColour(170, 0, 255);
-  //   delay(500);
-  //   setColour(0, 0, 0);
-  //   delay(500);
-  // }  // hang program if programming did not work
-
   // -------- READ FROM IMU ---------- // 
 
   if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)){
@@ -195,9 +191,6 @@ void loop() {
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
     mpu.dmpGetGyro(&gyro, fifoBuffer);
   }
-
-  // leftStepper.setSpeed(300);
-  // leftStepper.run();
 
   if (ypr[1] > 0) {
     leftStepper.setSpeed(-1000);
@@ -210,65 +203,20 @@ void loop() {
   leftStepper.runSpeed();
   rightStepper.runSpeed();
 
+  D8M.update();
+  Matrix frame = D8M.getBoxMatrix();
+  char tmp[64];
 
-  // float iteration_time = (millis() - oldMillis) / 1000.0;
-  // oldMillis = millis();
+  Serial.print(ypr[0]);
+  Serial.print(",");
+    
+  for (int i = 4; i < 15; i++){
+    sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
+    Serial.print(tmp);
+  }
 
-  // // -------- PID CONTROLLER ---------- // 
-
-  // // position control first
-  // float positionReading = getPosition();  // example I used for the controller has position read from rotary encoders - this value is total distance travelled
-  // P_error[1] = POSITION_SETPOINT - positionReading;
-  // P_integral[1] = P_integral[0] + P_error[1] * iteration_time;  // 1 is current, 0 is old
-  // P_derivative = (P_error[1] - P_error[0]) / iteration_time;
-  // P_out = Kp_position * P_error[1] + Ki_position * P_integral[1] + Kd_position * P_derivative + P_bias;
-  // // make this output positive to move forwards, negative to move backwards
-
-  // P_integral[0] = P_integral[1];  // time shift integral readings after out calculated
-  // P_error[0] = P_error[1];
-
-  // // balance control
-  // float tiltReading = ypr[1] * 180/M_PI;
-  // T_error[1] = balanceCenter + P_out - tiltReading;             // offset the tilt reading with the distance output to allow us to manipulate the position of the robot via tilt
-  // T_integral[1] = T_integral[0] + T_error[1] * iteration_time;  // 1 is current, 0 is old
-  // T_derivative = (T_error[1] - T_error[0]) / iteration_time;
-  // T_out = Kp_tilt * T_error[1] + Ki_tilt * T_integral[1] + Kd_tilt * T_derivative + T_bias;
-
-  // T_integral[0] = T_integral[1];  // time shift integral readings after out calculated
-  // T_error[0] = T_error[1];
-
-  // // heading control to offset the wheels for rotation
-  // float headingReading = ypr[0] * 180/M_PI;
-  // H_error[1] = HEADING_SETPOINT - headingReading;
-  // H_integral[1] = H_integral[0] + H_error[1] * iteration_time;  // 1 is current, 0 is old
-  // H_derivative = (H_error[1] - H_error[0]) / iteration_time;
-  // H_out = Kp_heading * H_error[1] + Ki_heading * H_integral[1] + Kd_heading * H_derivative + H_bias;
-
-  // H_integral[0] = H_integral[1];  // time shift integral readings after out calculated
-  // H_error[0] = H_error[1];
-
-  // leftWheelDrive = T_out + H_out;  // voltage / pwm that will actually drive the wheels
-  // rightWheelDrive = T_out - H_out;
-
-  // leftWheelDrive = constrain(leftWheelDrive, -maxSpeed, maxSpeed);
-  // rightWheelDrive = -constrain(rightWheelDrive, -maxSpeed, maxSpeed);
-  
-	// // Move the motor one step
-  // if (leftWheelDrive > 0) {
-  //   leftStepper.moveTo(leftStepper.currentPosition() + 20000);
-  // } else {
-  //   leftStepper.moveTo(leftStepper.currentPosition() - 20000);
-  // }
-  // leftStepper.setSpeed(leftWheelDrive);
-	// leftStepper.run();
-
-  // if (rightWheelDrive > 0) {
-  //   rightStepper.moveTo(rightStepper.currentPosition() + 20000);
-  // } else {
-  //   rightStepper.moveTo(rightStepper.currentPosition() - 20000);
-  // }
-  // rightStepper.setSpeed(rightWheelDrive);
-	// rightStepper.run();
+  sprintf(tmp, "%d,%d,%d,%d", frame.boxes[15][0], frame.boxes[15][1], frame.boxes[15][2], frame.boxes[15][3]);
+  Serial.println(tmp);
 
   vTaskDelay(10);
 }
@@ -278,16 +226,6 @@ void setColour(uint8_t r, uint8_t g, uint8_t b){
   analogWrite(greenPin, g);
   analogWrite(bluePin, b);
 }
-
-// float getPosition() {  //unsure of how this reading will work - needs to be 1D (as in just x)
-//   // could potentially have position just be a relative thing i.e. move forwards 1 / backwards 1 rather than move to position 23?
-
-//   leftDistance = leftStepper.currentPosition()/200.0 * 0.175 * M_PI;
-//   rightDistance = rightStepper.currentPosition()/200.0 * 0.175 * M_PI;
-  
-//   totalDistance = (leftDistance + rightDistance) / 2.0;
-//   return totalDistance;
-// }
 
 float convertYaw(float yaw){
   while (yaw < 0.0){
@@ -322,12 +260,12 @@ void communicationCode(void* pvParameters) {
   for (;;) {
 
     // -------- OUTPUTS ---------- //
-    SerialBT.print("Yaw: ");
-    SerialBT.print(ypr[0]);
-    SerialBT.print("\t L: ");
-    SerialBT.print(leftWheelDrive);
-    SerialBT.print("\t R: ");
-    SerialBT.println(rightWheelDrive);
+    Serial.print("Yaw: ");
+    Serial.print(ypr[0]);
+    Serial.print("\t L: ");
+    Serial.print(leftWheelDrive);
+    Serial.print("\t R: ");
+    Serial.println(rightWheelDrive);
 
     #ifdef ENABLE_HTTP_SERVER
       if (millis() - lastTime > 5000) {
