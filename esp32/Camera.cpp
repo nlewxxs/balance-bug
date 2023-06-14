@@ -44,6 +44,10 @@ Matrix Camera::getBoxMatrix(){
   boxMatrix.boxes[13][0] = Boxes.block_fourteen.x_min; boxMatrix.boxes[13][1] = Boxes.block_fourteen.y_min; boxMatrix.boxes[13][2] = Boxes.block_fourteen.x_max; boxMatrix.boxes[13][3] = Boxes.block_fourteen.y_max;
   boxMatrix.boxes[14][0] = Boxes.block_fifteen.x_min; boxMatrix.boxes[14][1] = Boxes.block_fifteen.y_min; boxMatrix.boxes[14][2] = Boxes.block_fifteen.x_max; boxMatrix.boxes[14][3] = Boxes.block_fifteen.y_max;
   boxMatrix.boxes[15][0] = Boxes.block_sixteen.x_min; boxMatrix.boxes[15][1] = Boxes.block_sixteen.y_min; boxMatrix.boxes[15][2] = Boxes.block_sixteen.x_max; boxMatrix.boxes[15][3] = Boxes.block_sixteen.y_max;
+  boxMatrix.boxes[16][0] = Boxes.colour_coords.x_min; boxMatrix.boxes[16][1] = Boxes.colour_coords.y_min; boxMatrix.boxes[16][2] = Boxes.colour_coords.x_max; boxMatrix.boxes[16][3] = Boxes.colour_coords.y_max;
+  boxMatrix.colour = Boxes.colour;
+  boxMatrix.colour_uncertain = Boxes.colour_uncertain;
+  
   return boxMatrix;
 }
 
@@ -55,13 +59,23 @@ void updateCoordinates(boxCoordinates *coords){
   // called straight after NB start bit detected. 
   uint16_t tmpMin;
   uint16_t tmpMax;
+  uint16_t colTmp;
 
   //remove the whitespace from the second MSG fifo
   read32bits(&uart_rx);
   //start processing bits
   read32bits(&uart_rx);
+  coords->colour = (uart_rx & 0b11100000000000000000000000000000) >> 29;
+  coords->colour_uncertain = (uart_rx & 0b00010000000000000000000000000000) >> 28;
+  coords->colour_coords.x_min = (uart_rx & 0b00001111111111100000000000000000) >> 17;
+  colTmp = (uart_rx & 0b00000000000000011111111100000000) << 6;
   tmpMin =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
+
+
   read32bits(&uart_rx);
+  coords->colour_coords.y_min = colTmp + (uart_rx & 0b11000000000000000000000000000000) >> 30;
+  coords->colour_coords.x_max = (uart_rx & 0b00111111111110000000000000000000) >> 19;
+  coords->colour_coords.y_max = (uart_rx & 0b00000000000001111111111100000000) >> 8;  
   tmpMax =                       (uart_rx & 0b00000000000000000000000011111111) << 3;
 
   read32bits(&uart_rx);
