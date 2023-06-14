@@ -142,21 +142,23 @@ void setup() {
 
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
+  
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+
+  // initialize device
+  setColour(170, 0, 255); // purple
 
   // initialize device
   mpu.initialize();
   SerialBT.println(F("Testing device connections..."));
   SerialBT.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
-  Serial.println(F("Testing device connections..."));
-  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+  // Serial.println(F("Testing device connections..."));
+  // Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
   // load and configure the DMP
-<<<<<<< HEAD
   SerialBT.println(F("Initializing DMP..."));
-=======
-  Serial.println(F("Initializing DMP..."));
-  setColour(170, 0, 255); // purple
->>>>>>> ee2c3660e9d45520ba6c6324c1bbd9593aeeba57
   devStatus = mpu.dmpInitialize();
 
   // mpu offsets
@@ -176,25 +178,20 @@ void setup() {
       mpu.setDMPEnabled(true);
       dmpReady = true;
       setColour(0, 255, 0); // bueno, set green 
-      delay(1000);
+      delay(600);
       setColour(0, 0, 0); // kill
-
   } else {
       // ERROR!
       // 1 = initial memory load failed
       // 2 = DMP configuration updates failed
       // (if it's going to break, usually the code will be 1)
-<<<<<<< HEAD
       SerialBT.print(F("DMP Initialization failed (code "));
       SerialBT.print(devStatus);
       SerialBT.println(F(")"));
-=======
-      Serial.print(F("DMP Initialization failed (code "));
-      Serial.print(devStatus);
-      Serial.println(F(")"));
       setColour(255, 0, 0);
-      while (1); // hang
->>>>>>> ee2c3660e9d45520ba6c6324c1bbd9593aeeba57
+      // Serial.print(F("DMP Initialization failed (code "));
+      // Serial.print(devStatus);
+      // Serial.println(F(")"));
   }
 
   preferences.begin("bastard", false);
@@ -220,22 +217,15 @@ void setup() {
   
 	leftStepper.setMaxSpeed(maxSpeed);
 	leftStepper.setAcceleration(acceleration);
-	// leftStepper.setMinPulseWidth(50);
+	leftStepper.setMinPulseWidth(20);
 	rightStepper.setMaxSpeed(maxSpeed);
 	rightStepper.setAcceleration(acceleration);
-	// rightStepper.setMinPulseWidth(50);
+	rightStepper.setMinPulseWidth(20);
   
   delay(1000);
 }
 
 void loop() {
-
-  while (!dmpReady) {
-    setColour(170, 0, 255);
-    delay(500);
-    setColour(0, 0, 0);
-    delay(500);
-  }  // hang program if programming did not work
 
   // Serial.println(xPortGetCoreID());
 
@@ -319,45 +309,49 @@ void loop() {
   //   leftWheelDrive = rightWheelDrive = -150;
   // }
 
-  
+  // leftStepper.setAcceleration(abs(leftWheelDrive));
+  // rightStepper.setAcceleration(abs(rightWheelDrive));
 	// Move the motor one step
-  if (leftWheelDrive > 0) {
-    leftStepper.moveTo(leftStepper.currentPosition() + 20000);
-  } else {
-    leftStepper.moveTo(leftStepper.currentPosition() - 20000);
-  }
+  // if (leftWheelDrive > 0) {
+  //   leftStepper.moveTo(leftStepper.currentPosition() + 100);
+  // } else {
+  //   leftStepper.moveTo(leftStepper.currentPosition() - 100);
+  // }
   leftStepper.setSpeed(leftWheelDrive);
-	leftStepper.run();
-  if (rightWheelDrive > 0) {
-    rightStepper.moveTo(rightStepper.currentPosition() + 20000);
-  } else {
-    rightStepper.moveTo(rightStepper.currentPosition() - 20000);
-  }
+	leftStepper.runSpeed();
+  // if (rightWheelDrive > 0) {
+  //   rightStepper.moveTo(rightStepper.currentPosition() + 100);
+  // } else {
+  //   rightStepper.moveTo(rightStepper.currentPosition() - 100);
+  // }
   rightStepper.setSpeed(rightWheelDrive);
-	rightStepper.run();
+	rightStepper.runSpeed();
 	// leftStepper.run();
 	// leftStepper.setSpeed(200);
 	// rightStepper.run();  
 	// rightStepper.setSpeed(200);
 
   delayMicroseconds(1000);
+  // vTaskDelay(10);
 }
 
-<<<<<<< HEAD
-float square(float x) {
-  return x * x;
-}
-
-float getDistance() {  //unsure of how this reading will work - needs to be 1D (as in just x)
-=======
 void setColour(uint8_t r, uint8_t g, uint8_t b){
   analogWrite(redPin, r);
   analogWrite(greenPin, g);
   analogWrite(bluePin, b);
 }
 
-float getPosition() {  //unsure of how this reading will work - needs to be 1D (as in just x)
->>>>>>> ee2c3660e9d45520ba6c6324c1bbd9593aeeba57
+float convertYaw(float yaw){
+  while (yaw < 0.0){
+    yaw = yaw + 360.0;
+  }
+  while (yaw > 360.0){
+    yaw = yaw - 360.0;
+  }
+  return yaw;
+}
+
+float getDistance() {  //unsure of how this reading will work - needs to be 1D (as in just x)
   // could potentially have position just be a relative thing i.e. move forwards 1 / backwards 1 rather than move to position 23?
 
   leftDistance = leftStepper.currentPosition()/200.0 * 0.175 * M_PI;
@@ -388,6 +382,8 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(L);
     SerialBT.print(", R: ");
     SerialBT.println(R);
+    SerialBT.print(", Pitch: ");
+    SerialBT.println(ypr[1] * 180/M_PI);
     // Serial.print("L: ");
     // Serial.print(L);
     // Serial.print(", R: ");
@@ -439,6 +435,15 @@ void communicationCode(void* pvParameters) {
         SerialBT.println(maxSpeed);
         leftStepper.setMaxSpeed(maxSpeed);
         rightStepper.setMaxSpeed(maxSpeed);
+      } else if (test[0] == 'C') {
+        SerialBT.print("P: ");
+        SerialBT.print(Kp_tilt);
+        SerialBT.print("I: ");
+        SerialBT.print(Ki_tilt);
+        SerialBT.print("D: ");
+        SerialBT.print(Kd_tilt);
+        SerialBT.print("Pp: ");
+        SerialBT.print(Kp_position);
       }
     }
     // SerialBT.print(" T: ");
