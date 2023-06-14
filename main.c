@@ -256,16 +256,18 @@ int main()
        //Read messages from the image processor and print them on the terminal
        while ((IORD(EEE_IMGPROC_0_BASE,EEE_IMGPROC_STATUS)>>8) & 0xff) { 	//Find out if there are words to read
           // for(int m = 0; m <10000; m++){}
+    	   usleep(2000);
            int word1 = IORD(EEE_IMGPROC_0_BASE,EEE_IMGPROC_MSG); 			//Get next word from message buffer
            int word2 = IORD(EEE_IMGPROC_0_BASE,EEE_IMGPROC_MSG2); 			//Get next word from message buffer
-    	  if (fwrite(&word1, 4, 1, ser) != 1)
-    		   printf("Error writing to UART");
-        if (fwrite(&word2, 4, 1, ser) != 1)
-    		   printf("Error writing to UART");
-        if (word1 == EEE_IMGPROC_MSG_START)				//Newline on message identifier
-    		   printf("\n");
-    	   printf("%08x ",word1);
-    	   printf("%08x ",word2);
+    	  fwrite(&word1, 4, 1, ser);
+//    		   printf("Error writing to UART");
+        fwrite(&word2, 4, 1, ser);
+
+//    		   printf("Error writing to UART");
+//        if (word1 == EEE_IMGPROC_MSG_START)				//Newline on message identifier
+//    		   printf("\n");
+//    	   printf("%08x ",word1);
+//    	   printf("%08x ",word2);
        }
 
        //Update the bounding box colour
@@ -274,6 +276,7 @@ int main()
 
        //Process input commands
        int in = getchar();
+//       int in = 0;
        switch (in) {
        	   case 'e': {
        		   exposureTime += EXPOSURE_STEP;
