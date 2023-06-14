@@ -20,7 +20,7 @@
 using recursive_directory_iterator = std::filesystem::recursive_directory_iterator;
 using filepath = std::filesystem::path;
 
-#define TESTPATHS "./testcases/"
+#define TESTPATHS "./samples/"
 #define DEBUGOUTPUTS true
 
 struct classifyElement{
@@ -46,7 +46,7 @@ struct imageInfo{
     void printGrid() {
         std::cout<<"\nCURRENT GRID BOX"<<std::endl;
         std::cout<<"{ xMin, yMin, xMax, yMax }"<<std::endl;
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 12; i++) {
             int arrLength = 0;
             std::cout<<"{";
             for (int j = 0; j < 4; j++) {
@@ -74,12 +74,12 @@ struct testOutput{
 };
 
 std::vector<std::string> getFolders(const std::string path) {
-    filepath myPath("./testcases/");
+    filepath myPath(TESTPATHS);
     std::vector<std::string> tstFolders;
     for (const filepath& dirEntry : recursive_directory_iterator(myPath)){
         if(dirEntry.string().find("/tst.") == std::string::npos){
             tstFolders.push_back(dirEntry.string());
-            // std::cout << "Found Directory: " << dirEntry << std::endl;
+            std::cout << "Found Directory: " << dirEntry << std::endl;
         }
     }
     return tstFolders;
@@ -164,8 +164,12 @@ void createBoundsGrid (const std::string filepath, testOutput &out) {
 
 void testAlgorithm(const testOutput &boundsGrid, const std::string path){
     // drawGrid(boundsGrid.coords.boundingBoxes);
-
     classifyMazeElement(boundsGrid.coords.boundingBoxes);
+
+    if(DEBUGOUTPUTS){
+        printDebug();
+    }
+
     std::string errorOut;
     
     errorOut = "Failed: isEnd in " + path + ", expected: " + ((boundsGrid.classifiedOut.isEnd) ? "true" : "false") + ", got: " + ((isEnd) ? "true" : "false");
@@ -186,10 +190,6 @@ void testAlgorithm(const testOutput &boundsGrid, const std::string path){
     ASSERT(boundsGrid.classifiedOut.rightTurn == rightTurn, errorOut);
 
     std::cout << "Passed: " << path << std::endl;
-
-    // if(DEBUGOUTPUTS){
-    //     printDebug();
-    // }
 }
 
 void testNodeScanner(float startAngle, float endAngle) {
@@ -214,9 +214,9 @@ void testNodeScanner(float startAngle, float endAngle) {
 
     for (const auto& tstFile : tstFolders){
         std::cout<<"\n";
-        //testCoords.printGrid();
         std::cout<<"Img Path: "<<tstFile<<std::endl;
         createBoundsGrid(tstFile, test);
+        // test.coords.printGrid();
         classifyMazeElement(test.coords.boundingBoxes);
         currAngle = test.coords.currAngle;
         std::cout<<"Current Image Angle: "<<currAngle<<std::endl;
@@ -334,22 +334,20 @@ int main() {
     std::sort(tstFolders.begin(),tstFolders.end());
     testOutput test;
 
-    /*
     for (const auto& tstFile : tstFolders){
         std::cout<<"\n";
         // std::cout<<tstFile<<std::endl;
         createBoundsGrid(tstFile, test);
-        // test.coords.printGrid();
+        test.coords.printGrid();
         testAlgorithm(test, tstFile);
     }
-    */
 
     // MAKE SURE FIRST ANGLE IS EQUAL TO THIS IN FILES
     // blockedRanges.push_back({0,20});
     // blockedRanges.push_back({129,231});
-    testNodeScanner(280,280+405);
+    // testNodeScanner(280,280+405);
 
-    if(DEBUGOUTPUTS){
-        printDebug();
-    }
+    // if(DEBUGOUTPUTS){
+    //     printDebug();
+    // }
 }

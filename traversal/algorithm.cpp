@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <map>
 #include <stack>
@@ -28,6 +29,10 @@ OUTPUTS
 struct Node {
     int x;
     int y;
+
+    bool operator<(const Node& other) const {
+        return (x*x + y*y) < (other.x*other.x + other.y*other.y);
+    }
 
     Node(int _x = 0, int _y = 0)
         : x(_x), y(_y) {}
@@ -141,7 +146,7 @@ std::vector<Range> blockedRanges;
 std::map<Node, std::vector<float>> nodePathAngles; // [ [Node,[Angles]] ]
 std::map<Node, std::stack<float>> nodePathStack; // [ [Node,[Angles]] ]
 
-std::stack<std::pair<Node,std::stack<float>>> nodeStackPathStack; // less storage but more complex
+// std::stack<std::pair<Node,std::stack<float>>> nodeStackPathStack; // less storage but more complex
 
 std::map<Node, float> nodeBackPath;
 
@@ -209,7 +214,7 @@ void printDebug() {
     std::cout<<"\nisNode:   "<<isNode<<" isEnd:     "<<isEnd<<" isPath:    "<<isPath<<std::endl;
     std::cout<<"isClear:  "<<isClear<<" leftTurn:  "<<leftTurn<<" rightTurn: "<<rightTurn<<std::endl;
     std::cout<<"leftWall: "<<leftWall<<" rightWall: "<<rightWall<<std::endl;
-
+    /*
     std::cout<<"\nPrevious Node Distance: "<<prevNodeDistance<<std::endl;
 
     std::cout<<"\nPath Angles:"<<std::endl;
@@ -247,6 +252,7 @@ void printDebug() {
         std::cout<< " > "<<tempPathStack.top();
         tempPathStack.pop();
     }
+    */
 }
 
 ///////////////////////////////////////////
@@ -274,16 +280,16 @@ bool encompassesBounds() {return false;}
 
 void classifyMazeElement(std::vector<std::vector<int>> grid) {
     // Left Turn
-    if (outsideBounds(grid[8], leftPathBounds) &&
-        outsideBounds(grid[9], leftPathBounds)) {
+    if (outsideBounds(grid[4], leftPathBounds) &&
+        outsideBounds(grid[5], leftPathBounds)) {
         std::cout << "LEFT JUNCTION"<<std::endl;
         leftTurn = true;
     } else {
         leftTurn = false;
     }
     // Right Turn
-    if (outsideBounds(grid[11], rightPathBounds) &&
-        outsideBounds(grid[10], rightPathBounds)) {
+    if (outsideBounds(grid[7], rightPathBounds) &&
+        outsideBounds(grid[6], rightPathBounds)) {
         std::cout << "RIGHT JUNCTION"<<std::endl;
         rightTurn = true;
     } else {
@@ -291,10 +297,10 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
     }
 
     // Path or End
-    if (outsideBounds(grid[9],  middlePathBounds) &&
-        outsideBounds(grid[10], middlePathBounds) &&
-        outsideBounds(grid[13], middlePathBounds) &&
-        outsideBounds(grid[14], middlePathBounds) ){
+    if (outsideBounds(grid[5],  middlePathBounds) &&
+        outsideBounds(grid[6],  middlePathBounds) &&
+        outsideBounds(grid[9],  middlePathBounds) &&
+        outsideBounds(grid[10], middlePathBounds) ){
         std::cout << "PATH AHEAD"<<std::endl;
         isClear = true;
         isEnd  = false;
@@ -306,8 +312,8 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
 
     // Left Wall
     // Check if within x axis later
-    if (isWall(grid[12], grid[8], leftWallBounds) ||
-        isWall(grid[13], grid[9], leftWallBounds)) {
+    if (isWall(grid[8], grid[4], leftWallBounds) ||
+        isWall(grid[9], grid[5], leftWallBounds)) {
         std::cout << "LEFT WALL"<<std::endl;
         leftWall = true;
     } else {
@@ -316,8 +322,8 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
 
     // Right Wall
     // Check if within x axis later
-    if (isWall(grid[15], grid[11], rightWallBounds) ||
-        isWall(grid[14], grid[10], rightWallBounds)) {
+    if (isWall(grid[11], grid[7], rightWallBounds) ||
+        isWall(grid[10], grid[6], rightWallBounds)) {
         std::cout << "RIGHT WALL"<<std::endl;
         rightWall = true;
     } else {
@@ -503,7 +509,7 @@ Node nodeCoords() {
     // use beaconAngles
     // use dead reckoning
 
-    return {0,0};
+    return Node(0,0);
 }
 
 void backTrack() {
@@ -535,8 +541,13 @@ void nodeResponse() {
     // if coords + pathAngles similar enough { backTrack }
     //
     // Add to Node-Path maps
+    // std::pair< Node,std::vector<float>> pair = std::make_pair(currNode, pathAngles);
     nodePathAngles[currNode] = pathAngles;
+    // testmap.insert(pair);
+
+    //nodePathAngles.insert(pair);
     // Disregard (startAngle+180)+-39 for nodePathStack
+    /*
     blockAngle(startAngle + 180);
     for (auto& angle : pathAngles) {
         if (!isBlocked(angle)) { pathStack.push(angle); }
@@ -551,6 +562,7 @@ void nodeResponse() {
     }
     blockedRanges = {};
     // get top of stack, pop it off, face it and move
+    */ 
 }
 
 void setupDfs() {
