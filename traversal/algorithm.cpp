@@ -48,7 +48,7 @@ struct Range {
     int max;
 };
 
-const float offsetDistance = 0.1;
+const float offsetDistance = 20; // offset of rover to camera 20cm
 
 //double leftWallMinX = 240;
 //double leftWallMinY = 240;
@@ -139,6 +139,11 @@ std::vector<float> beaconAngles = {-1, -1, -1}; // [Red, Blue, Yellow]
 std::vector<Range> blockedRanges;
 
 std::map<Node, std::vector<float>> nodePathAngles; // [ [Node,[Angles]] ]
+std::map<Node, std::stack<float>> nodePathStack; // [ [Node,[Angles]] ]
+
+std::stack<std::pair<Node,std::stack<float>>> nodeStackPathStack; // less storage but more complex
+
+std::map<Node, float> nodeBackPath;
 
 std::stack<Node> nodeStack;
 std::stack<float> pathStack;
@@ -340,7 +345,14 @@ bool isBlocked(float angle) {
     return false;
 }
 
-// endAngle = startAngle + 359
+void blockAngle(float angle) {
+    int min = ((int)angle - 39) % 360;
+    int max = ((int)angle + 39) % 360;
+    Range block = { min, max };
+    blockedRanges.push_back(block);
+}
+
+// endAngle = startAngle + 405
 void nodeScanner(float startAngle, float endAngle) {
     float pathStart    = -1;
     float beaconStart  = -1;
@@ -358,7 +370,9 @@ void nodeScanner(float startAngle, float endAngle) {
     // Testing
     //blockedRanges.push_back({0,20});
     //blockedRanges.push_back({129,231});
-    blockedRanges.push_back({((int)currAngle+135)%360, ((int)currAngle+205)%360});
+    //blockedRanges.push_back({((int)currAngle+135)%360, ((int)currAngle+205)%360});
+    // ^
+    //blockAngle(startAngle+180);
     std::cout<<"\n";
     for (float currAngle = startAngle; currAngle <= (endAngle - cycle); currAngle+=0.4f) {
         // modulo
@@ -485,18 +499,58 @@ void nodeScanner(float startAngle, float endAngle) {
     }
 }
 
-void nodeResponse() {
-
-}
-
 Node nodeCoords() {
     // use beaconAngles
+    // use dead reckoning
 
     return {0,0};
 }
 
 void backTrack() {
 
+}
+
+void nodeResponse() {
+    // Store startAngle
+    float startAngle = currAngle;
+    // Set blocked paths
+    if (isEnd)     { blockAngle(startAngle); }
+    if (rightWall) { blockAngle(startAngle + 90); }
+    if (leftWall)  { blockAngle(startAngle + 270); }
+    // Move forward by offset ~ 20cm
+    targetDistance = offsetDistance;
+    // Wait until moved distance
+    //
+    // Run nodeScanner
+    nodeScanner(startAngle,startAngle + 405);
+    // Calc coordinates
+    Node currNode = nodeCoords();
+    // Send Coords to Server
+    //
+    // Send Edge with startAngle and previous node in stack
+    //
+    // Backtrack if no paths available
+    if (pathAngles.size() <= 1) { backTrack(); }
+    // Backtrack + add Edge if revisiting Node
+    // if coords + pathAngles similar enough { backTrack }
+    //
+    // Add to Node-Path maps
+    nodePathAngles[currNode] = pathAngles;
+    // Disregard (startAngle+180)+-39 for nodePathStack
+    blockAngle(startAngle + 180);
+    for (auto& angle : pathAngles) {
+        if (!isBlocked(angle)) { pathStack.push(angle); }
+        else {
+            std::cout<<"PATH BACK: "<<angle<<std::endl;
+            nodeBackPath[currNode] = angle;
+        }
+    }
+    nodePathStack[currNode] = pathStack;
+    while (!pathStack.empty()) {
+        pathStack.pop();
+    }
+    blockedRanges = {};
+    // get top of stack, pop it off, face it and move
 }
 
 void setupDfs() {
@@ -508,11 +562,9 @@ void setupDfs() {
     // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN
 
     // Send currNode to server API e.g. 1,1;
-// int main(int argc, char const *argv[])
-// {
-//     /* code */
-//     return 0;
-// }
+
+    // Add paths to node map for debugging
+    // nodePathAngles[currNode] = pathAngles;
 
     // Pick angle
     if (pathAngles.size() != 0) {
@@ -535,6 +587,12 @@ void dfs() {
     // classifyMazeElement();
     //
     // Set initial blocked angles e.g. 45+6...180-6
+}
+
+void run() {
+    setupDfs();
+
+    dfs();
 }
 
 // int main() {
