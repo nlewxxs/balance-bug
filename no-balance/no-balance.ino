@@ -10,7 +10,7 @@
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
 
-// BluetoothSerial SerialBT;
+BluetoothSerial SerialBT;
 
 // #define ENABLE_HTTP_SERVER
 #define OUTPUT_DEBUG
@@ -97,9 +97,16 @@ float rightDistance;
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
+void callback(esp_spp_cb_event_t event, esp_spp_cb_param_t *param){
+  if(event == ESP_SPP_SRV_OPEN_EVT){
+    SerialBT.println("Client Connected");
+  }
+}
+
 void setup() {
 
-  Serial.begin(115200);
+  SerialBT.begin("MZRNR");
+  SerialBT.register_callback(callback);
 
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
@@ -112,11 +119,11 @@ void setup() {
   setColour(170, 0, 255); // purple
 
   mpu.initialize();
-  Serial.println(F("Testing device connections..."));
-  Serial.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
+  SerialBT.println(F("Testing device connections..."));
+  SerialBT.println(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
 
   // load and configure the DMP
-  Serial.println(F("Initializing DMP..."));
+  SerialBT.println(F("Initializing DMP..."));
 
   devStatus = mpu.dmpInitialize();
 
@@ -133,7 +140,7 @@ void setup() {
       mpu.CalibrateGyro(6);
       mpu.PrintActiveOffsets();
       // turn on the DMP, now that it's ready
-      Serial.println(F("Enabling DMP..."));
+      SerialBT.println(F("Enabling DMP..."));
       mpu.setDMPEnabled(true);
       dmpReady = true;
       setColour(0, 255, 0); // bueno, set green 
@@ -143,9 +150,9 @@ void setup() {
   } else {
       // ERROR!
 
-    Serial.print(F("DMP Initialization failed (code "));
-    Serial.print(devStatus);
-    Serial.println(F(")"));
+    SerialBT.print(F("DMP Initialization failed (code "));
+    SerialBT.print(devStatus);
+    SerialBT.println(F(")"));
     setColour(255, 0, 0);
 
   }
@@ -315,12 +322,12 @@ void communicationCode(void* pvParameters) {
   for (;;) {
 
     // -------- OUTPUTS ---------- //
-    Serial.print("Yaw: ");
-    Serial.print(ypr[0]);
-    Serial.print("\t L: ");
-    Serial.print(leftWheelDrive);
-    Serial.print("\t R: ");
-    Serial.println(rightWheelDrive);
+    SerialBT.print("Yaw: ");
+    SerialBT.print(ypr[0]);
+    SerialBT.print("\t L: ");
+    SerialBT.print(leftWheelDrive);
+    SerialBT.print("\t R: ");
+    SerialBT.println(rightWheelDrive);
 
     #ifdef ENABLE_HTTP_SERVER
       if (millis() - lastTime > 5000) {
