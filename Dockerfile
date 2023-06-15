@@ -24,6 +24,7 @@ RUN apt-get install yarn -y
 RUN apt-get install nodejs -y
 RUN apt-get install build-essential -y
 RUN apt-get install git -y
+RUN apt-get install gcc
 
 ENV GOROOT="/home/go"
 ENV GOPATH="/usr/src/"
@@ -33,8 +34,8 @@ ENV PATH="$GOPATH/bin:$GOROOT/bin:$PATH"
 # RUN echo "export GOROOT=/usr/local/go" >> /etc/bash.bashrc
 # RUN echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> /etc/bash.bashrc
 
-WORKDIR /home/go/src
-COPY ./adder ./
+# WORKDIR /home/go/src
+# COPY ./adder ./
 
 WORKDIR /usr/src/app
 COPY ./ .
