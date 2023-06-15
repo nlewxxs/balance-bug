@@ -12,7 +12,7 @@
 // #define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
 // #define ENABLE_CAMERA
-// #define ENABLE_MOTORS
+#define ENABLE_MOTORS
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
@@ -182,6 +182,7 @@ void loop() {
 
     leftStepper.runSpeed();
     rightStepper.runSpeed();
+    
   #endif
   #ifdef ENABLE_CAMERA
     D8M.update();
