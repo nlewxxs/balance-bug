@@ -1,31 +1,12 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <algorithm>
 #include <map>
 #include <stack>
 #include <math.h>
 
-/*
-INPUTS
-    SPI
-        [1...16][x,y][max,min]
-        [red,yellow,blue][x,y]
-    MPU
-        [current_angle (deg)]
-        [distance (total)]
-OUTPUTS
-    ESP
-        [stop,start (move)]
-        [target_angle (deg)]
-    SERVER
-        [x,y (Node)]
-        [ax,ay,bx,by (Edge)][distance][angle]
-*/
-
-///////////////////////////////////////////
-///////////     DEFINITIONS     ///////////
-///////////////////////////////////////////
-
+// Consts
 struct Node {
     int x;
     int y;
@@ -33,7 +14,17 @@ struct Node {
     bool operator<(const Node& other) const {
         return (x*x + y*y) < (other.x*other.x + other.y*other.y);
     }
-
+    
+    float distance(const Node& other) {
+        return sqrt((x-other.x)*(x-other.x) + (y-other.y)*(y-other.y));
+    }
+    
+    bool same(const Node& other) {
+        bool xSame = (x >= (other.x - 0.1)) && (x <= (other.x + 0.1));
+        bool ySame = (y >= (other.y - 0.1)) && (y <= (other.y + 0.1));
+        return xSame && ySame;
+    }
+    
     Node(int _x = 0, int _y = 0)
         : x(_x), y(_y) {}
 };
@@ -53,44 +44,17 @@ struct Range {
     int max;
 };
 
-const float offsetDistance = 20; // offset of rover to camera 20cm
+// 20cm distance ahead
+const float offsetDistance = 20; 
 
-//double leftWallMinX = 240;
-//double leftWallMinY = 240;
-//double leftWallMaxX = 400;
-//double leftWallMaxY = 480;
-const int leftWallBounds[4] = {0,240,320,420};
-
-//double rightWallMinX = 480;
-//double rightWallMinY = 240;
-//double rightWallMaxX = 640;
-//double rightWallMaxY = 480;
+const int leftWallBounds[4]  = {0,240,320,420};
 const int rightWallBounds[4] = {320,240,640,420};
 
-//double middlePathMinX = 260;
-//double middlePathMinY = 240;
-//double middlePathMaxX = 380;
-//double middlePathMaxY = 480;
 const int middlePathBounds[4] = {260,240,380,480};
+const int leftPathBounds[4]   = {0,280,320,320};
+const int rightPathBounds[4]  = {320,280,640,320};
 
-//double leftPathMinX = 0;
-//double leftPathMinY = 280;
-//double leftPathMaxX = 160;
-//double leftPathMaxY = 320;
-const int leftPathBounds[4] = {0,280,320,320};
-
-
-//double rightPathMinX = 480;
-//double rightPathMinY = 280;
-//double rightPathMaxX = 640;
-//double rightPathMaxY = 320;
-const int rightPathBounds[4] = {320,280,640,320};
-
-
-///////////////////////////////////////////
-///////////       INPUTS        ///////////
-///////////////////////////////////////////
-
+// Input
 bool isRed    = false;
 bool isBlue   = false;
 bool isYellow = false;
@@ -98,29 +62,12 @@ bool isYellow = false;
 float currAngle = 0;
 int totalDistance = 0;
 
-// [ [xMin, yMin, xMax, yMax] ]
-// std::vector<std::vector<int>> boundsGrid;
-
-///////////////////////////////////////////
-///////////       OUTPUTS       ///////////
-///////////////////////////////////////////
-
-//bool stop  = true;
-bool start = false;
-
+// Output
+bool  start = false;
 float targetAngle = 0;
 float targetDistance = 0;
 
-// [x,y]
-Node node;
-
-// [currNode, prevNode, angle, length]
-Edge edgeNodes;
-
-///////////////////////////////////////////
-///////////    DEBUG OUTPUTS    ///////////
-///////////////////////////////////////////
-
+// Internal
 bool isEnd  = false;
 bool isNode = false;
 bool isPath = false;
@@ -132,140 +79,28 @@ bool rightWall = false;
 bool leftTurn  = false;
 bool rightTurn = false;
 
-///////////////////////////////////////////
-///////////      INTERNAL       ///////////
-///////////////////////////////////////////
-
 double prevNodeDistance = 0;
 
+// [Red, Blue, Yellow]
+std::vector<float> beaconAngles = {-1, -1, -1};
 std::vector<float> pathAngles;
-std::vector<float> beaconAngles = {-1, -1, -1}; // [Red, Blue, Yellow]
 
 std::vector<Range> blockedRanges;
 
-std::map<Node, std::vector<float>> nodePathAngles; // [ [Node,[Angles]] ]
-std::map<Node, std::stack<float>> nodePathStack; // [ [Node,[Angles]] ]
-
-// std::stack<std::pair<Node,std::stack<float>>> nodeStackPathStack; // less storage but more complex
-
+std::map<Node, std::vector<float>> nodePathAngles;
+std::map<Node, std::stack<float>> nodePathStack;
 std::map<Node, float> nodeBackPath;
 
 std::stack<Node> nodeStack;
 std::stack<float> pathStack;
 
-///////////////////////////////////////////
-///////////      PRINTING       ///////////
-///////////////////////////////////////////
-
-void printGrid(std::vector<std::vector<int>> grid) {
-    std::cout<<"{ xMin, yMin, xMax, yMax }"<<std::endl;
-    for (int i = 0; i < 12; i++) {
-        int arrLength = 0;
-        std::cout<<"{";
-        for (int j = 0; j < 4; j++) {
-            if ( j != 0 ) { std::cout<<" "; }
-            std::cout<<grid[i][j];
-            if ( j != 3 ) { std::cout<<","; }
-            arrLength += std::to_string(grid[i][j]).length();
-            //std::cout<<"i: "<<i<<"j: "<<j<<"value: "<<grid[i][j];
-        }
-        std::cout<<"}";
-        if ( (i+1)%4 == 0 && i != 0) { std::cout<<std::endl; }
-        else {
-            std::cout<<",";
-            for (int arrLength; arrLength < 12; arrLength++) {
-                std::cout<<" ";
-            }
-        }
-    }
-}
-
-void drawGrid(std::vector<std::vector<int>> grid){
-    for (int i = 0; i <= 480; i+= 20) {
-        for (int j = 0; j <= 640; j+= 10) {
-            bool isCorner = false;
-            bool isVertical = false;
-            bool isHorizontal = false;
-            for (const auto& coord : grid){
-                if ((i == coord[1] || i == coord[3]) && (j == coord[0] || j == coord[2])) {
-                    isCorner = true;
-                    break;
-                }
-                if ((j == coord[0] || j == coord[2]) && i >= coord[1] && i <= coord[3]) {
-                    isVertical = true;
-                    break;
-                }
-                if ((i == coord[1] || i == coord[3]) && j >= coord[0] && j <= coord[2]) {
-                    isHorizontal = true;
-                    break;
-                }
-          }
-            if (isCorner) { std::cout<<"+"; }
-            else if (isVertical) { std::cout<<"¦"; }
-            else if (isHorizontal) { std::cout<<"-"; }
-            else { std::cout<< " "; }
-        }
-        std::cout << std::endl;
-    }
-}
-
-void printDebug() {
-    if ( isNode && isPath ) { std::cout << "BIG ERROR, DETECTING BOTH PATH & NODE"<<std::endl; }
-    std::cout<<"\nisNode:   "<<isNode<<" isEnd:     "<<isEnd<<" isPath:    "<<isPath<<std::endl;
-    std::cout<<"isClear:  "<<isClear<<" leftTurn:  "<<leftTurn<<" rightTurn: "<<rightTurn<<std::endl;
-    std::cout<<"leftWall: "<<leftWall<<" rightWall: "<<rightWall<<std::endl;
-    /*
-    std::cout<<"\nPrevious Node Distance: "<<prevNodeDistance<<std::endl;
-
-    std::cout<<"\nPath Angles:"<<std::endl;
-    for (auto &angle : pathAngles) {
-        std::cout<<" > "<<angle<<std::endl;
-    }
-    std::cout<<"\nBeacon Angles:"<<std::endl;
-    std::cout<<" > Red:    "<<beaconAngles[0]<<std::endl;
-    std::cout<<" > Blue:   "<<beaconAngles[1]<<std::endl;
-    std::cout<<" > Yellow: "<<beaconAngles[2]<<std::endl;
-
-    std::cout<<"\nBlocked Angles:"<<std::endl;
-    for (auto &range : blockedRanges) {
-        std::cout<<" > min: "<<range.min<<" max: "<<range.max<<std::endl;
-    }
-
-    std::cout<<"\nNode Path Map"<<std::endl;
-    for (auto &pair : nodePathAngles) {
-        std::cout<<" Node: " <<pair.first.x<<","<<pair.first.y<<std::endl;
-        for (auto &angle : pair.second) {
-            std::cout<<"  > "<<angle<<std::endl;
-        }
-    }
-
-    std::cout<<"\nNode Stack:"<<std::endl;
-    std::stack<Node> tempNodeStack = nodeStack;
-    while (!tempNodeStack.empty()) {
-        std::cout<< " > "<<tempNodeStack.top().x<<","<<tempNodeStack.top().y;
-        tempNodeStack.pop();
-    }
-
-    std::cout<<"\nPath Stack:"<<std::endl;
-    std::stack<float> tempPathStack = pathStack;
-    while (!tempPathStack.empty()) {
-        std::cout<< " > "<<tempPathStack.top();
-        tempPathStack.pop();
-    }
-    */
-}
-
-///////////////////////////////////////////
-//////////   CLASSIFY ELEMENT   ///////////
-///////////////////////////////////////////
-
+// Classify
 bool outsideBounds(std::vector<int> box, const int bound[4]) {
     // {xMin, yMin, xMax, yMax}
     bool outX = (box[2] < bound[0]) || (box[0] > bound[2]);
     bool outY = (box[3] < bound[1]) || (box[1] > bound[3]);
     return outX || outY;
 }
-
 bool isWall(std::vector<int> lowerL, std::vector<int> lowerR, std::vector<int> upperL, std::vector<int> upperR, int xLR, const int bound[4]) {
     // {xMin, yMin, xMax, yMax}
     bool lowerWallL   = ( (lowerL[3] >= bound[3]) && (lowerL[1] <= 361) ) || // wall in range
@@ -298,10 +133,6 @@ bool isWall(std::vector<int> lowerL, std::vector<int> lowerR, std::vector<int> u
     // std::cout<<" upperAcross: "<<upperAcross<<" connL: "<<connL<<" connR: "<<connR<<std::endl;
     return ( (connL || connR) && lowerAcross && upperAcross );
 }
-
-// FIGURE OUT LATER FOR LANES
-bool encompassesBounds() {return false;}
-
 void classifyMazeElement(std::vector<std::vector<int>> grid) {
     // Left Turn
     if (outsideBounds(grid[4], leftPathBounds) &&
@@ -358,10 +189,7 @@ void classifyMazeElement(std::vector<std::vector<int>> grid) {
     }
 }
 
-///////////////////////////////////////////
-///////////    MAZE TRAVERSAL   ///////////
-///////////////////////////////////////////
-
+// Traversal
 bool isBlocked(float angle) {
     for (Range range : blockedRanges) {
         if ((angle >= range.min) && (angle <= range.max)) {
@@ -370,15 +198,12 @@ bool isBlocked(float angle) {
     }
     return false;
 }
-
 void blockAngle(float angle) {
     int min = ((int)angle - 39) % 360;
     int max = ((int)angle + 39) % 360;
     Range block = { min, max };
     blockedRanges.push_back(block);
 }
-
-// endAngle = startAngle + 405
 void nodeScanner(float startAngle, float endAngle) {
     float pathStart    = -1;
     float beaconStart  = -1;
@@ -430,7 +255,7 @@ void nodeScanner(float startAngle, float endAngle) {
             isClear  = true;
             isYellow = false;
         }
-    // Testing
+    // Testin
     //while (currAngle + cycle < endAngle) {
         bool scanningBeacon = scanningRed || scanningBlue || scanningYellow;
 
@@ -512,50 +337,80 @@ void nodeScanner(float startAngle, float endAngle) {
         prevAngle = (int)currAngle;
     }
 }
-
-Node nodeCoords() {
-    // use beaconAngles
-    // use dead reckoning
-
+Node nodeCoords(std::vector<float>) {
+    // triangulate(beaconAngles);
+    // use dead reckoning - nodeStack.top(); + totalDistance - prevNodeDistance
+    // weight both calculations
     return Node(0,0);
 }
-
 void backTrack() {
 
 }
-
 void nodeResponse() {
+    // Stop Rover
+    start = false;
     // Store startAngle
     float startAngle = currAngle;
     // Set blocked paths
-    if (isEnd)     { blockAngle(startAngle); }
+    // !turn strict (miss paths but no crash) || wall loose (wont miss paths but may crash)
+    // Error with isEnd blocking as it may occur in slight turns/when not straight
+    if (isEnd && !leftWall && !rightWall) { blockAngle(startAngle); }
     if (!rightTurn) { blockAngle(startAngle + 90); }
     if (!leftTurn)  { blockAngle(startAngle + 270); }
     // Move forward by offset ~ 20cm
     targetDistance = offsetDistance;
     // Wait until moved distance
-    //
+    // Delay(1000);
     // Run nodeScanner
+    targetAngle = startAngle + 405;
     nodeScanner(startAngle,startAngle + 405);
     // Calc coordinates
-    Node currNode = nodeCoords();
+    Node currNode = nodeCoords(beaconAngles);
+    // Add currNode to stack
+    nodeStack.push(currNode);
+    // IMPORTANT
+    // Check if node similar to previously stored node, if true backtrack and remove that angle from the node
+    // Backtrack + add Edge if revisiting Node + skip sendning Coords
+    // if coords + pathAngles similar enough { backTrack }
+    for (auto& pair : nodePathAngles) { 
+        if (currNode.same(pair.first) && (pathAngles.size() == pair.second.size())) {
+            bool same = true;
+
+            std::vector<float> sorted1 = pathAngles;
+            std::vector<float> sorted2 = pair.second;
+
+            std::sort(sorted1.begin(), sorted1.end());
+            std::sort(sorted2.begin(), sorted2.end());
+
+            for (std::size_t i = 0; i < sorted1.size(); ++i) {
+                if (std::abs(sorted1[i] - sorted2[i]) > 39) {
+                    same = false;
+                    break;
+                }
+            }
+
+            if (same) { 
+                // SEND EDGE TO SERVER + REMOVE EDGE FROM STACK
+                backTrack(); 
+                return;
+            }
+        }
+    }
+    // 
+    // calc edge distance (total - prev) weight with coord1 - coord2
+    //
     // Send Coords to Server
     //
     // Send Edge with startAngle and previous node in stack
+    // 
+    // Set prevNodeDistance
+    prevNodeDistance = totalDistance;
     //
     // Backtrack if no paths available
-    if (pathAngles.size() <= 1) { backTrack(); }
-    // Backtrack + add Edge if revisiting Node
-    // if coords + pathAngles similar enough { backTrack }
-    //
+    if (pathAngles.size() <= 1) { backTrack(); return; }
     // Add to Node-Path maps
-    // std::pair< Node,std::vector<float>> pair = std::make_pair(currNode, pathAngles);
     nodePathAngles[currNode] = pathAngles;
-    // testmap.insert(pair);
-
-    //nodePathAngles.insert(pair);
     // Disregard (startAngle+180)+-39 for nodePathStack
-    /*
     blockAngle(startAngle + 180);
     for (auto& angle : pathAngles) {
         if (!isBlocked(angle)) { pathStack.push(angle); }
@@ -570,119 +425,88 @@ void nodeResponse() {
     }
     blockedRanges = {};
     // get top of stack, pop it off, face it and move
-    */ 
 }
-
 void setupDfs() {
-    // RUN CODE TWICE
+    float startAngle = currAngle;
+
+    // RUN CODE TWICE RESET AT startAngle -- later 
     targetAngle = currAngle + 405;
     // Might need classify inside nodeScanner not parallel
     nodeScanner(currAngle, targetAngle);
-    Node currNode = nodeCoords(/*beaconAngles*/);
-    // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN
+    Node currNode = nodeCoords(beaconAngles);
+    // TAKE AVERAGE TWO RUNS IF DISCREPENCY RUN AGAIN -- later
+
+    // Add currNode to top of stack
+    nodeStack.push(currNode);
 
     // Send currNode to server API e.g. 1,1;
+    // Call HTTP GET function -- communication
+    // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=2&XCoord="+std::to_string(currNode.x)+"&YCoord="+std::to_string(currNode.y);
+    // http.begin(serverPath); 
 
     // Add paths to node map for debugging
-    // nodePathAngles[currNode] = pathAngles;
+    nodePathAngles[currNode] = pathAngles;
 
-    // Pick angle
-    if (pathAngles.size() != 0) {
-        targetAngle = pathAngles[0];
-    } else {
-        std::cout<<"No Paths from Node: "<<currNode.x<<","<<currNode.y<<std::endl;
-        // SEND KILL SIGNAL IDK RN
+    // Add ALL paths to path stack -- figure out how thats gunna work with backtracking
+    for (auto& angle : pathAngles) {
+        pathStack.push(angle);
+        // Don't explicitly need but maybe to check if completed backtracking
+        nodeBackPath[currNode] = -1;
     }
-    // Add ALL other paths to path stack -- figure out how thats gunna work with backtracking
+    nodePathStack[currNode] = pathStack;
+    while (!pathStack.empty()) { pathStack.pop(); }
+
+    // Check if no available angles
+    if (pathAngles.size() == 0) {
+        std::cout<<"No Paths from Node: "<<currNode.x<<","<<currNode.y<<std::endl;
+        // MAYBE MOVE TOWARDS START ANGLE IF SMART
+        // SEND KILL SIGNAL IDK RN
+        nodeStack.pop();
+    }
 
     // Classify
     // Depends on classify either start or nodeResponse
 }
-
 void dfs() {
-    // START IN CORNER
-    setupDfs();
+    Node currNode = nodeStack.top();
+    std::stack<float> currPathStack = nodePathStack[currNode];
 
+    if (currPathStack.empty()) { backTrack(); return; }
+    else {
+        // Face first path
+        targetAngle = nodePathStack[currNode].top();
+        nodePathStack[currNode].pop();
+        // Wait till turned
+
+        // USE NIKS FUNCTION
+        std::vector<std::vector<int>> grid = {};
+        classifyMazeElement(grid);
+
+        if (isClear) { 
+            while (!isNode) { 
+                //GET GRID
+                start = true;
+                classifyMazeElement(grid);
+            }
+            nodeResponse();
+        }
+        else { start = false; /*END*/ }
+        // else if (isPath) { start = true; }
+
+        
+    }
     // Store init angle
     // classifyMazeElement();
     //
     // Set initial blocked angles e.g. 45+6...180-6
 }
-
 void run() {
     setupDfs();
 
-    dfs();
+    // LOOP while nodeStack isnt empty
+    while (!nodeStack.empty()) { 
+        dfs();
+    }
 }
-/*
-int main() {
-    // [1] is a dummy for now
-    std::vector<std::vector<int>> boundsGrid = {
-            {0, 175, 159, 184},   {160, 120, 232, 182}, {408, 120, 479, 191}, {480, 120, 637, 207},
-            {0, 300, 80, 360},    {0, 0, 0, 0},         {0, 0, 0, 0},         {590, 320, 640, 360},
-            {0, 360, 80, 480},    {0, 0, 0, 0},         {0, 0, 0, 0},         {580, 360, 640, 480}
-//        {0,140,130,240} , {240,120,320,160}, {320,140,410,240}, {500,120,640,200},
-//        {0,260,60,360}  , {0,0,0,0}        , {430,240,440,360}, {0,0,0,0},
-//        {0,0,0,0}       , {0,0,0,0}        , {450,360,480,420}, {480,420,530,480},
-    };
-    drawGrid(boundsGrid);
-    printGrid(boundsGrid);
 
-    classifyMazeElement(boundsGrid);
-
-    isClear = true;
-    isRed = true;
-    currAngle = 280;
-    // nodeScanner(280,280+1205);
-
-    printDebug();
-//    printOutputs();
-
-}
-*/
-
-/* GRIDS
-
-GRID TEST 1.
-
-    {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {0,0,0,0}       , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {40,240,120,360}, {0,0,0,0}        , {0,0,0,0}        , {520,240,600,360},
-    {40,360,120,480}, {0,0,0,0}        , {0,0,0,0}        , {520,360,600,480}
-
-    PASS
-
-GRID TEST 2.
-    {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {0,0,0,0}       , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {40,240,120,360}, {300,240,320,360}, {0,0,0,0}        , {520,240,600,360},
-    {40,360,120,480}, {0,0,0,0}        , {0,0,0,0}        , {520,360,600,480}
-
-    PASS
-
-GRID TEST 3
-
-    {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {10,120,80,240} , {0,0,0,0}        , {0,0,0,0}        , {510,120,610,240},
-    {90,240,160,360}, {0,0,0,0}        , {460,340,480,360}, {480,240,520,360},
-    {0,0,0,0}       , {160,360,320,470}, {320,360,480,470}, {0,0,0,0},
-
-    PASS
-
-GRID TEST 4
-    {0,0,640,480}   , {0,0,0,0}        , {0,0,0,0}        , {0,0,0,0},
-    {0,140,130,240} , {240,120,320,160}, {320,140,410,240}, {500,120,640,200},
-    {0,260,60,360}  , {0,0,0,0}        , {430,240,460,360}, {0,0,0,0},
-    {0,0,0,0}       , {0,0,0,0}        , {450,360,480,440}, {480,420,530,480},
-
-    UNSURE (Might need to seperate looking for path vs checking for node function)
-
-GRID TEST 5
-
-    {0,0,640,480}   , {0,0,0,0} , {0,0,0,0} , {0,0,0,0},
-    {0,0,0,0}       , {0,0,0,0} , {0,0,0,0} , {0,0,0,0},
-    {40,240,120,360}, {160,240,480,260} , {0,0,0,0} , {520,240,600,360},
-    {40,360,120,480}, {0,0,0,0} , {0,0,0,0} ,{520,360,600,480}
-
-    PASS
-*/
+int main() { return 0; }

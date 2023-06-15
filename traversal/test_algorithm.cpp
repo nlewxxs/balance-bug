@@ -205,8 +205,6 @@ void testNodeScanner(float startAngle, float endAngle) {
     int rotation = 0;
     int prevAngle = -1;
 
-    blockedRanges.push_back({((int)currAngle+141)%360, ((int)currAngle+219)%360});
-
     // Testing
     std::vector<std::string> tstFolders = getFolders(TESTPATHS);
     std::sort(tstFolders.begin(),tstFolders.end());
