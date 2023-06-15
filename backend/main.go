@@ -23,6 +23,7 @@ func indexView(c *gin.Context) {
 // Setup Gin Routes
 func SetupRoutes() *gin.Engine {
 	// Use Gin as router
+	// gin.SetMode(gin.releaseMode) 
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
