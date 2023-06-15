@@ -21,9 +21,9 @@ BluetoothSerial SerialBT;
 // #define ENABLE_HTTP_SERVER
 #define OUTPUT_DEBUG
 
-const uint8_t redPin = 19;
-const uint8_t greenPin = 18;
-const uint8_t bluePin = 5;
+// const uint8_t redPin = 19;
+// const uint8_t greenPin = 18;
+// const uint8_t bluePin = 5;
 
 TaskHandle_t communication;  // task on core 0 for communication
 
@@ -42,12 +42,19 @@ unsigned long timerDelay = 5000;
 float POSITION_SETPOINT = 0;
 
 // Define pin connections
-const int leftDirPin = 32; //A4
-const int leftStepPin = 33; //A3
+const int leftDirPin = 26; //A1
+const int leftStepPin = 25; //A2
 // Define pin connections
-const int rightDirPin = 25; //A2
-const int rightStepPin = 26; //A1
-//D2 D3 for 23 and 22 (sda and scl)
+const int rightDirPin = 33; //A3
+const int rightStepPin = 32; //A4
+//4 is sda is orange, 3 is scl is yellow
+
+const int leftMicro1 = 5; // 7 is blue - GPIO5
+const int leftMicro2 = 18; // 6 is white - GPIO18
+const int leftMicro3 = 19; // 5 is red - GPIO19
+const int rightMicro1 = 15; // 12 is blue - GPIO15
+const int rightMicro2 = 4; // 11 is white - GPIO4
+const int rightMicro3 = 14; // 10 is red - GPIO14
 
 // Define motor interface type
 #define motorInterfaceType 1
@@ -69,51 +76,31 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 VectorInt16 gyro;
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
-// heading PD controller
-float Kp_heading = 0; //0.8
+// heading PID controller
+float Kp_heading = 0;
 float Ki_heading = 0;
-float Kd_heading = 0; //0.2
+float Kd_heading = 0;
 
-// position PD controller -- Kp = -0.00123, Ki = -1.88e-06, Kd = -0.202
-// float Kp_position = 12;
+// position PID controller
 float Kp_position = 40;
 float Ki_position = 0;
 float Kd_position = 0;
-// float Kp_position = 40;
-// float Ki_position = 0;
-// float Kd_position = 0.1;
-// float Kp_position = -0.00123;
-// float Ki_position = -0.00000186;
-// float Kd_position = -0.202;
-// float Kp_position = 0.0005;
-// float Ki_position = 0;
-// float Kd_position = 0.75;
+
+// balance PID controller
+float Kp_tilt = 75;
+float Ki_tilt = 0;
+float Kd_tilt = 0;
+
+bool correcting1 = 0;
+bool correcting2 = 0;
+
+// balance rate PID controller
+// float Kp_tiltRate = 75;
+// float Ki_tiltRate = 0;
+// float Kd_tiltRate = 0;
 
 int maxSpeed = 1000;
 int acceleration = 600;
-
-
-// balance PID controller -- Kp = 18.3, Ki = 26.3, Kd = 1.88
-// float Kp_tilt = 13.5;  //13.5      //175 // 16 //2min17s
-// float Ki_tilt = 0;     //5
-// float Kd_tilt = 0.0012;  //0.0012      //8.5 // 0.0013
-float Kp_tilt = 75;  //13.5      //175 // 16 //2min17s
-float Ki_tilt = 0;     //5
-float Kd_tilt = 0;  //0.0012      //8.5 // 0.0013
-// float Kp_tilt = 13.5;      //175 // 16 //2min17s
-// float Ki_tilt = 0;     //5
-// float Kd_tilt = 0.0012;      //8.5 // 0.0013
-// float Kp_tilt = 43;  //13.5      //175 // 16 //2min17s
-// float Ki_tilt = 14.4;     //5
-// float Kd_tilt = 0.02;  //0.0012      //8.5 // 0.0013
-// float Kp_tilt = 2;        //175
-// float Ki_tilt = 0.0075;     //5
-// float Kd_tilt = 2;        //8.5
-
-
-// float Kp_tiltRate = 75;  //13.5      //175 // 16 //2min17s
-// float Ki_tiltRate = 0;     //5
-// float Kd_tiltRate = 0;  //0.0012      //8.5 // 0.0013
 
 float balanceCenter = 0;  // whatever tilt value is balanced
 float P_bias, T_bias, Trate_bias, H_bias = 0;
@@ -143,12 +130,26 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
   
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
+  // pinMode(redPin, OUTPUT);
+  // pinMode(greenPin, OUTPUT);
+  // pinMode(bluePin, OUTPUT);
+
+  pinMode(leftMicro1, OUTPUT);
+  pinMode(leftMicro2, OUTPUT);
+  pinMode(leftMicro3, OUTPUT);
+  pinMode(rightMicro1, OUTPUT);
+  pinMode(rightMicro2, OUTPUT);
+  pinMode(rightMicro3, OUTPUT);
+  
+  digitalWrite(leftMicro1 , LOW);
+  digitalWrite(leftMicro2 , LOW);
+  digitalWrite(leftMicro3 , LOW);
+  digitalWrite(rightMicro1, LOW);
+  digitalWrite(rightMicro2, LOW);
+  digitalWrite(rightMicro3, LOW);
 
   // initialize device
-  setColour(170, 0, 255); // purple
+  // setColour(170, 0, 255); // purple
 
   // initialize device
   mpu.initialize();
@@ -177,9 +178,9 @@ void setup() {
       SerialBT.println(F("Enabling DMP..."));
       mpu.setDMPEnabled(true);
       dmpReady = true;
-      setColour(0, 255, 0); // bueno, set green 
-      delay(600);
-      setColour(0, 0, 0); // kill
+      // setColour(0, 255, 0); // bueno, set green 
+      // delay(600);
+      // setColour(0, 0, 0); // kill
   } else {
       // ERROR!
       // 1 = initial memory load failed
@@ -188,7 +189,7 @@ void setup() {
       SerialBT.print(F("DMP Initialization failed (code "));
       SerialBT.print(devStatus);
       SerialBT.println(F(")"));
-      setColour(255, 0, 0);
+      // setColour(255, 0, 0);
       // Serial.print(F("DMP Initialization failed (code "));
       // Serial.print(devStatus);
       // Serial.println(F(")"));
@@ -196,14 +197,14 @@ void setup() {
 
   preferences.begin("bastard", false);
 
-  Kp_tilt = preferences.getFloat("P", 0);
-  Ki_tilt = preferences.getFloat("I", 0);
-  Kd_tilt = preferences.getFloat("D", 0);
-  Kp_position = preferences.getFloat("Pp", 0);
-  Ki_position = preferences.getFloat("Ii", 0);
-  Kd_position = preferences.getFloat("Dd", 0);
-  acceleration = preferences.getInt("A", 0);
-  maxSpeed = preferences.getInt("S", 0);
+  // Kp_tilt = preferences.getFloat("P", 0);
+  // Ki_tilt = preferences.getFloat("I", 0);
+  // Kd_tilt = preferences.getFloat("D", 0);
+  // Kp_position = preferences.getFloat("Pp", 0);
+  // Ki_position = preferences.getFloat("Ii", 0);
+  // Kd_position = preferences.getFloat("Dd", 0);
+  // acceleration = preferences.getInt("A", 0);
+  // maxSpeed = preferences.getInt("S", 0);
 
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
@@ -216,19 +217,16 @@ void setup() {
     0);                // pin task to core 0 -- by default we pin to core 1 
   
 	leftStepper.setMaxSpeed(maxSpeed);
-	leftStepper.setAcceleration(acceleration);
+	// leftStepper.setAcceleration(acceleration);
 	leftStepper.setMinPulseWidth(20);
 	rightStepper.setMaxSpeed(maxSpeed);
-	rightStepper.setAcceleration(acceleration);
+	// rightStepper.setAcceleration(acceleration);
 	rightStepper.setMinPulseWidth(20);
   
   delay(1000);
 }
 
 void loop() {
-
-  // Serial.println(xPortGetCoreID());
-
   // -------- READ FROM IMU ---------- // 
 
   if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)){
@@ -242,6 +240,37 @@ void loop() {
   oldMillis = millis();
 
   // -------- PID CONTROLLER ---------- // 
+  float tiltReading = ypr[1] * 180/M_PI;
+
+  if (abs(tiltReading) < preferences.getFloat("B1", 0)) {
+    Kp_tilt = preferences.getFloat("P1", 0);
+    Ki_tilt = preferences.getFloat("I1", 0);
+    Kd_tilt = preferences.getFloat("D1", 0);
+    Kp_position = preferences.getFloat("Pp1", 0);
+    Ki_position = preferences.getFloat("Ii1", 0);
+    Kd_position = preferences.getFloat("Dd1", 0);
+    maxSpeed = preferences.getInt("S1", 0);
+    digitalWrite(leftMicro1 , HIGH);
+    digitalWrite(leftMicro2 , HIGH);
+    digitalWrite(leftMicro3 , LOW);
+    digitalWrite(rightMicro1, HIGH);
+    digitalWrite(rightMicro2, HIGH);
+    digitalWrite(rightMicro3, LOW);
+  } else {
+    Kp_tilt = preferences.getFloat("P2", 0);
+    Ki_tilt = preferences.getFloat("I2", 0);
+    Kd_tilt = preferences.getFloat("D2", 0);
+    Kp_position = preferences.getFloat("Pp2", 0);
+    Ki_position = preferences.getFloat("Ii2", 0);
+    Kd_position = preferences.getFloat("Dd2", 0);
+    maxSpeed = preferences.getInt("S2", 0);
+    digitalWrite(leftMicro1 , LOW);
+    digitalWrite(leftMicro2 , LOW);
+    digitalWrite(leftMicro3 , LOW);
+    digitalWrite(rightMicro1, LOW);
+    digitalWrite(rightMicro2, LOW);
+    digitalWrite(rightMicro3, LOW);
+  }
 
   // position control first
   float positionReading = getDistance();  // example I used for the controller has position read from rotary encoders - this value is total distance travelled
@@ -254,10 +283,7 @@ void loop() {
   P_integral[0] = P_integral[1];  // time shift integral readings after out calculated
   P_error[0] = P_error[1];
 
-  // P_out = constrain(P_out, -15, 15);
-
   // balance control
-  float tiltReading = ypr[1] * 180/M_PI;
   T_error[1] = balanceCenter + P_out - tiltReading;             // offset the tilt reading with the distance output to allow us to manipulate the position of the robot via tilt
   T_integral[1] = T_integral[0] + T_error[1] * iteration_time;  // 1 is current, 0 is old
   T_derivative = (T_error[1] - T_error[0]) / iteration_time;
@@ -277,11 +303,6 @@ void loop() {
   // Trate_integral[0] = Trate_integral[1];  // time shift integral readings after out calculated
   // Trate_error[0] = Trate_error[1];
 
-
-
-
-
-
   // heading control to offset the wheels for rotation
   float headingReading = ypr[0] * 180/M_PI;
   H_error[1] = HEADING_SETPOINT - headingReading;
@@ -294,84 +315,53 @@ void loop() {
 
   leftWheelDrive = T_out + H_out;  // voltage / pwm that will actually drive the wheels
   rightWheelDrive = T_out - H_out;
-  // leftWheelDrive = T_out;  // voltage / pwm that will actually drive the wheels
-  // rightWheelDrive = T_out;
 
   leftWheelDrive = constrain(leftWheelDrive, -maxSpeed, maxSpeed);
   rightWheelDrive = -constrain(rightWheelDrive, -maxSpeed, maxSpeed);
 
-  // leftWheelDrive = 200;
-  // rightWheelDrive = 200;
+  // WHIP
+  if (tiltReading > preferences.getFloat("B2", 0) || (correcting1 && tiltReading > preferences.getFloat("B3", 0))) {
+    int speed = preferences.getInt("S3", 0);
+	  leftStepper.setMaxSpeed(speed);
+	  rightStepper.setMaxSpeed(speed);
+    leftWheelDrive = -speed;
+    rightWheelDrive = speed;
+    correcting1 = true;
+  } else if (tiltReading < -preferences.getFloat("B2", 0) || (correcting2 && tiltReading < -preferences.getFloat("B3", 0))) {
+    int speed = preferences.getInt("S3", 0);
+	  leftStepper.setMaxSpeed(speed);
+	  rightStepper.setMaxSpeed(speed);
+    leftWheelDrive = speed;
+    rightWheelDrive = -speed;
+    correcting2 = true;
+  }
 
-  // if (tiltReading > 5) {
-  //   leftWheelDrive = rightWheelDrive = 150;
-  // } else if (tiltReading < -5) {
-  //   leftWheelDrive = rightWheelDrive = -150;
-  // }
+  if (correcting1 && !(tiltReading > preferences.getFloat("B3", 0))) {
+    correcting1 = false;
+  }
+  if (correcting2 && !(tiltReading < -preferences.getFloat("B3", 0))) {
+    correcting2 = false;
+  }
 
-  // leftStepper.setAcceleration(abs(leftWheelDrive));
-  // rightStepper.setAcceleration(abs(rightWheelDrive));
-	// Move the motor one step
-  // if (leftWheelDrive > 0) {
-  //   leftStepper.moveTo(leftStepper.currentPosition() + 100);
-  // } else {
-  //   leftStepper.moveTo(leftStepper.currentPosition() - 100);
-  // }
   leftStepper.setSpeed(leftWheelDrive);
 	leftStepper.runSpeed();
-  // if (rightWheelDrive > 0) {
-  //   rightStepper.moveTo(rightStepper.currentPosition() + 100);
-  // } else {
-  //   rightStepper.moveTo(rightStepper.currentPosition() - 100);
-  // }
   rightStepper.setSpeed(rightWheelDrive);
 	rightStepper.runSpeed();
-	// leftStepper.run();
-	// leftStepper.setSpeed(200);
-	// rightStepper.run();  
-	// rightStepper.setSpeed(200);
 
   delayMicroseconds(1000);
   // vTaskDelay(10);
 }
 
-void setColour(uint8_t r, uint8_t g, uint8_t b){
-  analogWrite(redPin, r);
-  analogWrite(greenPin, g);
-  analogWrite(bluePin, b);
-}
-
-float convertYaw(float yaw){
-  while (yaw < 0.0){
-    yaw = yaw + 360.0;
-  }
-  while (yaw > 360.0){
-    yaw = yaw - 360.0;
-  }
-  return yaw;
-}
-
-float getDistance() {  //unsure of how this reading will work - needs to be 1D (as in just x)
-  // could potentially have position just be a relative thing i.e. move forwards 1 / backwards 1 rather than move to position 23?
-
+float getDistance() {
   leftDistance = leftStepper.currentPosition()/200.0 * 0.175 * M_PI;
   rightDistance = rightStepper.currentPosition()/200.0 * 0.175 * M_PI;
 
-  // if ((abs(leftDistance) >= abs(rightDistance) && leftDistance >= 0) || (abs(leftDistance) < abs(rightDistance) && rightDistance >= 0)) {
-  //   totalDistance = sqrt(square(leftDistance) + square(rightDistance)) / 2.0;
-  // } else {
-  //   totalDistance = -sqrt(square(leftDistance) + square(rightDistance)) / 2.0;
-  // }
   totalDistance = (leftDistance + rightDistance) / 2.0;
 
   // POSITION_SETPOINT = totalDistance + 0.1;
 
   return totalDistance;
-
-  // return 0;
 }
-
-
 
 void communicationCode(void* pvParameters) {
   // -------- OUTPUTS ---------- //
@@ -381,94 +371,135 @@ void communicationCode(void* pvParameters) {
     SerialBT.print("L: ");
     SerialBT.print(L);
     SerialBT.print(", R: ");
-    SerialBT.println(R);
+    SerialBT.print(R);
     SerialBT.print(", Pitch: ");
     SerialBT.println(ypr[1] * 180/M_PI);
-    // Serial.print("L: ");
-    // Serial.print(L);
-    // Serial.print(", R: ");
-    // Serial.println(R);
 
     if (SerialBT.available()) {
       String test = SerialBT.readString();
-      if (test.substring(0,2) == "Pp") {
-        preferences.putInt("Pp", test.substring(2,test.length()-1).toFloat());
-        Kp_position = preferences.getInt("Pp", 0);
-        SerialBT.print("Set Pp to ");
-        SerialBT.println(Kp_position);
-      } else if (test.substring(0,2) == "Ii") {
-        preferences.putInt("Ii", test.substring(2,test.length()-1).toFloat());
-        Ki_position = preferences.getInt("Ii", 0);
-        SerialBT.print("Set Ii to ");
-        SerialBT.println(Ki_position);
-      } else if (test.substring(0,2) == "Dd") {
-        preferences.putInt("Dd", test.substring(2,test.length()-1).toFloat());
-        Kd_position = preferences.getInt("Dd", 0);
-        SerialBT.print("Set Dd to ");
-        SerialBT.println(Kd_position);
-      } else if (test[0] == 'P') {
-        preferences.putFloat("P", test.substring(1,test.length()-1).toFloat());
-        Kp_tilt = preferences.getFloat("P", 0);
-        SerialBT.print("Set P to ");
-        SerialBT.println(Kp_tilt);
-      } else if (test[0] == 'I') {
-        preferences.putFloat("I", test.substring(1,test.length()-1).toFloat());
-        Ki_tilt = preferences.getFloat("I", 0);
-        SerialBT.print("Set I to ");
-        SerialBT.println(Ki_tilt);
-      } else if (test[0] == 'D') {
-        preferences.putFloat("D", test.substring(1,test.length()-1).toFloat());
-        Kd_tilt = preferences.getFloat("D", 0);
-        SerialBT.print("Set D to ");
-        SerialBT.println(Kd_tilt);
-      } else if (test[0] == 'A') {
-        preferences.putInt("A", test.substring(1,test.length()-1).toInt());
-        acceleration = preferences.getInt("A", 0);
-        SerialBT.print("Set A to ");
-        SerialBT.println(acceleration);
-        leftStepper.setAcceleration(acceleration);
-        rightStepper.setAcceleration(acceleration);
-      } else if (test[0] == 'S') {
-        preferences.putInt("S", test.substring(1,test.length()-1).toInt());
-        maxSpeed = preferences.getInt("S", 0);
-        SerialBT.print("Set S to ");
-        SerialBT.println(maxSpeed);
-        leftStepper.setMaxSpeed(maxSpeed);
-        rightStepper.setMaxSpeed(maxSpeed);
+      if (test.substring(0,3) == "Pp1") {
+        preferences.putFloat("Pp1", test.substring(3,test.length()-1).toFloat());
+        // Kp_position = preferences.getInt("Pp", 0);
+        SerialBT.print("Set Pp1 to ");
+        SerialBT.println(preferences.getFloat("Pp1", 0));
+      } else if (test.substring(0,3) == "Ii1") {
+        preferences.putFloat("Ii1", test.substring(3,test.length()-1).toFloat());
+        // Ki_position = preferences.getInt("Ii", 0);
+        SerialBT.print("Set Ii1 to ");
+        SerialBT.println(preferences.getFloat("Ii1", 0));
+      } else if (test.substring(0,3) == "Dd1") {
+        preferences.putFloat("Dd1", test.substring(3,test.length()-1).toFloat());
+        // Kd_position = preferences.getInt("Dd", 0);
+        SerialBT.print("Set Dd1 to ");
+        SerialBT.println(preferences.getFloat("Dd1", 0));
+      } else if (test.substring(0,3) == "Pp2") {
+        preferences.putFloat("Pp2", test.substring(3,test.length()-1).toFloat());
+        // Kp_position = preferences.getInt("Pp", 0);
+        SerialBT.print("Set Pp2 to ");
+        SerialBT.println(preferences.getFloat("Pp2", 0));
+      } else if (test.substring(0,3) == "Ii2") {
+        preferences.putFloat("Ii2", test.substring(3,test.length()-1).toFloat());
+        // Ki_position = preferences.getInt("Ii", 0);
+        SerialBT.print("Set Ii2 to ");
+        SerialBT.println(preferences.getFloat("Ii2", 0));
+      } else if (test.substring(0,3) == "Dd2") {
+        preferences.putFloat("Dd2", test.substring(3,test.length()-1).toFloat());
+        // Kd_position = preferences.getInt("Dd", 0);
+        SerialBT.print("Set Dd2 to ");
+        SerialBT.println(preferences.getFloat("Dd2", 0));
+      } else if (test.substring(0,2) == "P1") {
+        preferences.putFloat("P1", test.substring(2,test.length()-1).toFloat());
+        // Kp_tilt = preferences.getFloat("P", 0);
+        SerialBT.print("Set P1 to ");
+        SerialBT.println(preferences.getFloat("P1", 0), 4);
+      } else if (test.substring(0,2) == "I1") {
+        preferences.putFloat("I1", test.substring(2,test.length()-1).toFloat());
+        // Kp_tilt = preferences.getFloat("P", 0);
+        SerialBT.print("Set I1 to ");
+        SerialBT.println(preferences.getFloat("I1", 0), 4);
+      } else if (test.substring(0,2) == "D1") {
+        preferences.putFloat("D1", test.substring(2,test.length()-1).toFloat());
+        // Kp_tilt = preferences.getFloat("P", 0);
+        SerialBT.print("Set D1 to ");
+        SerialBT.println(preferences.getFloat("D1", 0), 4);
+      } else if (test.substring(0,2) == "P2") {
+        preferences.putFloat("P2", test.substring(2,test.length()-1).toFloat());
+        // Kp_tilt = preferences.getFloat("P", 0);
+        SerialBT.print("Set P2 to ");
+        SerialBT.println(preferences.getFloat("P2", 0), 4);
+      } else if (test.substring(0,2) == "I2") {
+        preferences.putFloat("I2", test.substring(2,test.length()-1).toFloat());
+        // Kp_tilt = preferences.getFloat("P", 0);
+        SerialBT.print("Set I2 to ");
+        SerialBT.println(preferences.getFloat("I2", 0), 4);
+      } else if (test.substring(0,2) == "D2") {
+        preferences.putFloat("D2", test.substring(2,test.length()-1).toFloat());
+        // Kp_tilt = preferences.getFloat("P", 0);
+        SerialBT.print("Set D2 to ");
+        SerialBT.println(preferences.getFloat("D2", 0), 4);
+      } else if (test.substring(0,2) == "S1") {
+        preferences.putInt("S1", test.substring(2,test.length()-1).toInt());
+        // maxSpeed1 = preferences.getInt("S1", 0);
+        SerialBT.print("Set S1 to ");
+        SerialBT.println(preferences.getInt("S1", 0));
+      } else if (test.substring(0,2) == "S2") {
+        preferences.putInt("S2", test.substring(2,test.length()-1).toInt());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set S2 to ");
+        SerialBT.println(preferences.getInt("S2", 0));
+      } else if (test.substring(0,2) == "S3") {
+        preferences.putInt("S3", test.substring(2,test.length()-1).toInt());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set S3 to ");
+        SerialBT.println(preferences.getInt("S3", 0));
+      } else if (test.substring(0,1) == "B1") {
+        preferences.putFloat("B1", test.substring(2,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set B1 to ");
+        SerialBT.println(preferences.getFloat("B1", 0));
+      } else if (test.substring(0,2) == "B2") {
+        preferences.putFloat("B2", test.substring(2,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set B2 to ");
+        SerialBT.println(preferences.getFloat("B2", 0));
+      } else if (test.substring(0,2) == "B3") {
+        preferences.putFloat("B3", test.substring(2,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set B3 to ");
+        SerialBT.println(preferences.getFloat("B3", 0));
       } else if (test[0] == 'C') {
-        SerialBT.print("P: ");
-        SerialBT.print(Kp_tilt);
-        SerialBT.print("I: ");
-        SerialBT.print(Ki_tilt);
-        SerialBT.print("D: ");
-        SerialBT.print(Kd_tilt);
-        SerialBT.print("Pp: ");
-        SerialBT.print(Kp_position);
+        SerialBT.print("P1: ");
+        SerialBT.print(preferences.getFloat("P1", 0), 4);
+        SerialBT.print(" I1: ");
+        SerialBT.print(preferences.getFloat("I1", 0), 4);
+        SerialBT.print(" D1: ");
+        SerialBT.print(preferences.getFloat("D1", 0), 4);
+        SerialBT.print(" P2: ");
+        SerialBT.print(preferences.getFloat("P2", 0), 4);
+        SerialBT.print(" I2: ");
+        SerialBT.print(preferences.getFloat("I2", 0), 4);
+        SerialBT.print(" D2: ");
+        SerialBT.print(preferences.getFloat("D2", 0), 4);
+        SerialBT.print(" Pp1: ");
+        SerialBT.print(preferences.getFloat("Pp1", 0), 4);
+        SerialBT.print(" Ii1: ");
+        SerialBT.print(preferences.getFloat("Ii1", 0), 4);
+        SerialBT.print(" Dd1: ");
+        SerialBT.print(preferences.getFloat("Dd1", 0), 4);
+        SerialBT.print(" Pp2: ");
+        SerialBT.print(preferences.getFloat("Pp2", 0), 4);
+        SerialBT.print(" Ii2: ");
+        SerialBT.print(preferences.getFloat("Ii2", 0), 4);
+        SerialBT.print(" Dd2: ");
+        SerialBT.print(preferences.getFloat("Dd2", 0), 4);
+        SerialBT.print(" maxSpeed1: ");
+        SerialBT.print(preferences.getInt("S1", 0));
+        SerialBT.print(" maxSpeed2: ");
+        SerialBT.print(preferences.getInt("S2", 0));
+        SerialBT.print(" correct speed: ");
+        SerialBT.print(preferences.getInt("S3", 0));
       }
     }
-    // SerialBT.print(" T: ");
-    // SerialBT.print(T_out);
-    // SerialBT.print(" H: ");
-    // SerialBT.print(H_out);
-    // getDistance();
-    // Serial.print(" L_D: ");
-    // Serial.print(leftDistance);
-    // Serial.print(" R_D: ");
-    // Serial.print(rightDistance);
-    // SerialBT.print(" L_D: ");
-    // SerialBT.print(leftDistance);
-    // SerialBT.print(" R_D: ");
-    // SerialBT.print(rightDistance);
-    // SerialBT.print(" P_out: ");
-    // SerialBT.print(P_out);
-    // SerialBT.print(" Distance: ");
-    // SerialBT.print(totalDistance);
-    // SerialBT.print("  pitch: ");
-    // SerialBT.print(ypr[1] * 180/M_PI);
-    // SerialBT.print(" roll: ");
-    // SerialBT.print(ypr[2] * 180/M_PI);
-    // SerialBT.print(" yaw: ");
-    // SerialBT.println(ypr[0] * 180/M_PI);
     vTaskDelay(100);
   }
 }
