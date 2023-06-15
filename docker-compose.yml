@@ -1,0 +1,8 @@
+version: "3.8"
+  
+services:
+  tst:
+    build: ./
+    container_name: tst_env
+    stdin_open: true
+    tty: true
