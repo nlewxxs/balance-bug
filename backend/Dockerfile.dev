@@ -64,8 +64,8 @@ ENV PATH="$GOPATH/bin:$GOROOT/bin:$PATH"
 WORKDIR /usr/src/app
 COPY . .
 #RUN go build -v -o /usr/local/bin/app ./...
-WORKDIR /usr/src/app/balance-bug/backend
-RUN go run main.go
+# WORKDIR /usr/src/app/balance-bug/backend
+# RUN go run main.go
 
 
 ENTRYPOINT [ "/bin/bash" ]

@@ -61,8 +61,8 @@ ENV PATH="$GOPATH/bin:$GOROOT/bin:$PATH"
 # RUN echo "export GOROOT=/usr/local/go" >> /etc/bash.bashrc
 # RUN echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> /etc/bash.bashrc
 
-WORKDIR /home/go/src
-COPY ./backend/ImageClassification ./
+# WORKDIR /home/go/src
+# COPY ./backend/ImageClassification ./
 
 WORKDIR /usr/src/app
 COPY . .
