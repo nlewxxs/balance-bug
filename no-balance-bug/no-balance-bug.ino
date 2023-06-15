@@ -1,3 +1,7 @@
+#include <StackArray.h>
+#include <map>
+#include <stack>
+#include <vector>
 #include <Wire.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -12,7 +16,7 @@
 // #define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
 // #define ENABLE_CAMERA
-#define ENABLE_MOTORS
+// #define ENABLE_MOTORS
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
