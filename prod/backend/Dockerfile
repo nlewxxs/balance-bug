@@ -7,6 +7,6 @@ WORKDIR /usr/src/app
 COPY . .
 
 EXPOSE 8081
-RUN ["chmod", "+x", "./main"]
-ENTRYPOINT ["./main"]
+RUN ["chmod", "+x", "./backend"]
+ENTRYPOINT ["./backend"]
 

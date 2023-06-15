@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -20,8 +20,8 @@ type BugInformationStruct struct {
 }
 
 type BugNameIdStruct struct {
-	BugName  string `json:"BugName"`
-	BugId    string `json:"BugId"`
+	BugName string `json:"BugName"`
+	BugId   string `json:"BugId"`
 }
 
 // CRUD: Create Read Update Delete API Format
@@ -41,7 +41,7 @@ func DisplayBugInformation(c *gin.Context) {
 		for rows.Next() {
 			// Individual row processing
 			BugInformationRow := BugInformationStruct{}
-			if err := rows.Scan(&BugInformationRow.BugId,&BugInformationRow.BugName, &BugInformationRow.LastSeen); err != nil {
+			if err := rows.Scan(&BugInformationRow.BugId, &BugInformationRow.BugName, &BugInformationRow.LastSeen); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
@@ -72,7 +72,7 @@ func AddBugInformation(c *gin.Context) {
 	// Validate entry
 	if len(BugIdNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
-	} else  if len(BugNameNew) == 0 {
+	} else if len(BugNameNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
 	} else {
 		var BugInformationNew BugInformationStruct
@@ -110,7 +110,7 @@ func PingBugInformation(c *gin.Context) {
 		return
 	}
 
-    t := time.Now().In(location)
+	t := time.Now().In(location)
 	BugInformationNew.LastSeen = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
@@ -163,28 +163,27 @@ func UpdateBugNameBugInformation(c *gin.Context) {
 	}
 }
 
-
 func OnlineBugInformation(c *gin.Context) {
 
 	TimeoutNew := c.Query("Timeout")
 	Timeout := 5.0
-	
-	if (len(TimeoutNew) > 0) {
+
+	if len(TimeoutNew) > 0 {
 		TimeoutExtracted, err := strconv.ParseFloat(TimeoutNew, 32)
 		if err != nil {
-			c.JSON(http.StatusNotAcceptable, gin.H{"message" : "invalid timeout format, please enter a valid float"})
+			c.JSON(http.StatusNotAcceptable, gin.H{"message": "invalid timeout format, please enter a valid float"})
 		}
 		Timeout = TimeoutExtracted
 	}
 
-	location, err := time.LoadLocation("Europe/London")
+	//location, err := time.LoadLocation("Europe/London")
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+	// 	return
+	// }
 
-    t := time.Now().In(location)
+	t := time.Now() //.In(location)
 	CurrentTime := t.Format("2006-01-02 15:04:05")
 	fmt.Println(CurrentTime, Timeout)
 
@@ -192,7 +191,7 @@ func OnlineBugInformation(c *gin.Context) {
 	rows, err := db.Query(`SELECT BugName, BugId
 	                       FROM testdb.BugInformation 
 			       WHERE TIMESTAMPDIFF(SECOND, LastSeen, ?) < ?`,
-			       CurrentTime, Timeout)
+		CurrentTime, Timeout)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
@@ -214,7 +213,6 @@ func OnlineBugInformation(c *gin.Context) {
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
-
 
 	// Log message
 	log.Println("Retrieved Online Bugs")

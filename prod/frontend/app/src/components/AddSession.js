@@ -44,7 +44,7 @@ function AddSession() {
         return false;
     };
 
-    const url = "http://localhost:8081/BugInformation/Online?Timeout=inf"
+    const url = "http://90.196.3.86:8081/BugInformation/Online?Timeout=inf"
     
     const getOnlineBugs = () => {
         fetchData(url)
@@ -114,7 +114,7 @@ function AddSession() {
         dateTime = dateTime.replace('T', '%20').replace('Z', '');
         // Make api call
         setLoading(true);
-        const url = `http://localhost:8081/Session/Add?TimeStamp=${dateTime}&BugName=${selectedOption}&SessionName=${sessionName}`;
+        const url = `http://90.196.3.86:8081/Session/Add?TimeStamp=${dateTime}&BugName=${selectedOption}&SessionName=${sessionName}`;
         fetchData(url)
         .then( response => {
             //console.log(response.data);
