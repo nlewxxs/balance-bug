@@ -15,7 +15,7 @@ services:
 
   go-api:
     build: 
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
       # context: ./backend
     container_name: go-api
     ports:

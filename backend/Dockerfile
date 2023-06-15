@@ -10,18 +10,20 @@
 
 # RUN go mod download
 
-# RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -installsuffix cgo -o /go/bin/build
+# #RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -a -installsuffix cgo -o /go/bin/build
 
 
-# FROM scratch
+# #FROM scratch
 
-# COPY --from=builder /go/bin/build /go/bin/build
-# COPY --from=builder /build/wait-for-it.sh ./wait-for-it.sh
+# #COPY --from=builder /go/bin/build /go/bin/build
+# #COPY --from=builder /build/wait-for-it.sh ./wait-for-it.sh
 
-# CMD ["chmod", "+x", "wait-for-it.sh"]
-# CMD ["./wait-for-it.sh", "db:5432", "--"]
+# #CMD ["chmod", "+x", "wait-for-it.sh"]
+# #CMD ["./wait-for-it.sh", "db:5432", "--"]
+# CMD ['dev']
+# ENTRYPOINT [ "/bin/bash" ]
 
-# ENTRYPOINT ["/go/bin/build"]
+# #ENTRYPOINT ["/go/bin/build"]
 
 # EXPOSE 8081
 FROM ubuntu:22.04
@@ -49,6 +51,7 @@ RUN apt-get install yarn -y
 
 RUN apt-get install nodejs -y
 RUN apt-get install build-essential -y
+RUN apt-get install git -y
 
 ENV GOROOT="/home/go"
 ENV GOPATH="/usr/src/"
@@ -58,9 +61,15 @@ ENV PATH="$GOPATH/bin:$GOROOT/bin:$PATH"
 # RUN echo "export GOROOT=/usr/local/go" >> /etc/bash.bashrc
 # RUN echo "export PATH=$GOPATH/bin:$GOROOT/bin:$PATH" >> /etc/bash.bashrc
 
+WORKDIR /home/go/src
+COPY ./backend/ImageClassification ./
+
 WORKDIR /usr/src/app
 COPY . .
 #RUN go build -v -o /usr/local/bin/app ./...
+# WORKDIR /usr/src/app/balance-bug/backend
+# RUN go run main.go
+
 
 ENTRYPOINT [ "/bin/bash" ]
 #CMD ["app"]
