@@ -91,13 +91,21 @@ float Kp_tilt = 75;
 float Ki_tilt = 0;
 float Kd_tilt = 0;
 
-bool correcting1 = 0;
-bool correcting2 = 0;
+// bool correcting1 = 0;
+// bool correcting2 = 0;
+bool correcting = false;
+bool microStepping = false;
+bool first = true;
+
+// float calibrationOffset = 27.73;
+float calibrationOffset = 0;
 
 // balance rate PID controller
 // float Kp_tiltRate = 75;
 // float Ki_tiltRate = 0;
 // float Kd_tiltRate = 0;
+
+// acceptable pid values -- 200,8,1,20 -- 160,25,0.02,30. Correcting: 4,4,-0.5
 
 int maxSpeed = 1000;
 int acceleration = 600;
@@ -114,9 +122,12 @@ unsigned long oldMillis = 0;
 float leftWheelDrive;
 float rightWheelDrive;
 
-float totalDistance;
-float leftDistance;
-float rightDistance;
+// float totalDistance;
+// float leftDistance;
+// float rightDistance;
+
+unsigned long lastStabilityTime = 0;
+float stabBuffer[3] = {720.0, 720.0, 720.0};
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
@@ -141,9 +152,9 @@ void setup() {
   pinMode(rightMicro2, OUTPUT);
   pinMode(rightMicro3, OUTPUT);
   
-  digitalWrite(leftMicro1 , LOW);
-  digitalWrite(leftMicro2 , LOW);
-  digitalWrite(leftMicro3 , LOW);
+  digitalWrite(leftMicro1, LOW);
+  digitalWrite(leftMicro2, LOW);
+  digitalWrite(leftMicro3, LOW);
   digitalWrite(rightMicro1, LOW);
   digitalWrite(rightMicro2, LOW);
   digitalWrite(rightMicro3, LOW);
@@ -223,7 +234,7 @@ void setup() {
 	// rightStepper.setAcceleration(acceleration);
 	rightStepper.setMinPulseWidth(20);
   
-  delay(1000);
+  delay(500);
 }
 
 void loop() {
@@ -234,39 +245,53 @@ void loop() {
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
     mpu.dmpGetGyro(&gyro, fifoBuffer);
+    if (first) {
+      calibrationOffset = ypr[1] * 180/M_PI;
+      first = false;
+    }
   }
 
   float iteration_time = (millis() - oldMillis) / 1000.0;
   oldMillis = millis();
 
   // -------- PID CONTROLLER ---------- // 
-  float tiltReading = ypr[1] * 180/M_PI;
+  float tiltReading = ypr[1] * 180/M_PI - calibrationOffset;
 
-  if (abs(tiltReading) < preferences.getFloat("B1", 0)) {
+  if (abs(tiltReading) < preferences.getFloat("B1", 0) && !correcting) {
+    microStepping = true;
     Kp_tilt = preferences.getFloat("P1", 0);
     Ki_tilt = preferences.getFloat("I1", 0);
     Kd_tilt = preferences.getFloat("D1", 0);
     Kp_position = preferences.getFloat("Pp1", 0);
     Ki_position = preferences.getFloat("Ii1", 0);
     Kd_position = preferences.getFloat("Dd1", 0);
+    Kp_tiltRate = preferences.getFloat("PR1", 0);
+    Ki_tiltRate = preferences.getFloat("IR1", 0);
+    Kd_tiltRate = preferences.getFloat("DR1", 0);
     maxSpeed = preferences.getInt("S1", 0);
-    digitalWrite(leftMicro1 , HIGH);
-    digitalWrite(leftMicro2 , HIGH);
-    digitalWrite(leftMicro3 , LOW);
+    digitalWrite(leftMicro1, HIGH);
+    digitalWrite(leftMicro2, HIGH);
+    digitalWrite(leftMicro3, LOW);
     digitalWrite(rightMicro1, HIGH);
     digitalWrite(rightMicro2, HIGH);
     digitalWrite(rightMicro3, LOW);
   } else {
+    microStepping = false;
     Kp_tilt = preferences.getFloat("P2", 0);
     Ki_tilt = preferences.getFloat("I2", 0);
     Kd_tilt = preferences.getFloat("D2", 0);
     Kp_position = preferences.getFloat("Pp2", 0);
     Ki_position = preferences.getFloat("Ii2", 0);
     Kd_position = preferences.getFloat("Dd2", 0);
+    Kp_tiltRate = preferences.getFloat("PR2", 0);
+    Ki_tiltRate = preferences.getFloat("IR2", 0);
+    Kd_tiltRate = preferences.getFloat("DR2", 0);
     maxSpeed = preferences.getInt("S2", 0);
-    digitalWrite(leftMicro1 , LOW);
-    digitalWrite(leftMicro2 , LOW);
-    digitalWrite(leftMicro3 , LOW);
+	  leftStepper.setMaxSpeed(maxSpeed);
+	  rightStepper.setMaxSpeed(maxSpeed);
+    digitalWrite(leftMicro1, LOW);
+    digitalWrite(leftMicro2, LOW);
+    digitalWrite(leftMicro3, LOW);
     digitalWrite(rightMicro1, LOW);
     digitalWrite(rightMicro2, LOW);
     digitalWrite(rightMicro3, LOW);
@@ -283,6 +308,9 @@ void loop() {
   P_integral[0] = P_integral[1];  // time shift integral readings after out calculated
   P_error[0] = P_error[1];
 
+  // P_out = constrain(P_out, -preferences.getFloat("B1", 0) * 0.9, preferences.getFloat("B1", 0) * 0.9); // so as to not overcompensate and make us fall over
+  P_out = constrain(P_out, -3, 3); // so as to not overcompensate and make us fall over
+
   // balance control
   T_error[1] = balanceCenter + P_out - tiltReading;             // offset the tilt reading with the distance output to allow us to manipulate the position of the robot via tilt
   T_integral[1] = T_integral[0] + T_error[1] * iteration_time;  // 1 is current, 0 is old
@@ -292,7 +320,7 @@ void loop() {
   T_integral[0] = T_integral[1];  // time shift integral readings after out calculated
   T_error[0] = T_error[1];
   
-  // balance rate control
+  // // balance rate control
   // int tiltRateReading = gyro.y;
   // Trate_error[1] = T_out - tiltRateReading; // tilt rate setpoint is output of the tilt controller - this involves actually thinking about real world tilt rate maybe?
   //                                       // units in rad/s?
@@ -320,43 +348,63 @@ void loop() {
   rightWheelDrive = -constrain(rightWheelDrive, -maxSpeed, maxSpeed);
 
   // WHIP
-  if (tiltReading > preferences.getFloat("B2", 0) || (correcting1 && tiltReading > preferences.getFloat("B3", 0))) {
-    int speed = preferences.getInt("S3", 0);
-	  leftStepper.setMaxSpeed(speed);
-	  rightStepper.setMaxSpeed(speed);
-    leftWheelDrive = -speed;
-    rightWheelDrive = speed;
-    correcting1 = true;
-  } else if (tiltReading < -preferences.getFloat("B2", 0) || (correcting2 && tiltReading < -preferences.getFloat("B3", 0))) {
-    int speed = preferences.getInt("S3", 0);
-	  leftStepper.setMaxSpeed(speed);
-	  rightStepper.setMaxSpeed(speed);
-    leftWheelDrive = speed;
-    rightWheelDrive = -speed;
-    correcting2 = true;
+  // if (-T_error[1] > preferences.getFloat("B2", 0) || (correcting1 && -T_error[1] > preferences.getFloat("B3", 0))) {
+  if (tiltReading > preferences.getFloat("B2", 0)) {
+    // int speed = preferences.getInt("S3", 0);
+	  // leftStepper.setMaxSpeed(speed);
+	  // rightStepper.setMaxSpeed(speed);
+    // leftWheelDrive = -speed;
+    // rightWheelDrive = speed;
+    correcting = true;
+  // } else if (-T_error[1] < -preferences.getFloat("B2", 0) || (correcting2 && -T_error[1] < -preferences.getFloat("B3", 0))) {
+  } else if (tiltReading < -preferences.getFloat("B2", 0)) {
+    // int speed = preferences.getInt("S3", 0);
+	  // leftStepper.setMaxSpeed(speed);
+	  // rightStepper.setMaxSpeed(speed);
+    // leftWheelDrive = speed;
+    // rightWheelDrive = -speed;
+    correcting = true;
   }
 
-  if (correcting1 && !(tiltReading > preferences.getFloat("B3", 0))) {
-    correcting1 = false;
+  if (correcting && (lastStabilityTime - millis() > 666)) {
+    stabBuffer[0] = stabBuffer[1];
+    stabBuffer[1] = stabBuffer[2];
+    stabBuffer[2] = T_error[1];
+    if (abs(stabBuffer[0]) < 1.0 && abs(stabBuffer[1]) < 1.0 && abs(stabBuffer[2]) < 1.0) {
+      correcting = false;
+      stabBuffer[0] = stabBuffer[1] = stabBuffer[2] = 720; // impossible pitch reading
+    }
+    lastStabilityTime = millis();
   }
-  if (correcting2 && !(tiltReading < -preferences.getFloat("B3", 0))) {
-    correcting2 = false;
-  }
+
+  // if (correcting1 && !(-T_error[1] > preferences.getFloat("B3", 0))) {
+  //   correcting1 = false;
+  // }
+  // if (correcting2 && !(-T_error[1] < -preferences.getFloat("B3", 0))) {
+  //   correcting2 = false;
+  // }
 
   leftStepper.setSpeed(leftWheelDrive);
 	leftStepper.runSpeed();
+	// leftStepper.runSpeed();
+	// leftStepper.runSpeed();
+	// leftStepper.runSpeed();
   rightStepper.setSpeed(rightWheelDrive);
 	rightStepper.runSpeed();
+	// rightStepper.runSpeed();
+	// rightStepper.runSpeed();
+	// rightStepper.runSpeed();
 
   delayMicroseconds(1000);
   // vTaskDelay(10);
 }
 
 float getDistance() {
-  leftDistance = leftStepper.currentPosition()/200.0 * 0.175 * M_PI;
-  rightDistance = rightStepper.currentPosition()/200.0 * 0.175 * M_PI;
+  float microStep = microStepping ? 8.0 : 1.0;
+  float leftDistance = leftStepper.currentPosition() * M_PI * 0.175 / 200.0 / microStep;
+  float rightDistance = rightStepper.currentPosition() * M_PI * 0.175 / 200.0 / microStep;
 
-  totalDistance = (leftDistance + rightDistance) / 2.0;
+  float totalDistance = (rightDistance - leftDistance) / 2.0;
 
   // POSITION_SETPOINT = totalDistance + 0.1;
 
@@ -372,9 +420,16 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(L);
     SerialBT.print(", R: ");
     SerialBT.print(R);
-    SerialBT.print(", Pitch: ");
-    SerialBT.println(ypr[1] * 180/M_PI);
+    SerialBT.print(", Pit: ");
+    SerialBT.print(ypr[1] * 180/M_PI - calibrationOffset);
+    SerialBT.print(", Dis: ");
+    SerialBT.print(getDistance());
+    // SerialBT.print(", I: ");
+    // SerialBT.println(T_integral[1]);
+    SerialBT.print(", GY: ");
+    SerialBT.println(gyro.y);
 
+    //bluetooth tuning code
     if (SerialBT.available()) {
       String test = SerialBT.readString();
       if (test.substring(0,3) == "Pp1") {
@@ -452,7 +507,37 @@ void communicationCode(void* pvParameters) {
         // maxSpeed2 = preferences.getInt("S2", 0);
         SerialBT.print("Set S3 to ");
         SerialBT.println(preferences.getInt("S3", 0));
-      } else if (test.substring(0,1) == "B1") {
+      } else if (test.substring(0,3) == "PR1") {
+        preferences.putFloat("PR1", test.substring(3,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set PR1 to ");
+        SerialBT.println(preferences.getFloat("PR1", 0));
+      } else if (test.substring(0,3) == "IR1") {
+        preferences.putFloat("IR1", test.substring(3,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set IR1 to ");
+        SerialBT.println(preferences.getFloat("IR1", 0));
+      } else if (test.substring(0,3) == "DR1") {
+        preferences.putFloat("DR1", test.substring(3,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set DR1 to ");
+        SerialBT.println(preferences.getFloat("DR1", 0));
+      } else if (test.substring(0,3) == "PR2") {
+        preferences.putFloat("PR2", test.substring(3,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set PR2 to ");
+        SerialBT.println(preferences.getFloat("PR2", 0));
+      } else if (test.substring(0,3) == "IR2") {
+        preferences.putFloat("IR2", test.substring(3,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set IR2 to ");
+        SerialBT.println(preferences.getFloat("IR2", 0));
+      } else if (test.substring(0,3) == "DR2") {
+        preferences.putFloat("DR2", test.substring(3,test.length()-1).toFloat());
+        // maxSpeed2 = preferences.getInt("DR2", 0);
+        SerialBT.print("Set DR2 to ");
+        SerialBT.println(preferences.getFloat("DR2", 0));
+      } else if (test.substring(0,2) == "B1") {
         preferences.putFloat("B1", test.substring(2,test.length()-1).toFloat());
         // maxSpeed2 = preferences.getInt("S2", 0);
         SerialBT.print("Set B1 to ");
@@ -467,6 +552,11 @@ void communicationCode(void* pvParameters) {
         // maxSpeed2 = preferences.getInt("S2", 0);
         SerialBT.print("Set B3 to ");
         SerialBT.println(preferences.getFloat("B3", 0));
+      } else if (test.substring(0,2) == "SM") {
+        preferences.putInt("SM", test.substring(2,test.length()-1).toInt());
+        // maxSpeed2 = preferences.getInt("S2", 0);
+        SerialBT.print("Set SM to ");
+        SerialBT.println(preferences.getInt("SM", 0));
       } else if (test[0] == 'C') {
         SerialBT.print("P1: ");
         SerialBT.print(preferences.getFloat("P1", 0), 4);
@@ -498,6 +588,12 @@ void communicationCode(void* pvParameters) {
         SerialBT.print(preferences.getInt("S2", 0));
         SerialBT.print(" correct speed: ");
         SerialBT.print(preferences.getInt("S3", 0));
+        SerialBT.print(" B1: ");
+        SerialBT.print(preferences.getFloat("B1", 0), 4);
+        SerialBT.print(" B2: ");
+        SerialBT.print(preferences.getFloat("B2", 0), 4);
+        SerialBT.print(" B3: ");
+        SerialBT.print(preferences.getFloat("B3", 0), 4);
       }
     }
     vTaskDelay(100);
