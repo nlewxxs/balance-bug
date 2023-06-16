@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cmath>
+#include <math.h>
 
 
 ///////////////////////////////////////////
@@ -138,17 +138,17 @@ Node triangulate (const Angle &input, const float &offset) {
 
 
 int main() {
-    Angle testAngle = {
-        180,          //yellow
-        45.0,           //red
-        315.0,          //blue
-    };
-
     // Angle testAngle = {
-    //     138.814,          //yellow
-    //     54.782,           //red
-    //     345.964,          //blue
+    //     180,          //yellow
+    //     45.0,           //red
+    //     315.0,          //blue
     // };
+
+    Angle testAngle = {
+        138.814,          //yellow
+        54.782,           //red
+        345.964,          //blue
+    };
 
     // Angle testAngle = {
     //     221.186,          //yellow
