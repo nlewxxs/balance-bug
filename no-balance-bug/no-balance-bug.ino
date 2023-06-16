@@ -13,12 +13,12 @@
 #include "Traversal.h"
 
 // MACROS
-#define ENABLE_YAW_OUTPUT
+// #define ENABLE_YAW_OUTPUT
 #define ENABLE_HTTP_SERVER
-#define ENABLE_BLUETOOTH
-#define ENABLE_CAMERA
-#define ENABLE_CLASSIFICATION
-#define ENABLE_MOTORS
+// #define ENABLE_BLUETOOTH
+// #define ENABLE_CAMERA
+// #define ENABLE_CLASSIFICATION
+// #define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
 // // #define YDIST 100
@@ -37,9 +37,14 @@ const uint8_t bluePin = 5;
 
 TaskHandle_t communication;  // task on core 0 for communication
 
-const char* ssid = "CommunityFibre10Gb_AF5A8";
-const char* password = "dvasc4xppp";
-String serverName = "http://192.168.1.16:8081";  // local ip of the backend host (NOT localhost)
+Communicate communicate;
+communicate.ssid = "Ben";
+communicate.password = "begforit";
+communicate.serverName = "http://90.196.3.86:8081";
+
+// const char* ssid = "Ben";
+// const char* password = "begforit";
+// String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
@@ -58,6 +63,8 @@ const int leftStepPin = 33; //A3
 const int rightDirPin = 25; //A2
 const int rightStepPin = 26; //A1
 //D2 D3 for 23 and 22 (sda and scl)
+
+bool initialised = false;
 
 // Define motor interface type
 #define motorInterfaceType 1
@@ -243,18 +250,7 @@ void communicationCode(void* pvParameters) {
 
   #ifdef ENABLE_HTTP_SERVER
     //wifi setup
-    WiFi.begin(ssid, password);
-    debugOutput("Connecting");
-
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-      debugOutput("Attempting WiFi connection...");
-    }
-
-    debugOutput("");
-    debugOutput("Connected to WiFi network with IP Address: ", false);
-    debugOutput(WiFi.localIP());
-    debugOutput("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+    Communicate.init();
   #endif
 
   // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
@@ -267,38 +263,38 @@ void communicationCode(void* pvParameters) {
       debugOutput(ypr[0], false);
     #endif
     #ifdef ENABLE_HTTP_SERVER
-      if (millis() - lastTime > 5000) {
-        //Check WiFi connection status
-        if (WiFi.status() == WL_CONNECTED) {
-          // WiFiClient client;
-          HTTPClient http;
-          // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-          String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
-          // Serial.println(serverPath);
-          // Your Domain name with URL path or IP address with path
-          http.begin(serverPath.c_str());
-          // HTTP GET request
-          int httpResponseCode = http.GET();
+      // if (millis() - lastTime > 5000) {
+      //   //Check WiFi connection status
+      //   if (WiFi.status() == WL_CONNECTED) {
+      //     // WiFiClient client;
+      //     HTTPClient http;
+      //     // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
+      //     String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
+      //     // Serial.println(serverPath);
+      //     // Your Domain name with URL path or IP address with path
+      //     http.begin(serverPath.c_str());
+      //     // HTTP GET request
+      //     int httpResponseCode = http.GET();
 
-          if (httpResponseCode > 0) {
-            debugOutput("HTTP Response code: ", false);
-            debugOutput(httpResponseCode);  // HTTP response code e.g. 200
-            String payload = http.getString();
-            debugOutput(payload);  // HTTP response package e..g JSON object
-          } else {
-            debugOutput("Error code: ", false);
-            debugOutput(httpResponseCode);
-          }
+      //     if (httpResponseCode > 0) {
+      //       debugOutput("HTTP Response code: ", false);
+      //       debugOutput(httpResponseCode);  // HTTP response code e.g. 200
+      //       String payload = http.getString();
+      //       debugOutput(payload);  // HTTP response package e..g JSON object
+      //     } else {
+      //       debugOutput("Error code: ", false);
+      //       debugOutput(httpResponseCode);
+      //     }
 
-          // Free resources
-          http.end();
-        } else {
-          debugOutput("WiFi Disconnected");
-        }
-        // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
-        // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
-        lastTime = millis();
-      }
+      //     // Free resources
+      //     http.end();
+      //   } else {
+      //     debugOutput("WiFi Disconnected");
+      //   }
+      //   // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
+      //   // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
+      //   lastTime = millis();
+      // }
     #endif
     vTaskDelay(100);
   }
