@@ -13,8 +13,9 @@ import (
 
 func TurnOn(c *gin.Context) {
 	BugId := c.Query("BugId")
+	BeaconOn := c.Query("BeaconOn")
 
-	if(len(BugId) == 0){
+	if((len(BugId) == 0) || (len(BeaconOn) == 0)){
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a BugId"})
 	} else {
 		var BugName 	string;
@@ -35,6 +36,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE `BugName`=?;", BugName);
@@ -47,10 +49,12 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		TurnOnExistsQuery := db.QueryRow("SELECT `SessionId` FROM testdb.BeaconOn WHERE `SessionId`=?;", SessionId);
 
+		//nothing connected
 		switch err := TurnOnExistsQuery.Scan(&OnExists); err {
 		case sql.ErrNoRows:
 			c.Header("Access-Control-Allow-Origin", "*")
@@ -63,24 +67,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-		}
-
-		OnQuery := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE SessionId=?;", SessionId);
-		switch err := OnQuery.Scan(&On); err {
-		case sql.ErrNoRows:
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with On query"})
 			return
-		case nil:
-			fmt.Println(On)
-			if (On == "1") {
-				c.Header("Access-Control-Allow-Origin", "*")
-				c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-				c.JSON(http.StatusOK, "2")
-				return
-			}
-		default:
-			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
 
 		ChargeQuery := db.QueryRow("SELECT `ChargeStatus` FROM testdb.BeaconCharge WHERE `SessionId`=?;", SessionId);
@@ -100,13 +87,42 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
-		
-
-		// Update DB
-		_, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "1")
-		if (err != nil) {
+		OnQuery := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE SessionId=?;", SessionId);
+		switch err := OnQuery.Scan(&On); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with On query"})
+			return
+		case nil:
+			fmt.Println(On)
+			if ((BeaconOn == "1") && (On == "1")) {
+				c.Header("Access-Control-Allow-Origin", "*")
+				c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+				c.JSON(http.StatusOK, "2")
+				return
+			} else if ((BeaconOn == "1") && (On == "0")){
+				_, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "1")
+				if (err != nil) {
+					fmt.Println(err.Error())
+					c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+					return
+				}
+			} else if ((BeaconOn == "0") && (On == "1")){
+				_, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "0")
+				if (err != nil) {
+					fmt.Println(err.Error())
+					c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+					return
+				}
+			} else {
+				c.Header("Access-Control-Allow-Origin", "*")
+				c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+				c.JSON(http.StatusOK, "2")
+				return
+			}
+		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			return

@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-
+	"database/sql"
 )
 
 type NodeStruct struct {
@@ -19,18 +19,50 @@ type NodeStruct struct {
 
 //Create the table, this is REQUIRED before reading
 func CreateNodeTable (c *gin.Context) {
-	SessionId := c.Query("SessionId")
+	BugId := c.Query("BugId")
 
-	if len(SessionId) == 0{
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a SessionId"})
+	if len(BugId) == 0{
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a BugId"})
+		return
+	}
+
+	var BugName 	string;
+	var SessionId 	string;
+
+	BugNameQuery := db.QueryRow("SELECT `BugName` FROM testdb.BugInformation WHERE `BugId`=?;", BugId);
+	switch err := BugNameQuery.Scan(&BugName); err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugId-BugName Translation"})
+		return
+	case nil:
+		fmt.Println(BugName)
+	default:
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
 	}
 	
-	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS testdb.%s_nodes (`NodeId` char(100) NOT NULL, `XCoord` char(100) NOT NULL, `YCoord` char(100) NOT NULL, PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) ENGINE=InnoDB;", SessionId)
+	SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1;");
+	switch err := SessionIdQuery.Scan(&SessionId); err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "No Session Exists"})
+		return
+	case nil:
+		fmt.Println(SessionId)
+	default:
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
+	}
+
+
+	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS `testdb.%s_nodes` (`NodeId` char(100) NOT NULL, `XCoord` char(100) NOT NULL, `YCoord` char(100) NOT NULL, PRIMARY KEY (`NodeId`, `XCoord`, `YCoord`)) ENGINE=InnoDB;", SessionId)
 	
 	_, err := db.Exec(SqlCommand)
     if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not create table"})
+		return
     }
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
@@ -43,16 +75,18 @@ func CreateNodeTable (c *gin.Context) {
 //DISPLAY SESSION IDs
 func DisplayAllNodes(c *gin.Context) {
 	SessionId := c.Query("SessionId")
-	
+
 	if len(SessionId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a valid SessionId!"})
+		return
 	}
-
-	SqlQuery := fmt.Sprintf("SELECT * FROM testdb.%s_nodes", SessionId)
+	
+	SqlQuery := fmt.Sprintf("SELECT * FROM `testdb.%s_nodes`", SessionId)
 	rows, err := db.Query(SqlQuery)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB, maybe the appropriate table hasn't been created yet"})
+		return
 	}
 
 	// Get all rows and add into SessionListStructs
@@ -81,7 +115,7 @@ func DisplayAllNodes(c *gin.Context) {
 func AddNode(c *gin.Context) {
 	var NodeNew NodeStruct
 
-	SessionId := c.Query("SessionId")
+	BugId := c.Query("BugId")
 	NodeNew.NodeId = c.Query("NodeId")
 	NodeNew.XCoord = c.Query("XCoord")
 	NodeNew.YCoord = c.Query("YCoord")
@@ -93,16 +127,45 @@ func AddNode(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a XCoord"})
 	} else if len(NodeNew.YCoord) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a YCoord"})
-	} else if len(SessionId) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
+	} else if len(BugId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
 	}else {
 		// Insert item to DB
-		SqlCommand := fmt.Sprintf("INSERT INTO testdb.%s_nodes (`NodeId`, `XCoord`, `YCoord`) VALUES(?,?,?);", SessionId)
+		var BugName 	string;
+		var SessionId 	string;
+
+		BugNameQuery := db.QueryRow("SELECT `BugName` FROM testdb.BugInformation WHERE `BugId`=?;", BugId);
+		switch err := BugNameQuery.Scan(&BugName); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugId-BugName Translation"})
+			return
+		case nil:
+			fmt.Println(BugName)
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
+		}
+		
+		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1;");
+		switch err := SessionIdQuery.Scan(&SessionId); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "No Session Exists"})
+			return
+		case nil:
+			fmt.Println(SessionId)
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
+		}
+		SqlCommand := fmt.Sprintf("INSERT INTO `testdb.%s_nodes` (`NodeId`, `XCoord`, `YCoord`) VALUES(?,?,?);", SessionId)
 
 		_, err := db.Query(SqlCommand, NodeNew.NodeId, NodeNew.XCoord, NodeNew.YCoord)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		// Log message

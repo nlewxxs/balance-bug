@@ -58,14 +58,14 @@ func AddSession(c *gin.Context) {
 	SessionIdNew := uuid.New().String()
 	SessionNameNew := c.Query("SessionName")
 
-	location, err := time.LoadLocation("Europe/London")
+	//location, err := time.LoadLocation("Europe/London")
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+	// 	return
+	// }
 
-	t := time.Now().In(location)
+	t := time.Now() //.In(location)
 	TimeStampNew := t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
@@ -108,14 +108,14 @@ func PingSession(c *gin.Context) {
 
 	SessionListNew.SessionId = c.Query("SessionId")
 
-	location, err := time.LoadLocation("Europe/London")
+	//location, err := time.LoadLocation("Europe/London")
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+	// 	return
+	// }
 
-    t := time.Now().In(location)
+    t := time.Now() //.In(location)
 	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry

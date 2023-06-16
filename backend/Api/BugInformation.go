@@ -60,14 +60,14 @@ func AddBugInformation(c *gin.Context) {
 
 	BugIdNew := c.Query("BugId")
 	BugNameNew := c.Query("BugName")
-	location, err := time.LoadLocation("Europe/London")
+	//location, err := time.LoadLocation("Europe/London")
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+	// 	return
+	// }
 
-	LastSeenNew := time.Now().In(location)
+	LastSeenNew := time.Now() //.In(location)
 
 	// Validate entry
 	if len(BugIdNew) == 0 {
@@ -103,14 +103,14 @@ func PingBugInformation(c *gin.Context) {
 
 	BugInformationNew.BugId = c.Query("BugId")
 
-	location, err := time.LoadLocation("Europe/London")
+	//location, err := time.LoadLocation("Europe/London")
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-		return
-	}
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+	// 	return
+	// }
 
-	t := time.Now().In(location)
+	t := time.Now() //.In(location)
 	BugInformationNew.LastSeen = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
@@ -172,6 +172,7 @@ func OnlineBugInformation(c *gin.Context) {
 		TimeoutExtracted, err := strconv.ParseFloat(TimeoutNew, 32)
 		if err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{"message": "invalid timeout format, please enter a valid float"})
+			return
 		}
 		Timeout = TimeoutExtracted
 	}
@@ -195,6 +196,7 @@ func OnlineBugInformation(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
 	}
 
 	// Get all rows and add into SessionListStructs
@@ -208,7 +210,7 @@ func OnlineBugInformation(c *gin.Context) {
 			if err := rows.Scan(&BugInformationRow.BugName, &BugInformationRow.BugId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-				break
+				return
 			}
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
