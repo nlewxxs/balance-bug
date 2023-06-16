@@ -1,6 +1,9 @@
 #ifndef Motor_h
 #define Motor_h
 
+#include "Esp.h"
+
+
 class Motor {
   public: 
     int dir;
@@ -12,7 +15,10 @@ class Motor {
     bool initialised;
     int counter;
     int target;
-    void onStepTimer();
+    void setBackwards(bool side);
+    void setSpeed(bool side, int desiredSpeed);
+    void setForward(bool);
+    // void onStepTimer();
     hw_timer_t *step_timer;
 };
 

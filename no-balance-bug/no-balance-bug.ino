@@ -326,7 +326,12 @@ void spin(){  // this is a function to just spin
   while (ypr[0] < target_angle){
     leftStepper.runSpeed();
     rightStepper.runSpeed();
-    mpu.update();
+    if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)){
+      mpu.dmpGetQuaternion(&q, fifoBuffer);
+      mpu.dmpGetGravity(&gravity, &q);
+      mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+      mpu.dmpGetGyro(&gyro, fifoBuffer);
+    }
 
     #ifdef ENABLE_TRIANGULATE
     // ----------------- BENBENBEN TODO TODO HERE BEN HERE ---------------------- //
