@@ -31,6 +31,7 @@ func BeaconPing(c *gin.Context) {
 	default:
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
 	}
 	
 	TurnOnQuery := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE `SessionId`=?;", SessionId);
@@ -92,5 +93,6 @@ func BeaconPing(c *gin.Context) {
 	default:
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
 	}
 }

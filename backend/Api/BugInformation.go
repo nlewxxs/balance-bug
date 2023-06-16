@@ -172,6 +172,7 @@ func OnlineBugInformation(c *gin.Context) {
 		TimeoutExtracted, err := strconv.ParseFloat(TimeoutNew, 32)
 		if err != nil {
 			c.JSON(http.StatusNotAcceptable, gin.H{"message": "invalid timeout format, please enter a valid float"})
+			return
 		}
 		Timeout = TimeoutExtracted
 	}
@@ -195,6 +196,7 @@ func OnlineBugInformation(c *gin.Context) {
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
 	}
 
 	// Get all rows and add into SessionListStructs
@@ -208,7 +210,7 @@ func OnlineBugInformation(c *gin.Context) {
 			if err := rows.Scan(&BugInformationRow.BugName, &BugInformationRow.BugId); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-				break
+				return
 			}
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}

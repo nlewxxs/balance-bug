@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-
+	"database/sql"
 )
 
 
@@ -34,19 +34,50 @@ type EdgeStruct struct {
 
 //Create the table, this is REQUIRED before reading
 func CreateEdgeTable (c *gin.Context) {
-	SessionId := c.Query("SessionId")
+	BugId := c.Query("BugId")
 
-	if len(SessionId) == 0{
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a SessionId"})
+	if len(BugId) == 0{
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a BugId"})
+		return
 	}
 
-	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS testdb.%s_edges (`NodeId` char(100) NOT NULL, `EdgeNodeId` char(100) NOT NULL, `Distance` char(100), `Angle` char(100), PRIMARY KEY (`NodeId`, `EdgeNodeId`), FOREIGN KEY (`NodeId`) REFERENCES testdb.%s_nodes(`NodeId`), FOREIGN KEY (`EdgeNodeId`) REFERENCES testdb.%s_nodes(`NodeId`)) ENGINE=InnoDB;", SessionId,SessionId,SessionId)
+	var BugName 	string;
+	var SessionId 	string;
+
+	BugNameQuery := db.QueryRow("SELECT `BugName` FROM `BugInformation` WHERE `BugId`=?;", BugId);
+	switch err := BugNameQuery.Scan(&BugName); err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugId-BugName Translation"})
+		return
+	case nil:
+		fmt.Println(BugName)
+	default:
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
+	}
+	
+	SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1;");
+	switch err := SessionIdQuery.Scan(&SessionId); err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "No Session Exists"})
+		return
+	case nil:
+		fmt.Println(SessionId)
+	default:
+		fmt.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+		return
+	}
+
+	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS `testdb.%s_edges` (`NodeId` char(100) NOT NULL, `EdgeNodeId` char(100) NOT NULL, `Distance` char(100), `Angle` char(100), PRIMARY KEY (`NodeId`, `EdgeNodeId`), FOREIGN KEY (`NodeId`) REFERENCES `testdb.%s_nodes`(`NodeId`), FOREIGN KEY (`EdgeNodeId`) REFERENCES `testdb.%s_nodes`(`NodeId`)) ENGINE=InnoDB;", SessionId,SessionId,SessionId)
 	
 	_, err := db.Query(SqlCommand)
     if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not create table"})
-    }
+		return
+	}
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
@@ -62,9 +93,10 @@ func DisplayAllEdges(c *gin.Context) {
 	
 	if len(SessionId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a valid SessionId!"})
+		return
 	}
 
-	SqlQuery := fmt.Sprintf("SELECT * FROM testdb.%s_edges", SessionId)
+	SqlQuery := fmt.Sprintf("SELECT * FROM `testdb.%s_edges`", SessionId)
 	rows, err := db.Query(SqlQuery)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -96,8 +128,10 @@ func DisplayAllEdges(c *gin.Context) {
 
 func AddEdge(c *gin.Context) {
 	var EdgeNew EdgeStruct
+	var BugName 	string;
+	var SessionId 	string;
 
-	SessionId := c.Query("SessionId")
+	BugId := c.Query("BugId")
 	EdgeNew.NodeId = c.Query("NodeId")
 	EdgeNew.EdgeNodeId = c.Query("EdgeNodeId")
 	EdgeNew.Distance = c.Query("Distance")
@@ -112,16 +146,38 @@ func AddEdge(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a Distance"})
 	} else if len(EdgeNew.Angle) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a Angle"})
-	} else if len(SessionId) == 0 {
-		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
+	} else if len(BugId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
 	}else {
 		// Insert item to DB
 		// fmt.Println("SessionID: ", SessionId)
-		//TODO: ADD FOREIGN KEY FOR SYMBOLIC LINK
-		//NEST A REQUEST, LUCKILY READ HAVE VERY LOW LATENCY
-
+		BugNameQuery := db.QueryRow("SELECT `BugName` FROM `BugInformation` WHERE `BugId`=?;", BugId);
+		switch err := BugNameQuery.Scan(&BugName); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugId-BugName Translation"})
+			return
+		case nil:
+			fmt.Println(BugName)
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
+		}
 		
-		SqlCommand := fmt.Sprintf("INSERT INTO testdb.%s_edges (`NodeId`, `EdgeNodeId`, `Distance`, `Angle`) VALUES((SELECT NodeId FROM testdb.%s_nodes WHERE NodeId='%s'),(SELECT NodeId FROM testdb.%s_nodes WHERE NodeId='%s'),%s,%s);", SessionId, SessionId, EdgeNew.NodeId, SessionId, EdgeNew.EdgeNodeId, EdgeNew.Distance, EdgeNew.Angle)
+		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1;");
+		switch err := SessionIdQuery.Scan(&SessionId); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "No Session Exists"})
+			return
+		case nil:
+			fmt.Println(SessionId)
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
+		}
+
+		SqlCommand := fmt.Sprintf("INSERT INTO `testdb.%s_edges` (`NodeId`, `EdgeNodeId`, `Distance`, `Angle`) VALUES((SELECT NodeId FROM `testdb.%s_nodes` WHERE NodeId='%s'),(SELECT NodeId FROM `testdb.%s_nodes` WHERE NodeId='%s'),%s,%s);", SessionId, SessionId, EdgeNew.NodeId, SessionId, EdgeNew.EdgeNodeId, EdgeNew.Distance, EdgeNew.Angle)
 
 
 		// fmt.Println("SQL Command: ", SqlCommand)
@@ -130,6 +186,7 @@ func AddEdge(c *gin.Context) {
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		// Log message

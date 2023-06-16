@@ -36,6 +36,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE `BugName`=?;", BugName);
@@ -48,6 +49,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		TurnOnExistsQuery := db.QueryRow("SELECT `SessionId` FROM testdb.BeaconOn WHERE `SessionId`=?;", SessionId);
@@ -65,6 +67,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		ChargeQuery := db.QueryRow("SELECT `ChargeStatus` FROM testdb.BeaconCharge WHERE `SessionId`=?;", SessionId);
@@ -84,6 +87,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		OnQuery := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE SessionId=?;", SessionId);
@@ -121,6 +125,7 @@ func TurnOn(c *gin.Context) {
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
 		}
 
 		// Return success response
