@@ -6,20 +6,26 @@
 
 class Motor {
   public: 
-    int dir;
-    int step;
-    int speed;
-    void init();
-    void setSpeed();
+    static int leftDir;
+    static int leftStep;
+    static int rightDir;
+    static int rightStep;
+    static int leftSpeed;
+    static int rightSpeed;
+    static void init();
+    static void setSpeed();
   private:
-    bool initialised;
-    int counter;
-    int target;
-    void setBackwards(bool side);
-    void setSpeed(bool side, int desiredSpeed);
-    void setForward(bool);
+    static bool initialised;
+    static int leftCounter;
+    static int leftTarget;
+    static int rightTarget;
+    static int rightCounter;
+    static void IRAM_ATTR onStepTimer();
+    static void setBackwards(bool side);
+    static void setSpeed(bool side, int desiredSpeed);
+    static void setForward(bool);
     // void onStepTimer();
-    hw_timer_t *step_timer;
+    static hw_timer_t *step_timer;
 };
 
 #endif
