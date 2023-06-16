@@ -2,7 +2,7 @@
 // timer and ISR for stepper control
 // hw_timer_t *step_timer = NULL;
 
-void IRAM_ATTR onStepTimer(int &counter, int &step, int &target){
+void IRAM_ATTR onStepTimer(int *counter, int *step, int *target){
   // ISR, check if need to pulse
   // lower limit for counter is given by (speed - 1000) * 1000
   // timer goes off every 1 microsecond
@@ -37,7 +37,7 @@ void Motor::init() {
   pinMode(dir, OUTPUT);
   pinMode(step, OUTPUT);
   step_timer = timerBegin(0, 8, true);
-  timerAttachInterrupt(step_timer, &onStepTimer(&counter, &step, &target), true);
+  timerAttachInterrupt(step_timer, *onStepTimer(&counter, &step, &target), true);
   timerAlarmWrite(step_timer, 100, true);
   timerAlarmEnable(step_timer);
 }
