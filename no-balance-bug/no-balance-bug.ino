@@ -1,4 +1,3 @@
-#include <StackArray.h>
 #include <map>
 #include <stack>
 #include <vector>
@@ -11,6 +10,8 @@
 #include <BluetoothSerial.h>
 #include "Camera.h"
 #include "triangulate.h"
+#include "motor.h"
+
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
@@ -23,6 +24,28 @@
 // // #define YDIST 100
 // // #define ERRMARGIN 5
 
+// stepper motor code
+// based on hardcoded PWM using timers and interrupts for stepping
+
+// #define left 1
+// #define right 0
+
+// int dirLeft = 33;
+// int stepLeft = 32;
+// int dirRight = 26;
+// int stepRight = 25;
+
+// // speeds vary between 1 and 5000
+// // speed 10000 corresponds to 200 microsecond between steps
+// // so the time between pulses is (5000 - speed) * 200 micro seconds
+// int leftSpeed = 1;
+// int rightSpeed = 1;
+
+// int leftCounter = 0;
+// int rightCounter = 0;
+
+// long leftTarget;
+// long rightTarget;
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
