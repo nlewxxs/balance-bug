@@ -58,7 +58,7 @@ void Image::debugInfo() {
 }
 
 // FUNCTION DOESNT NEED IF ELSE -- later fix
-classifyElement Image::classify(int grid[12][4]) {
+void Image::classify(int grid[12][4]) {
     // Left Turn
     if (outsideBounds(grid[4], leftPathBounds) &&
         outsideBounds(grid[5], leftPathBounds)) {
@@ -108,6 +108,4 @@ classifyElement Image::classify(int grid[12][4]) {
 
     info.isNode = info.isEnd   || info.leftTurn || info.rightTurn;
     info.isPath = info.isClear && info.leftWall && info.rightWall;
-    
-    return info;
 }
