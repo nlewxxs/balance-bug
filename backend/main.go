@@ -9,8 +9,8 @@ import (
 	// // api "BalanceBugServer/backend/api"
 
 	//"github.com/gin-gonic/contrib/cors"
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 // Function called for index
@@ -23,11 +23,11 @@ func indexView(c *gin.Context) {
 // Setup Gin Routes
 func SetupRoutes() *gin.Engine {
 	// Use Gin as router
-	// gin.SetMode(gin.releaseMode) 
+	// gin.SetMode(gin.releaseMode)
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AllowMethods = []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"}
+	config.AllowMethods = []string{"Get", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
 	router.Use(cors.New(config))
 	// router.Use(cors.New(cors.Config{
 	// 	AllowAllOrigins: true,
