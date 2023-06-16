@@ -19,6 +19,9 @@
 // #define ENABLE_CAMERA
 // #define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
+// //#define XDIST 100
+// // #define YDIST 100
+// // #define ERRMARGIN 5
 
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
