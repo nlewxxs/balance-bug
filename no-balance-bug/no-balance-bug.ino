@@ -33,6 +33,7 @@ Camera D8M;
 const uint8_t redPin = 19;
 const uint8_t greenPin = 18;
 const uint8_t bluePin = 5;
+String bugId =  "MazEERunnEEr";
 
 TaskHandle_t communication;  // task on core 0 for communication
 
@@ -245,11 +246,15 @@ void communicationCode(void* pvParameters) {
 
   #ifdef ENABLE_HTTP_SERVER
     //wifi setup
-    communicate.init("Ben", "test1234", "http://90.196.3.86:8081");
+  if (!communicate.getInitialised()){
+    communicate.init("Ben", "test1234", "http://90.196.3.86:8081", bugId);
+  }
+    
   #endif
 
   // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
   for (;;) {
+    
 
     // -------- OUTPUTS ---------- //
 
@@ -258,6 +263,9 @@ void communicationCode(void* pvParameters) {
       debugOutput(ypr[0], false);
     #endif
     #ifdef ENABLE_HTTP_SERVER
+      if (!communicate.getInSession()){
+        communicate.ping();
+      }
       // if (millis() - lastTime > 5000) {
       //   //Check WiFi connection status
       //   if (WiFi.status() == WL_CONNECTED) {
