@@ -10,6 +10,7 @@
 #include <AccelStepper.h>
 #include <BluetoothSerial.h>
 #include "Camera.h"
+#include "triangulate.h"
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
@@ -17,6 +18,8 @@
 // #define ENABLE_BLUETOOTH
 // #define ENABLE_CAMERA
 // #define ENABLE_MOTORS
+// #define ENABLE_TRIANGULATE
+
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
