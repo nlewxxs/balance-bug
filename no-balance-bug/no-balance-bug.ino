@@ -295,3 +295,23 @@ void communicationCode(void* pvParameters) {
     vTaskDelay(100);
   }
 }
+
+void spin(){  // this is a function to just spin
+  float target_angle = ypr[0] + 360.0;
+  leftStepper.setSpeed(200);
+  rightStepper.setSpeed(200);
+  while (ypr[0] < target_angle){
+    leftStepper.runSpeed();
+    rightStepper.runSpeed();
+    mpu.update();
+
+    #ifdef ENABLE_TRIANGULATE
+    // ----------------- BENBENBEN TODO TODO HERE BEN HERE ---------------------- //
+    #endif
+
+  }
+  leftStepper.setSpeed(0);
+  rightStepper.setSpeed(0);
+  leftStepper.runSpeed();
+  rightStepper.runSpeed();
+}

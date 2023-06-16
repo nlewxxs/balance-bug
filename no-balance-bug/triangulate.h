@@ -1,5 +1,5 @@
-#ifndef ENABLE_TRIANGULATE
-#define ENABLE_TRIANGULATE
+#ifndef triangulate_h
+#define triangulate_h
 
 ///////////////////////////////////////////
 ///////////       MACROS        ///////////
