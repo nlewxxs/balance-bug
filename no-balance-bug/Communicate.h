@@ -4,17 +4,17 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <String>
+#include "Esp.h"
 
 class Communicate {
   public: 
     char* ssid;
     char* password;
-    String serverName
-    bool initialised;
-    void init();
+    String serverName;
+    void init(char *_ssid, char *_password, char *_serverName);
     // bool checkNewSession();
-  // private:
-  //   bool initialised;
+  private:
+    bool initialised;
 };
 
 #endif

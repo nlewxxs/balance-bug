@@ -2,8 +2,6 @@
 #include <stack>
 #include <vector>
 #include <Wire.h>
-#include <WiFi.h>
-#include <HTTPClient.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <AccelStepper.h>
@@ -11,6 +9,7 @@
 #include "Camera.h"
 #include "Classify.h"
 #include "Traversal.h"
+#include "Communicate.h"
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
@@ -38,9 +37,7 @@ const uint8_t bluePin = 5;
 TaskHandle_t communication;  // task on core 0 for communication
 
 Communicate communicate;
-communicate.ssid = "Ben";
-communicate.password = "begforit";
-communicate.serverName = "http://90.196.3.86:8081";
+
 
 // const char* ssid = "Ben";
 // const char* password = "begforit";
@@ -63,8 +60,6 @@ const int leftStepPin = 33; //A3
 const int rightDirPin = 25; //A2
 const int rightStepPin = 26; //A1
 //D2 D3 for 23 and 22 (sda and scl)
-
-bool initialised = false;
 
 // Define motor interface type
 #define motorInterfaceType 1
@@ -250,7 +245,7 @@ void communicationCode(void* pvParameters) {
 
   #ifdef ENABLE_HTTP_SERVER
     //wifi setup
-    Communicate.init();
+    communicate.init("Ben", "test1234", "http://90.196.3.86:8081");
   #endif
 
   // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute

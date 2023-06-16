@@ -1,12 +1,18 @@
 #include "Communicate.h"
 
-void Communicate::init(){
+void Communicate::init(char *_ssid, char *_password, char *_serverName){
+  ssid = _ssid;
+  password = _password;
+  serverName = _serverName;
+
   WiFi.begin(ssid, password);
-    debugOutput("Connecting");
+    // debugOutput("Connecting");
+    Serial.println("Connecting");
 
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
-      debugOutput("Attempting WiFi connection...");
+      // debugOutput("Attempting WiFi connection...");
+      Serial.println("Attempting WiFi connection...");
     } 
 
     HTTPClient http;
@@ -27,7 +33,7 @@ void Communicate::init(){
         String payload = http.getString();
         Serial.println(payload);
         if(httpResponseCode == 201){
-          Serial.println!("Initialised");
+          Serial.println("Initialised");
           initialised = true;
         }
         
@@ -41,10 +47,10 @@ void Communicate::init(){
     http.end();
       
 
-    debugOutput("");
-    debugOutput("Connected to WiFi network with IP Address: ", false);
-    debugOutput(WiFi.localIP());
-    debugOutput("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+    // debugOutput("");
+    // debugOutput("Connected to WiFi network with IP Address: ", false);
+    // debugOutput(WiFi.localIP());
+    // debugOutput("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
 }
     
 // bool checkNewSession();
