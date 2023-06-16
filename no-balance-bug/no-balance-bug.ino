@@ -1,4 +1,3 @@
-#include <StackArray.h>
 #include <map>
 #include <stack>
 #include <vector>
@@ -10,14 +9,16 @@
 #include <AccelStepper.h>
 #include <BluetoothSerial.h>
 #include "Camera.h"
-#include "triangulate.h"
+#include "Classify.h"
+#include "Traversal.h"
 
 // MACROS
-// #define ENABLE_YAW_OUTPUT
-// #define ENABLE_HTTP_SERVER
-// #define ENABLE_BLUETOOTH
-// #define ENABLE_CAMERA
-// #define ENABLE_MOTORS
+#define ENABLE_YAW_OUTPUT
+#define ENABLE_HTTP_SERVER
+#define ENABLE_BLUETOOTH
+#define ENABLE_CAMERA
+#define ENABLE_CLASSIFICATION
+#define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
 // // #define YDIST 100
@@ -83,7 +84,7 @@ int acceleration = 600;
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
 template <typename T> 
-void debugOutput(T o, bool newline = false) {
+void debugOutput(T o, bool newline = true) {
   #ifdef ENABLE_BLUETOOTH
     if (newline) { SerialBT.println(o); } else { SerialBT.print(o); }
   #else 
@@ -209,6 +210,13 @@ void loop() {
 
     sprintf(tmp, "%d,%d,%d,%d", frame.boxes[15][0], frame.boxes[15][1], frame.boxes[15][2], frame.boxes[15][3]);
     debugOutput(tmp);
+
+    Image newImage;   
+
+    newImage.classify(frame.boxes);
+    debugOutput("Classification:");
+    newImage.debugInfo();
+
   #endif
 
   vTaskDelay(10);
@@ -234,7 +242,7 @@ void communicationCode(void* pvParameters) {
   // Serial.println(xPortGetCoreID());
 
   #ifdef ENABLE_HTTP_SERVER
-    wifi setup
+    //wifi setup
     WiFi.begin(ssid, password);
     debugOutput("Connecting");
 
@@ -303,7 +311,6 @@ void spin(){  // this is a function to just spin
   while (ypr[0] < target_angle){
     leftStepper.runSpeed();
     rightStepper.runSpeed();
-    mpu.update();
 
     #ifdef ENABLE_TRIANGULATE
     // ----------------- BENBENBEN TODO TODO HERE BEN HERE ---------------------- //
