@@ -35,15 +35,6 @@ Params: `SessionId`
 Reponse: `SessionList` if success<br> 
 Type: `200`
 
-### Add
-
-`GET /Session/Add`
-
-Params: `BugName, SessionId`
-
-Reponse: `SessionList` if success<br> 
-Type: `201`
-
 ## BugInformation
 This is for connectivity to the balance-bug and frontend.
 
