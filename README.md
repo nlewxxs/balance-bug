@@ -54,15 +54,6 @@ This is for connectivity to the balance-bug and frontend.
 Reponse: `BugInformationList` if success<br> 
 Type: `200`
 
-### Add
-
-`GET /BugInformation/Add`
-
-Params: `BugId, BugName`
-
-Reponse: `BugInformationList` if success<br> 
-Type: `201`
-
 ### UpdateBugName
 
 `GET /BugInformation/UpdateBugName`
