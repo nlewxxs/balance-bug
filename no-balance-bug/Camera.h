@@ -6,7 +6,7 @@
 #include <HardwareSerial.h>
 
 struct Matrix {
-  int boxes[17][4];
+  int boxes[13][4];
   uint8_t colour;
   uint8_t colour_uncertain;
 };
@@ -20,10 +20,6 @@ struct coordinate {
 
 struct boxCoordinates {
 
-  coordinate block_one;
-  coordinate block_two;
-  coordinate block_three;
-  coordinate block_four;
   coordinate block_five;
   coordinate block_six;
   coordinate block_seven;

@@ -32,19 +32,19 @@ void read32bits(uint64_t *rx){
 
 Matrix Camera::getBoxMatrix(){
   Matrix boxMatrix;
-  boxMatrix.boxes[4][0] = Boxes.block_five.x_min; boxMatrix.boxes[4][1] = Boxes.block_five.y_min; boxMatrix.boxes[4][2] = Boxes.block_five.x_max; boxMatrix.boxes[4][3] = Boxes.block_five.y_max;
-  boxMatrix.boxes[5][0] = Boxes.block_six.x_min; boxMatrix.boxes[5][1] = Boxes.block_six.y_min; boxMatrix.boxes[5][2] = Boxes.block_six.x_max; boxMatrix.boxes[5][3] = Boxes.block_six.y_max;
-  boxMatrix.boxes[6][0] = Boxes.block_seven.x_min; boxMatrix.boxes[6][1] = Boxes.block_seven.y_min; boxMatrix.boxes[6][2] = Boxes.block_seven.x_max; boxMatrix.boxes[6][3] = Boxes.block_seven.y_max;
-  boxMatrix.boxes[7][0] = Boxes.block_eight.x_min; boxMatrix.boxes[7][1] = Boxes.block_eight.y_min; boxMatrix.boxes[7][2] = Boxes.block_eight.x_max; boxMatrix.boxes[7][3] = Boxes.block_eight.y_max;
-  boxMatrix.boxes[8][0] = Boxes.block_nine.x_min; boxMatrix.boxes[8][1] = Boxes.block_nine.y_min; boxMatrix.boxes[8][2] = Boxes.block_nine.x_max; boxMatrix.boxes[8][3] = Boxes.block_nine.y_max;
-  boxMatrix.boxes[9][0] = Boxes.block_ten.x_min; boxMatrix.boxes[9][1] = Boxes.block_ten.y_min; boxMatrix.boxes[9][2] = Boxes.block_ten.x_max; boxMatrix.boxes[9][3] = Boxes.block_ten.y_max;
-  boxMatrix.boxes[10][0] = Boxes.block_eleven.x_min; boxMatrix.boxes[10][1] = Boxes.block_eleven.y_min; boxMatrix.boxes[10][2] = Boxes.block_eleven.x_max; boxMatrix.boxes[10][3] = Boxes.block_eleven.y_max;
-  boxMatrix.boxes[11][0] = Boxes.block_twelve.x_min; boxMatrix.boxes[11][1] = Boxes.block_twelve.y_min; boxMatrix.boxes[11][2] = Boxes.block_twelve.x_max; boxMatrix.boxes[11][3] = Boxes.block_twelve.y_max;
-  boxMatrix.boxes[12][0] = Boxes.block_thirteen.x_min; boxMatrix.boxes[12][1] = Boxes.block_thirteen.y_min; boxMatrix.boxes[12][2] = Boxes.block_thirteen.x_max; boxMatrix.boxes[12][3] = Boxes.block_thirteen.y_max;
-  boxMatrix.boxes[13][0] = Boxes.block_fourteen.x_min; boxMatrix.boxes[13][1] = Boxes.block_fourteen.y_min; boxMatrix.boxes[13][2] = Boxes.block_fourteen.x_max; boxMatrix.boxes[13][3] = Boxes.block_fourteen.y_max;
-  boxMatrix.boxes[14][0] = Boxes.block_fifteen.x_min; boxMatrix.boxes[14][1] = Boxes.block_fifteen.y_min; boxMatrix.boxes[14][2] = Boxes.block_fifteen.x_max; boxMatrix.boxes[14][3] = Boxes.block_fifteen.y_max;
-  boxMatrix.boxes[15][0] = Boxes.block_sixteen.x_min; boxMatrix.boxes[15][1] = Boxes.block_sixteen.y_min; boxMatrix.boxes[15][2] = Boxes.block_sixteen.x_max; boxMatrix.boxes[15][3] = Boxes.block_sixteen.y_max;
-  boxMatrix.boxes[16][0] = Boxes.colour_coords.x_min; boxMatrix.boxes[16][1] = Boxes.colour_coords.y_min; boxMatrix.boxes[16][2] = Boxes.colour_coords.x_max; boxMatrix.boxes[16][3] = Boxes.colour_coords.y_max;
+  boxMatrix.boxes[0][0] = Boxes.block_five.x_min;     boxMatrix.boxes[0][1] = Boxes.block_five.y_min;     boxMatrix.boxes[0][2] = Boxes.block_five.x_max;     boxMatrix.boxes[0][3] = Boxes.block_five.y_max;
+  boxMatrix.boxes[1][0] = Boxes.block_six.x_min;      boxMatrix.boxes[1][1] = Boxes.block_six.y_min;      boxMatrix.boxes[1][2] = Boxes.block_six.x_max;      boxMatrix.boxes[1][3] = Boxes.block_six.y_max;
+  boxMatrix.boxes[2][0] = Boxes.block_seven.x_min;    boxMatrix.boxes[2][1] = Boxes.block_seven.y_min;    boxMatrix.boxes[2][2] = Boxes.block_seven.x_max;    boxMatrix.boxes[2][3] = Boxes.block_seven.y_max;
+  boxMatrix.boxes[3][0] = Boxes.block_eight.x_min;    boxMatrix.boxes[3][1] = Boxes.block_eight.y_min;    boxMatrix.boxes[3][2] = Boxes.block_eight.x_max;    boxMatrix.boxes[3][3] = Boxes.block_eight.y_max;
+  boxMatrix.boxes[4][0] = Boxes.block_nine.x_min;     boxMatrix.boxes[4][1] = Boxes.block_nine.y_min;     boxMatrix.boxes[4][2] = Boxes.block_nine.x_max;     boxMatrix.boxes[4][3] = Boxes.block_nine.y_max;
+  boxMatrix.boxes[5][0] = Boxes.block_ten.x_min;      boxMatrix.boxes[5][1] = Boxes.block_ten.y_min;      boxMatrix.boxes[5][2] = Boxes.block_ten.x_max;      boxMatrix.boxes[5][3] = Boxes.block_ten.y_max;
+  boxMatrix.boxes[6][0] = Boxes.block_eleven.x_min;   boxMatrix.boxes[6][1] = Boxes.block_eleven.y_min;   boxMatrix.boxes[6][2] = Boxes.block_eleven.x_max;   boxMatrix.boxes[6][3] = Boxes.block_eleven.y_max;
+  boxMatrix.boxes[7][0] = Boxes.block_twelve.x_min;   boxMatrix.boxes[7][1] = Boxes.block_twelve.y_min;   boxMatrix.boxes[7][2] = Boxes.block_twelve.x_max;   boxMatrix.boxes[7][3] = Boxes.block_twelve.y_max;
+  boxMatrix.boxes[8][0] = Boxes.block_thirteen.x_min; boxMatrix.boxes[8][1] = Boxes.block_thirteen.y_min; boxMatrix.boxes[8][2] = Boxes.block_thirteen.x_max; boxMatrix.boxes[8][3] = Boxes.block_thirteen.y_max;
+  boxMatrix.boxes[9][0] = Boxes.block_fourteen.x_min; boxMatrix.boxes[9][1] = Boxes.block_fourteen.y_min; boxMatrix.boxes[9][2] = Boxes.block_fourteen.x_max; boxMatrix.boxes[9][3] = Boxes.block_fourteen.y_max;
+  boxMatrix.boxes[10][0] = Boxes.block_fifteen.x_min; boxMatrix.boxes[10][1] = Boxes.block_fifteen.y_min; boxMatrix.boxes[10][2] = Boxes.block_fifteen.x_max; boxMatrix.boxes[10][3] = Boxes.block_fifteen.y_max;
+  boxMatrix.boxes[11][0] = Boxes.block_sixteen.x_min; boxMatrix.boxes[11][1] = Boxes.block_sixteen.y_min; boxMatrix.boxes[11][2] = Boxes.block_sixteen.x_max; boxMatrix.boxes[11][3] = Boxes.block_sixteen.y_max;
+  boxMatrix.boxes[12][0] = Boxes.colour_coords.x_min; boxMatrix.boxes[12][1] = Boxes.colour_coords.y_min; boxMatrix.boxes[12][2] = Boxes.colour_coords.x_max; boxMatrix.boxes[12][3] = Boxes.colour_coords.y_max;
   boxMatrix.colour = Boxes.colour;
   boxMatrix.colour_uncertain = Boxes.colour_uncertain;
   
@@ -162,14 +162,10 @@ void updateCoordinates(boxCoordinates *coords){
   coords->block_fifteen.x_max =   (uart_rx & 0b00000000000000000000111111111110) >> 1;
   tmpMax =                           (uart_rx & 0b00000000000000000000000000000001) << 10;
 
-
-
-
   read32bits(&uart_rx);
   coords->block_fifteen.y_min =   tmpMin + ((uart_rx & 0b11111111110000000000000000000000) >> 22);
   coords->block_sixteen.x_min =   (uart_rx & 0b00000000001111111111100000000000) >> 11;
   coords->block_sixteen.y_min =   (uart_rx & 0b00000000000000000000011111111111);
-
 
   read32bits(&uart_rx);
   coords->block_fifteen.y_max =   tmpMax + ((uart_rx & 0b11111111110000000000000000000000) >> 22);

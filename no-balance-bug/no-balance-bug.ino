@@ -13,16 +13,15 @@
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
-#define ENABLE_HTTP_SERVER
+// #define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
-// #define ENABLE_CAMERA
+#define ENABLE_CAMERA
 // #define ENABLE_CLASSIFICATION
 // #define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
 // // #define YDIST 100
 // // #define ERRMARGIN 5
-
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
@@ -205,13 +204,12 @@ void loop() {
 
     debugOutput(ypr[0], false);
     debugOutput(",", false);
-      
-    for (int i = 4; i < 15; i++){
+  
+    for (int i = 0; i < 11; i++){
       sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
       debugOutput(tmp, false);
     }
-
-    sprintf(tmp, "%d,%d,%d,%d", frame.boxes[15][0], frame.boxes[15][1], frame.boxes[15][2], frame.boxes[15][3]);
+    sprintf(tmp, "%d,%d,%d,%d", frame.boxes[12][0], frame.boxes[12][1], frame.boxes[12][2], frame.boxes[12][3]);
     debugOutput(tmp);
 
     Image newImage;   

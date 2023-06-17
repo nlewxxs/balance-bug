@@ -9,13 +9,13 @@ const int rightPathBounds[4]  = {320,280,640,320};
 
 // all below should be false
 
-bool Image::outsideBounds(const int (&box)[4], const int (&bound)[4]){
+bool Image::outsideBounds(const int box[4], const int bound[4]){
     bool outX = (box[2] < bound[0]) || (box[0] > bound[2]);
     bool outY = (box[3] < bound[1]) || (box[1] > bound[3]);
     return outX || outY;
 }
 
-bool Image::hasWall(const int (&lowerL)[4], const int (&lowerR)[4], const int (&upperL)[4], const int (&upperR)[4],const int xLR, const int (&bound)[4]) {
+bool Image::hasWall(const int lowerL[4], const int lowerR[4], const int upperL[4], const int upperR[4],const int xLR, const int bound[4]) {
     // {xMin, yMin, xMax, yMax}
     bool lowerWallL   = ( (lowerL[3] >= bound[3]) && (lowerL[1] <= 361) ) || // wall in range
                         ( (lowerR[0] <= xLR+1) && (lowerL[2] >= xLR-1) &&    // overlap on x axis
