@@ -42,8 +42,6 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/", indexView)
 
 	// Set routes for api
-	// Update to POST, UPDATE, DELETE etc
-
 	//api Paths
 	router.PUT("/Session/Add", api.AddSession)
 	router.PATCH("/Session/Ping", api.PingSession)
@@ -57,7 +55,6 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
 	router.PUT("/Edges/CreateTable", api.CreateEdgeTable)
 
-	// router.GET("/BugInformation/Add", api.AddBugInformation)
 	router.PATCH("/BugInformation/Ping", api.PingBugInformation)
 	router.GET("/BugInformation/Online", api.OnlineBugInformation)
 	router.GET("/BugInformation/DisplayAll", api.DisplayBugInformation)
