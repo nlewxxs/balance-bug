@@ -43,7 +43,7 @@ func SetupRoutes() *gin.Engine {
 
 	// Set routes for api
 	//api Paths
-	router.PUT("/Session/Add", api.AddSession)
+	router.GET("/Session/Add", api.AddSession)
 	router.PATCH("/Session/Ping", api.PingSession)
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
 
