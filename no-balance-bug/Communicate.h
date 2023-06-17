@@ -20,7 +20,7 @@ class Communicate {
     char* ssid;
     char* password;
     void checkConnection();
-    // HTTPClient http;
+    HTTPClient http;
     String serverName;
 };
 

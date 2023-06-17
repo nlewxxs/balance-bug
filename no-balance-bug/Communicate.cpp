@@ -6,6 +6,11 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
   password = _password;
   serverName = _serverName;
   bugId = _bugId;
+  http.setReuse(true);
+
+  const char * headerkeys[] = {"Access-Control-Allow-Origin","*","Access-Control-Allow-Headers","access-control-allow-origin, access-control-allow-headers"} ;
+  size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
+  http.collectHeaders(headerkeys,headerkeyssize);
 
   WiFi.begin(ssid, password);
   // debugOutput("Connecting");
@@ -17,16 +22,17 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
     Serial.println("Attempting WiFi connection...");
   } 
 
+  String pathName = serverName + "/BugInformation/Ping?BugId=" + bugId;
+  http.begin(pathName.c_str());
+
   while(!initialised){
-    HTTPClient http;
-    String serverPath = serverName + "/BugInformation/Ping?BugId=" + bugId;
-    
+    // HTTPClient http;    
     // Your Domain name with URL path or IP address with path
-    http.begin(serverPath.c_str());
 
     // Send HTTP GET request
-    Serial.println("PingingServer");
-    int httpResponseCode = http.GET();
+    Serial.println("Subscribing to Server");
+    String Data = "BugId=" + bugId;
+    int httpResponseCode = http.PATCH(Data);
     
     if (httpResponseCode>0) {
       Serial.print("HTTP Response code: ");
@@ -48,6 +54,7 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
       vTaskDelay(1000);
     }
     http.end();
+    // http.close();
   }
   // Free resources
     
@@ -71,36 +78,41 @@ void Communicate::checkConnection(){
 void Communicate::ping(){
 
   checkConnection();
+  const char * headerkeys[] = {"Access-Control-Allow-Origin","*","Access-Control-Allow-Headers","access-control-allow-origin, access-control-allow-headers"} ;
+  size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
+  http.collectHeaders(headerkeys,headerkeyssize);
 
-  String serverPath = serverName + "/BugInformation/Ping?BugId=" + bugId;
-  HTTPClient http;
-    // Your Domain name with URL path or IP address with path
-    http.begin(serverPath.c_str());
+  // Your Domain name with URL path or IP address with path
+  // http.begin(serverPath.c_str());
 
-    // Send HTTP GET request
-    Serial.println("Pinging Server");
-    int httpResponseCode = http.GET();
+
+  // Send HTTP GET request
+  Serial.println("Pinging Server");
+  String Data = "BugId=" + bugId;
+  int httpResponseCode = http.PATCH(Data);
+  
+  if (httpResponseCode>0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    String payload = http.getString();
+    Serial.println(payload);
+    if(httpResponseCode == 200){
+      return;
+    }
+    else{
+      Serial.print("Incorrect response code: ");
+      Serial.println(httpResponseCode);
+    }
     
-    if (httpResponseCode>0) {
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
-      String payload = http.getString();
-      Serial.println(payload);
-      if(httpResponseCode == 200){
-        return;
-      }
-      else{
-        Serial.print("Incorrect response code: ");
-        Serial.println(httpResponseCode);
-      }
-      
-    }
-    else {
-      Serial.print("Error code: ");
-      Serial.println(httpResponseCode);
-      checkConnection();
-    }
-    http.end();
+  }
+  else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+    checkConnection();
+  }
+  http.end();
+
+  // http.close();
 }
 
 bool Communicate::getInitialised(){ return initialised; }
