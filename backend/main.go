@@ -45,26 +45,26 @@ func SetupRoutes() *gin.Engine {
 	// Update to POST, UPDATE, DELETE etc
 
 	//api Paths
-	router.GET("/Session/Add", api.AddSession)
+	router.PUT("/Session/Add", api.AddSession)
 	router.PATCH("/Session/Ping", api.PingSession)
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
 
-	router.GET("/Nodes/Add", api.AddNode)
+	router.PUT("/Nodes/Add", api.AddNode)
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
-	router.GET("/Nodes/CreateTable", api.CreateNodeTable)
+	router.PUT("/Nodes/CreateTable", api.CreateNodeTable)
 
-	router.GET("/Edges/Add", api.AddEdge)
+	router.PUT("/Edges/Add", api.AddEdge)
 	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
-	router.GET("/Edges/CreateTable", api.CreateEdgeTable)
+	router.PUT("/Edges/CreateTable", api.CreateEdgeTable)
 
 	// router.GET("/BugInformation/Add", api.AddBugInformation)
-	router.GET("/BugInformation/Ping", api.PingBugInformation)
+	router.PATCH("/BugInformation/Ping", api.PingBugInformation)
 	router.GET("/BugInformation/Online", api.OnlineBugInformation)
 	router.GET("/BugInformation/DisplayAll", api.DisplayBugInformation)
-	router.GET("/BugInformation/UpdateBugName", api.UpdateBugNameBugInformation)
+	router.PATCH("/BugInformation/UpdateBugName", api.UpdateBugNameBugInformation)
 
-	router.GET("/Beacon/TurnOn", api.TurnOn)
-	router.GET("/Beacon/BeaconPing", api.BeaconPing)
+	router.PATCH("/Beacon/TurnOn", api.TurnOn)
+	router.PATCH("/Beacon/BeaconPing", api.BeaconPing)
 
 	/*
 		SessionId.Edges
