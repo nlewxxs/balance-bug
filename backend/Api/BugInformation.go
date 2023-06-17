@@ -120,18 +120,20 @@ func PingBugInformation(c *gin.Context) {
 			BugInformationNew.BugName = BugInformationNew.BugId
 
 			// Insert item to DB
-			_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
+			req, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
 			if err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
+			req.Close();
 		case nil:
 			fmt.Println(BugName)
-			_, err := db.Query("UPDATE testdb.BugInformation SET `LastSeen`=? WHERE BugId=?;", BugInformationNew.LastSeen, BugInformationNew.BugId)
+			req, err := db.Query("UPDATE testdb.BugInformation SET `LastSeen`=? WHERE BugId=?;", BugInformationNew.LastSeen, BugInformationNew.BugId)
 			if err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			}
+			req.Close();
 
 			// Log message
 			log.Println("updated BugInformation entry", BugInformationNew)
@@ -142,6 +144,7 @@ func PingBugInformation(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			return
 		}
+		// BugNameQuery.Close();
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusOK, &BugInformationNew)
