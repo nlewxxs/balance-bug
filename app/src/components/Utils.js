@@ -42,5 +42,36 @@ async function fetchData(url) {
     return { data, isLoading, error } ;
 };
 
-export {fetchData,
+async function putData(url) {
+  let data = null;
+  let isLoading = true;
+  let error = null;
+
+  const requestOptions = {
+    method: 'PUT',
+    headers: {},
+    body: ''
+  };
+
+  await fetch(url, requestOptions)
+  .then(response => {
+      //console.log(response);
+      if (!response.ok) {
+          throw Error("Unable to PUT that resource");
+      }
+      return response.json();
+  })
+  .then(rdata => {
+      isLoading = false;
+      data = rdata;
+  })
+  .catch(err => {
+      isLoading = false;
+      error = err.message;
+      console.log(err.message);
+  })
+  return { data, isLoading, error } ;
+};
+
+export {fetchData, putData,
         usePoll}; 

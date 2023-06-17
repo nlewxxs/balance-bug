@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SessionList from './SessionList';
-import {fetchData, usePoll} from './Utils.js';
+import {fetchData, putData, usePoll} from './Utils.js';
 
 function LoadSession() {
     const [sessions, setSessions] = useState(null);
@@ -17,7 +17,7 @@ function LoadSession() {
 //        getSessions();  
 //    }, 1000); 
     
-    const url = "http://192.168.68.126:8081/Session/DisplayAll"
+    const url = "http://90.196.3.86:8081/Session/DisplayAll"
     const getSessions = () => {
         fetchData(url)
         .then(response => {
