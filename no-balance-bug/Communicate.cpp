@@ -42,7 +42,7 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
   pathName = serverName + "/Nodes/CreateTable?BugId=" + bugId;
   httpNode.begin(pathName.c_str());
 
-  pathName = serverName + "/Nodes/CreateTable?BugId=" + bugId;
+  pathName = serverName + "/Edges/CreateTable?BugId=" + bugId;
   httpEdge.begin(pathName.c_str());
 
   

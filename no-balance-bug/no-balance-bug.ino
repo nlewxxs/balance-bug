@@ -247,7 +247,7 @@ void communicationCode(void* pvParameters) {
   #ifdef ENABLE_HTTP_SERVER
     //wifi setup
   if (!communicate.getInitialised()){
-    communicate.init("Ben", "test1234", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
+    communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
   }
     
   #endif
