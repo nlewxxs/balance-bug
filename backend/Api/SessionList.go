@@ -150,7 +150,7 @@ func CheckNewSession(c *gin.Context) {
 			return
 		}
 
-		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1 WHERE TIMESTAMPDIFF(SECOND, LastSeen, ?) < ?;", CurrentTime, TimeDiffExtracted)
+		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE TIMESTAMPDIFF(SECOND, TimeStamp, ?) < ? ORDER BY `TimeStamp` DESC LIMIT 1;", CurrentTime, TimeDiffExtracted)
 		switch err := SessionIdQuery.Scan(&SessionListNew.SessionId); err {
 		case sql.ErrNoRows:
 			log.Println("Did not find matching SessionList")
