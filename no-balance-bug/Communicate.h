@@ -17,6 +17,9 @@ class Communicate {
     void setUpMap();
     void addNode(String _nodeId, String _xCoord, String _yCoord);
     void addEdge(String _nodeId, String _edgeNodeId, String _distance, String _angle);
+    bool getSufficientCharge();
+    bool getBeaconStatusChange();
+    void setBeacon(String _beaconValue);
 
   private:
     bool initialised;
@@ -29,10 +32,13 @@ class Communicate {
     HTTPClient httpGetNewSession;
     HTTPClient httpNode;
     HTTPClient httpEdge;
+    HTTPClient httpBeacon;
     String serverName;
     bool mapSetup;
     bool httpNodeSetup;
     bool httpEdgeSetup;
+    bool sufficientCharge;
+    bool beaconStatusChange;
 };
 
 #endif

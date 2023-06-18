@@ -10,6 +10,8 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
   httpGetNewSession.setReuse(true);
   httpNodeSetup = false;
   httpEdgeSetup = false;
+  sufficientCharge = false;
+  beaconStatusChange = false;
 
 
   //set up http rooutes
@@ -140,6 +142,9 @@ void Communicate::ping(){
 bool Communicate::getInitialised(){ return initialised; }
 bool Communicate::getInSession() { return inSession; }
 bool Communicate::getStatusMapSetup() { return mapSetup; }
+bool Communicate::getSufficientCharge() { return sufficientCharge; }
+bool Communicate::getBeaconStatusChange() { return beaconStatusChange; }
+
 
 void Communicate::checkNewSession(){
   int httpResponseCode = httpGetNewSession.GET();
@@ -305,3 +310,56 @@ void Communicate::addEdge(String _nodeId, String _edgeNodeId, String _distance, 
     Serial.println("First Set up the tables");
   }
 }
+
+void Communicate::setBeacon(String _beaconValue){
+  if(mapSetup) {
+    String pathName = serverName + "/Beacon/TurnOn?BugId=" + bugId + "&BeaconOn=" + _beaconValue;
+    httpBeacon.begin(pathName.c_str());
+
+    String params = "BugId="  + bugId + "&BeaconOn=" + _beaconValue;
+    int httpBeaconResponseCode = httpBeacon.PATCH(params);
+
+    if (httpBeaconResponseCode>0) {
+      Serial.print("Beacon TurnOn Response Code: ");
+      Serial.println(httpBeaconResponseCode);
+      String payload = httpEdge.getString();
+      Serial.println(payload);
+
+      if(httpBeaconResponseCode == 200){
+        Serial.println("Ok, Response successfully processed");
+
+        if(payload == "\"0\"") {
+          Serial.println("Session associated to BugId doesn't exist");
+        }
+        if(payload == "\"1\"") {
+          Serial.println("Charge Status of Beacons Insufficient");
+          sufficientCharge = false;
+        }
+        if(payload == "\"2\"") {
+          Serial.println("No Change in Beacon TurnOn Value, with sufficient charge");
+          beaconStatusChange = false;
+          sufficientCharge = true;
+        }
+        if(payload == "\"3\"") {
+          Serial.println("Successfully altered Beacon TurnOn value, with sufficient charge");
+          sufficientCharge = true;
+          beaconStatusChange = true;
+        }
+      }
+      else{
+        Serial.print("Incorrect response code: ");
+        Serial.println(httpBeaconResponseCode);
+      }
+      
+    }
+    else {
+      Serial.print("Error code: ");
+      Serial.println(httpBeaconResponseCode);
+      checkConnection();
+    }
+    httpBeacon.end();
+  } else {
+    Serial.println("First Set up the tables");
+  }
+}
+
