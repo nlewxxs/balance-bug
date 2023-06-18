@@ -6,7 +6,9 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <HTTPClient.h>
-// #include "Communicate.h"
+#include "Communicate.h"
+
+//"http://90.196.3.86:8081" -> current address of the server, initialise with this
 
 TaskHandle_t spiFPGA;
 TaskHandle_t backend;
