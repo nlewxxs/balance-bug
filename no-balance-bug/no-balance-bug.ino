@@ -13,9 +13,9 @@
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
-// #define ENABLE_HTTP_SERVER
+#define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
-#define ENABLE_CAMERA
+// #define ENABLE_CAMERA
 // #define ENABLE_CLASSIFICATION
 // #define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
@@ -37,6 +37,8 @@ String bugId =  "MazEERunnEEr";
 TaskHandle_t communication;  // task on core 0 for communication
 
 Communicate communicate;
+
+#define CHECK_NEW_SESSION_TIMEOUT 20
 
 
 // const char* ssid = "Ben";
@@ -245,7 +247,7 @@ void communicationCode(void* pvParameters) {
   #ifdef ENABLE_HTTP_SERVER
     //wifi setup
   if (!communicate.getInitialised()){
-    communicate.init("Ben", "test1234", "http://90.196.3.86:8081", bugId);
+    communicate.init("Ben", "test1234", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
   }
     
   #endif
@@ -263,6 +265,10 @@ void communicationCode(void* pvParameters) {
     #ifdef ENABLE_HTTP_SERVER
       if (!communicate.getInSession()){
         communicate.ping();
+        communicate.checkNewSession();
+        vTaskDelay(100);
+      } else{
+        Serial.println("In a new session!");
       }
       // if (millis() - lastTime > 5000) {
       //   //Check WiFi connection status

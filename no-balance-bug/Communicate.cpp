@@ -1,16 +1,18 @@
 #include "Communicate.h"
 
-void Communicate::init(char *_ssid, char *_password, char *_serverName, String _bugId){
+void Communicate::init(char *_ssid, char *_password, char *_serverName, String _bugId, float checkNewSessionTimeout){
   inSession = false;
   ssid = _ssid;
   password = _password;
   serverName = _serverName;
   bugId = _bugId;
-  http.setReuse(true);
+  httpPing.setReuse(true);
+  httpGetNewSession.setReuse(true);
 
   const char * headerkeys[] = {"Access-Control-Allow-Origin","*","Access-Control-Allow-Headers","access-control-allow-origin, access-control-allow-headers"} ;
   size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
-  http.collectHeaders(headerkeys,headerkeyssize);
+  httpPing.collectHeaders(headerkeys,headerkeyssize);
+  httpGetNewSession.collectHeaders(headerkeys,headerkeyssize);
 
   WiFi.begin(ssid, password);
   // debugOutput("Connecting");
@@ -22,9 +24,14 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
     Serial.println("Attempting WiFi connection...");
   } 
 
-  String pathName = serverName + "/BugInformation/Ping?BugId=" + bugId;
-  http.begin(pathName.c_str());
+  String pathName = serverName + "/Session/CheckNewSession?BugId=" + bugId + "&TimeDiff=" + String(checkNewSessionTimeout);
+  httpGetNewSession.begin(pathName.c_str());
 
+  pathName = serverName + "/BugInformation/Ping?BugId=" + bugId;
+  String Data = "BugId=" + bugId;
+  httpPing.begin(pathName.c_str());
+
+  
   while(!initialised){
     // HTTPClient http;    
     // Your Domain name with URL path or IP address with path
@@ -32,12 +39,12 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
     // Send HTTP GET request
     Serial.println("Subscribing to Server");
     String Data = "BugId=" + bugId;
-    int httpResponseCode = http.PATCH(Data);
+    int httpResponseCode = httpPing.PATCH(Data);
     
     if (httpResponseCode>0) {
       Serial.print("HTTP Response code: ");
       Serial.println(httpResponseCode);
-      String payload = http.getString();
+      String payload = httpPing.getString();
       Serial.println(payload);
       if(httpResponseCode == 200){
         Serial.println("Initialised");
@@ -53,7 +60,7 @@ void Communicate::init(char *_ssid, char *_password, char *_serverName, String _
       Serial.println(httpResponseCode);
       vTaskDelay(1000);
     }
-    http.end();
+    httpPing.end();
     // http.close();
   }
   // Free resources
@@ -80,21 +87,24 @@ void Communicate::ping(){
   checkConnection();
   const char * headerkeys[] = {"Access-Control-Allow-Origin","*","Access-Control-Allow-Headers","access-control-allow-origin, access-control-allow-headers"} ;
   size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
-  http.collectHeaders(headerkeys,headerkeyssize);
+  httpPing.collectHeaders(headerkeys,headerkeyssize);
 
   // Your Domain name with URL path or IP address with path
   // http.begin(serverPath.c_str());
 
 
   // Send HTTP GET request
+  String pathName = serverName + "/BugInformation/Ping?BugId=" + bugId;
+  httpPing.begin(pathName.c_str());
+
   Serial.println("Pinging Server");
   String Data = "BugId=" + bugId;
-  int httpResponseCode = http.PATCH(Data);
+  int httpResponseCode = httpPing.PATCH(Data);
   
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
-    String payload = http.getString();
+    String payload = httpPing.getString();
     Serial.println(payload);
     if(httpResponseCode == 200){
       return;
@@ -110,12 +120,40 @@ void Communicate::ping(){
     Serial.println(httpResponseCode);
     checkConnection();
   }
-  http.end();
+  httpPing.end();
 
   // http.close();
 }
 
 bool Communicate::getInitialised(){ return initialised; }
-bool Communicate::getInSession(){ return inSession; }
+bool Communicate::getInSession() { return inSession; }
+
+void Communicate::checkNewSession(){
+  int httpResponseCode = httpGetNewSession.GET();
+
+  if (httpResponseCode>0) {
+    Serial.print("Check New Session Response Code: ");
+    Serial.println(httpResponseCode);
+    String payload = httpGetNewSession.getString();
+    Serial.println(payload);
+
+    if(httpResponseCode == 200){
+      Serial.println("Ok Response");
+      if(payload == "\"1\""){
+        Serial.println("Now Entering Session");
+        inSession = true;
+      }
+    }
+    else{
+      Serial.print("Incorrect response code: ");
+      Serial.println(httpResponseCode);
+    }
     
-// bool checkNewSession();
+  }
+  else {
+    Serial.print("Error code: ");
+    Serial.println(httpResponseCode);
+    checkConnection();
+  }
+  httpGetNewSession.end();
+}

@@ -9,10 +9,11 @@
 class Communicate {
   public: 
     bool getInitialised();
-    bool getInSession();
-    void init(char *_ssid, char *_password, char *_serverName, String _bugId);
+    void init(char *_ssid, char *_password, char *_serverName, String _bugId, float checkNewSessionTimeout);
     void ping();
-    // bool checkNewSession();
+    void checkNewSession();
+    bool getInSession();
+
   private:
     bool initialised;
     bool inSession;
@@ -20,7 +21,8 @@ class Communicate {
     char* ssid;
     char* password;
     void checkConnection();
-    HTTPClient http;
+    HTTPClient httpPing;
+    HTTPClient httpGetNewSession;
     String serverName;
 };
 
