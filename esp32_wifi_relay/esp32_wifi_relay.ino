@@ -6,6 +6,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <HTTPClient.h>
+// #include "Communicate.h"
 
 TaskHandle_t spiFPGA;
 TaskHandle_t backend;
@@ -24,8 +25,8 @@ int toSendFPGA = 0;
 uint16_t buf = 0;      // fpga SPI recv buffer
 
 int status = WL_IDLE_STATUS;
-const char* ssid = "Mi 9T Pro";
-const char* password = "randompass";
+const char* ssid = "Ben";
+const char* password = "test1234";
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 unsigned int localPort = 2390;
