@@ -267,8 +267,11 @@ void communicationCode(void* pvParameters) {
         communicate.ping();
         communicate.checkNewSession();
         vTaskDelay(100);
-      } else{
-        Serial.println("In a new session!");
+      } else if(!communicate.getStatusMapSetup()){
+        communicate.setUpMap();
+      }
+      else{
+        Serial.println("All set up");
       }
       // if (millis() - lastTime > 5000) {
       //   //Check WiFi connection status

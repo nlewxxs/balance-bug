@@ -13,6 +13,10 @@ class Communicate {
     void ping();
     void checkNewSession();
     bool getInSession();
+    bool getStatusMapSetup();
+    void setUpMap();
+    void addNode(String _nodeId, String _xCoord, String _yCoord);
+    void addEdge(String _nodeId, String _edgeNodeId, String _distance, String _angle);
 
   private:
     bool initialised;
@@ -23,7 +27,12 @@ class Communicate {
     void checkConnection();
     HTTPClient httpPing;
     HTTPClient httpGetNewSession;
+    HTTPClient httpNode;
+    HTTPClient httpEdge;
     String serverName;
+    bool mapSetup;
+    bool httpNodeSetup;
+    bool httpEdgeSetup;
 };
 
 #endif
