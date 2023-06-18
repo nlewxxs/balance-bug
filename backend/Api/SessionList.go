@@ -1,28 +1,31 @@
 package Api
 
 import (
-    "fmt"
-    "log"
-    "net/http"
-    "time"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 
+	"database/sql"
+
 	"github.com/google/uuid"
 )
 
 type SessionListStruct struct {
-	TimeStamp      	string  `json:"TimeStamp"`
-	BugName         string  `json:"BugName"`
-	SessionId   	string  `json:"SessionId"`
-	SessionName     string  `json:"SessionName"`
+	TimeStamp   string `json:"TimeStamp"`
+	BugName     string `json:"BugName"`
+	SessionId   string `json:"SessionId"`
+	SessionName string `json:"SessionName"`
 }
 
 // CRUD: Create Read Update Delete API Format
-//DISPLAY SESSION IDs
+// DISPLAY SESSION IDs
 func DisplaySessionList(c *gin.Context) {
 	rows, err := db.Query("SELECT * FROM testdb.SessionList")
 	if err != nil {
@@ -103,6 +106,75 @@ func AddSession(c *gin.Context) {
 	}
 }
 
+func CheckNewSession(c *gin.Context) {
+	BugId := c.Query("BugId")
+	timeDiff := c.Query("TimeDiff")
+
+	TimeDiffExtracted, err := strconv.ParseFloat(timeDiff, 32)
+	if err != nil {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "invalid TimeDiff format, please enter a valid float"})
+		return
+	}
+
+	t := time.Now() //.In(location)
+	CurrentTime := t.Format("2006-01-02 15:04:05")
+
+	//location, err := time.LoadLocation("Europe/London")
+
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
+	// 	return
+	// }
+
+	// Validate entry
+	if len(CurrentTime) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
+	} else if len(BugId) == 0 {
+		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.BugName"})
+	} else {
+		// Create todo item
+		var SessionListNew SessionListStruct
+
+		SessionListNew.TimeStamp = CurrentTime
+
+		BugNameQuery := db.QueryRow("SELECT `BugName` FROM `BugInformation` WHERE `BugId`=?;", BugId)
+		switch err := BugNameQuery.Scan(&SessionListNew.BugName); err {
+		case sql.ErrNoRows:
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with BugId-BugName Translation"})
+			return
+		case nil:
+			fmt.Println(SessionListNew.BugName)
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
+		}
+
+		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1 WHERE TIMESTAMPDIFF(SECOND, LastSeen, ?) < ?;", CurrentTime, TimeDiffExtracted)
+		switch err := SessionIdQuery.Scan(&SessionListNew.SessionId); err {
+		case sql.ErrNoRows:
+			log.Println("Did not find matching SessionList")
+
+			// Return success response
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+			c.JSON(http.StatusCreated, "0")
+			return
+		case nil:
+			log.Println("Found matching SessionList entry")
+
+			// Return success response
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
+			c.JSON(http.StatusCreated, "1")
+		default:
+			fmt.Println(err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			return
+		}
+	}
+}
+
 func PingSession(c *gin.Context) {
 	var SessionListNew SessionListStruct
 
@@ -115,7 +187,7 @@ func PingSession(c *gin.Context) {
 	// 	return
 	// }
 
-    t := time.Now() //.In(location)
+	t := time.Now() //.In(location)
 	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
 
 	// Validate entry
@@ -123,7 +195,7 @@ func PingSession(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
 	} else {
 		// Insert item to DB
-        _, err := db.Query("UPDATE testdb.SessionList SET `TimeStamp`=? WHERE SessionId=?;", SessionListNew.TimeStamp, SessionListNew.SessionId)
+		_, err := db.Query("UPDATE testdb.SessionList SET `TimeStamp`=? WHERE SessionId=?;", SessionListNew.TimeStamp, SessionListNew.SessionId)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
@@ -139,4 +211,3 @@ func PingSession(c *gin.Context) {
 		c.JSON(http.StatusOK, &SessionListNew)
 	}
 }
-

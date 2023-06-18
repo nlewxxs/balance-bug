@@ -46,6 +46,7 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/Session/Add", api.AddSession)
 	router.PATCH("/Session/Ping", api.PingSession)
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
+	router.GET("/Session/CheckNewSession", api.CheckNewSession)
 
 	router.PUT("/Nodes/Add", api.AddNode)
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
