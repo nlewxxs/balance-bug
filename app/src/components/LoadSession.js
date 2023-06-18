@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import SessionList from './SessionList';
-import {fetchData, putData, usePoll} from './Utils.js';
+import {fetchData, usePoll} from './Utils.js';
 
 function LoadSession() {
     const [sessions, setSessions] = useState(null);

@@ -14,10 +14,6 @@ function MainMenu() {
         setHover(!isHover);
     };
 
-    const handleClick = () => {
-        window.open("https://www.imperial.ac.uk/students/academic-support/graduate-school/students/masters/professional-development/plagiarism-online/");
-    };
-
     const img = isHover ? msk : imp;
     return (
       <div className="menu_page">
@@ -26,7 +22,6 @@ function MainMenu() {
           <img src={img}
             onMouseEnter={handleHover}
             onMouseLeave={handleHover}
-            onClick={handleClick}
             className="img" alt="imperial"/>
         </div>
         <div className="btn_container">

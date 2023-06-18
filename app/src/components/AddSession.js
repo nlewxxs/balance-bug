@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchData, putData, usePoll } from "./Utils";
+import { fetchData, usePoll } from "./Utils";
 import DropdownSelect from "./DropdownSelect.js";
 
 function AddSession() {
@@ -114,7 +114,7 @@ function AddSession() {
         dateTime = dateTime.replace('T', '%20').replace('Z', '');
         // Make api call
         setLoading(true);
-        const url = ``;
+        const url = `http://90.196.3.86:8081/Session/Add?TimeStamp=${dateTime}&BugName=${selectedOption}&SessionName=${sessionName}`;
         fetchData(url)
         .then( response => {
             //console.log(response.data);
