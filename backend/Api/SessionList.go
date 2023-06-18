@@ -150,7 +150,7 @@ func CheckNewSession(c *gin.Context) {
 			return
 		}
 
-		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1 WHERE TIMESTAMPDIFF(SECOND, LastSeen, ?) < ?;", CurrentTime, TimeDiffExtracted)
+		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE TIMESTAMPDIFF(SECOND, TimeStamp, ?) < ? ORDER BY `TimeStamp` DESC LIMIT 1;", CurrentTime, TimeDiffExtracted)
 		switch err := SessionIdQuery.Scan(&SessionListNew.SessionId); err {
 		case sql.ErrNoRows:
 			log.Println("Did not find matching SessionList")
@@ -158,7 +158,7 @@ func CheckNewSession(c *gin.Context) {
 			// Return success response
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-			c.JSON(http.StatusCreated, "0")
+			c.JSON(http.StatusOK, "0")
 			return
 		case nil:
 			log.Println("Found matching SessionList entry")
@@ -166,7 +166,7 @@ func CheckNewSession(c *gin.Context) {
 			// Return success response
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-			c.JSON(http.StatusCreated, "1")
+			c.JSON(http.StatusOK, "1")
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
