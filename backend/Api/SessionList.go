@@ -90,11 +90,12 @@ func AddSession(c *gin.Context) {
 		SessionListNew.SessionName = SessionNameNew
 
 		// Insert item to DB
-		_, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`, `SessionName`) VALUES(?, ?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId, SessionListNew.SessionName)
+		req, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`, `SessionName`) VALUES(?, ?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId, SessionListNew.SessionName)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
+		req.Close()
 
 		// Log message
 		log.Println("created SessionList entry", SessionListNew)
@@ -195,12 +196,13 @@ func PingSession(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
 	} else {
 		// Insert item to DB
-		_, err := db.Query("UPDATE testdb.SessionList SET `TimeStamp`=? WHERE SessionId=?;", SessionListNew.TimeStamp, SessionListNew.SessionId)
+		req, err := db.Query("UPDATE testdb.SessionList SET `TimeStamp`=? WHERE SessionId=?;", SessionListNew.TimeStamp, SessionListNew.SessionId)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			return
 		}
+		req.Close()
 
 		// Log message
 		log.Println("updated SessionList entry", SessionListNew)

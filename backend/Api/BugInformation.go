@@ -164,11 +164,12 @@ func UpdateBugNameBugInformation(c *gin.Context) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
 	} else {
 		// Insert item to DB
-		_, err := db.Query("UPDATE testdb.BugInformation SET `BugName`=? WHERE BugId=?;", BugInformationNew.BugName, BugInformationNew.BugId)
+		req, err := db.Query("UPDATE testdb.BugInformation SET `BugName`=? WHERE BugId=?;", BugInformationNew.BugName, BugInformationNew.BugId)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 		}
+		req.Close()
 
 		// Log message
 		log.Println("updated BugInformation entry", BugInformationNew)

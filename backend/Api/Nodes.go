@@ -160,12 +160,13 @@ func AddNode(c *gin.Context) {
 		}
 		SqlCommand := fmt.Sprintf("INSERT INTO `testdb.%s_nodes` (`NodeId`, `XCoord`, `YCoord`) VALUES(?,?,?);", SessionId)
 
-		_, err := db.Query(SqlCommand, NodeNew.NodeId, NodeNew.XCoord, NodeNew.YCoord)
+		req, err := db.Query(SqlCommand, NodeNew.NodeId, NodeNew.XCoord, NodeNew.YCoord)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			return
 		}
+		req.Close()
 
 		// Log message
 		fmt.Println("created SessionList entry", NodeNew)

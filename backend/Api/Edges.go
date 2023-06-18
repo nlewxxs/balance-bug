@@ -72,12 +72,14 @@ func CreateEdgeTable(c *gin.Context) {
 
 	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS `testdb.%s_edges` (`NodeId` char(100) NOT NULL, `EdgeNodeId` char(100) NOT NULL, `Distance` char(100), `Angle` char(100), PRIMARY KEY (`NodeId`, `EdgeNodeId`), FOREIGN KEY (`NodeId`) REFERENCES `testdb.%s_nodes`(`NodeId`), FOREIGN KEY (`EdgeNodeId`) REFERENCES `testdb.%s_nodes`(`NodeId`)) ENGINE=InnoDB;", SessionId, SessionId, SessionId)
 
-	_, err := db.Query(SqlCommand)
+	req, err := db.Query(SqlCommand)
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not create table"})
 		return
 	}
+	req.Close()
+
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
@@ -179,12 +181,13 @@ func AddEdge(c *gin.Context) {
 
 		// fmt.Println("SQL Command: ", SqlCommand)
 
-		_, err := db.Query(SqlCommand)
+		req, err := db.Query(SqlCommand)
 		if err != nil {
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			return
 		}
+		req.Close()
 
 		// Log message
 		fmt.Println("created SessionList entry", EdgeNew)

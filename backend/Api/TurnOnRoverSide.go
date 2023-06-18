@@ -102,7 +102,7 @@ func TurnOn(c *gin.Context) {
 				c.JSON(http.StatusOK, "2")
 				return
 			} else if (BeaconOn == "1") && (On == "0") {
-				_, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "1")
+				req, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "1")
 				if err != nil {
 					fmt.Println(err.Error())
 					c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
@@ -111,13 +111,15 @@ func TurnOn(c *gin.Context) {
 					c.JSON(http.StatusOK, "2")
 					return
 				}
+				req.Close()
 			} else if (BeaconOn == "0") && (On == "1") {
-				_, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "0")
+				req, err := db.Query("UPDATE testdb.BeaconOn SET `On`=?;", "0")
 				if err != nil {
 					fmt.Println(err.Error())
 					c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 					return
 				}
+				req.Close()
 			} else {
 				c.Header("Access-Control-Allow-Origin", "*")
 				c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
