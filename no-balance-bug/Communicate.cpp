@@ -322,7 +322,7 @@ void Communicate::setBeacon(String _beaconValue){
     if (httpBeaconResponseCode>0) {
       Serial.print("Beacon TurnOn Response Code: ");
       Serial.println(httpBeaconResponseCode);
-      String payload = httpEdge.getString();
+      String payload = httpBeacon.getString();
       Serial.println(payload);
 
       if(httpBeaconResponseCode == 200){
