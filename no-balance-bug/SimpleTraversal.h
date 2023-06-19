@@ -18,13 +18,16 @@ enum Decision{
   MoveThenRight
 };
 
+//coordinates
 struct Coords{
   int x;
   int y;
 };
 
+//simple traversal
 class SimpleTraversal {
   public: 
+    //public functions
     void init(char *_ssid, char *_password, char *_serverName, String _bugId, float timeout);
     void setBugId(String _bugId);
     void setDistance(float _distance);
@@ -32,17 +35,23 @@ class SimpleTraversal {
     void setTurnAngle(float _angle);
     void makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
     Decision getDecision();
+
+    //public objects
     Communicate communicate;
   private:
-    // bool initialised;
+    //private variables
     String bugId;
-    enum Decision movementDecision;
-    void calculateCoords();
     float distance;
     float angle;
     Coords coords;
     int nodeNameCtr;
     String prevNode;
+
+    //private objects
+    enum Decision movementDecision;
+
+    //private functions
+    void calculateCoords();
 };
 
 
