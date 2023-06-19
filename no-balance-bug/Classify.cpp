@@ -60,16 +60,16 @@ void Image::debugInfo() {
 // FUNCTION DOESNT NEED IF ELSE -- later fix
 classifyElement Image::classify(int grid[12][4]) {
     // Left Turn
-    if (outsideBounds(grid[4], leftPathBounds) &&
-        outsideBounds(grid[5], leftPathBounds)) {
+    if (outsideBounds(grid[0], leftPathBounds) &&
+        outsideBounds(grid[1], leftPathBounds)) {
         // std::cout << "LEFT JUNCTION"
         info.leftTurn = true;
     } else {
         info.leftTurn = false;
     }
     // Right Turn
-    if (outsideBounds(grid[7], rightPathBounds) &&
-        outsideBounds(grid[6], rightPathBounds)) {
+    if (outsideBounds(grid[3], rightPathBounds) &&
+        outsideBounds(grid[2], rightPathBounds)) {
         // std::cout << "RIGHT JUNCTION"
         info.rightTurn = true;
     } else {
@@ -77,10 +77,10 @@ classifyElement Image::classify(int grid[12][4]) {
     }
 
     // Path or End
-    if (outsideBounds(grid[5],  middlePathBounds) &&
-        outsideBounds(grid[6],  middlePathBounds) &&
-        outsideBounds(grid[9],  middlePathBounds) &&
-        outsideBounds(grid[10], middlePathBounds) ){
+    if (outsideBounds(grid[1],  middlePathBounds) &&
+        outsideBounds(grid[2],  middlePathBounds) &&
+        outsideBounds(grid[5],  middlePathBounds) &&
+        outsideBounds(grid[6], middlePathBounds) ){
         // std::cout << "PATH AHEAD"
         info.isClear = true;
         info.isEnd  = false;
@@ -91,7 +91,7 @@ classifyElement Image::classify(int grid[12][4]) {
     }
 
     // Left Wall
-    if (hasWall(grid[8], grid[9], grid[4], grid[5], 160, leftWallBounds)) {
+    if (hasWall(grid[4], grid[5], grid[0], grid[1], 160, leftWallBounds)) {
         // std::cout << "LEFT WALL"
         info.leftWall = true;
     } else {
@@ -99,7 +99,7 @@ classifyElement Image::classify(int grid[12][4]) {
     }
 
     // Right Wall
-    if (hasWall(grid[10], grid[11], grid[6], grid[7], 480, rightWallBounds)) {
+    if (hasWall(grid[6], grid[7], grid[2], grid[3], 480, rightWallBounds)) {
         // std::cout << "RIGHT WALL"
         info.rightWall = true;
     } else {

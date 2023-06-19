@@ -14,10 +14,9 @@
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
-#define ENABLE_HTTP_SERVER
+// #define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
-// #define ENABLE_CAMERA
-// #define ENABLE_CLASSIFICATION
+#define ENABLE_CAMERA
 // #define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
@@ -208,9 +207,6 @@ void loop() {
     D8M.update();
     Matrix frame = D8M.getBoxMatrix();
     char tmp[64];
-
-    debugOutput(ypr[0], false);
-    debugOutput(",", false);
   
     for (int i = 0; i < 11; i++){
       sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
@@ -221,8 +217,7 @@ void loop() {
 
     Image newImage;   
 
-    newImage.classify(frame.boxes);
-    debugOutput("Classification:");
+    classifyElement stuffs = newImage.classify(frame.boxes);
     newImage.debugInfo();
 
   #endif
@@ -254,7 +249,7 @@ void communicationCode(void* pvParameters) {
   // if (!communicate.getInitialised()){
   //   communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
   // }
-  traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
+    traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
     
   #endif
 
