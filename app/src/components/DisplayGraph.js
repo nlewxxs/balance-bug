@@ -117,8 +117,12 @@ function DisplayGraph() {
         color: '#000000',
       },
       format: 'png',
-      physics: {
-        enabled: false,
+      physics: false,
+      interaction: {
+        selectable: false, // Disable node and edge selection
+        dragNodes: false, // Disable node dragging
+        dragView: false, // Disable panning and zooming
+        zoomView: false, // Disable zooming
       },
     };
   
@@ -136,7 +140,7 @@ function DisplayGraph() {
       <div className="display_page">
         <h1 className="title">GRAPH FILLER</h1>
         <div className="graph">
-          <Graph graph={graph} options={{options}} events={events}/>
+          <Graph graph={graph} options={options} events={events}/>
             {/* Display Graph Info */}
         </div>
         <div className="btn_container">
