@@ -18,6 +18,13 @@ type NodeStruct struct {
 	YCoord string `json:"YCoord"`
 }
 
+type ProcessedNodeStruct struct {
+	Id    string `json:"id"`
+	Label string `json:"label"`
+	X     string `json:"x"`
+	Y     string `json:"y"`
+}
+
 // Create the table, this is REQUIRED before reading
 func CreateNodeTable(c *gin.Context) {
 	BugId := c.Query("BugId")
@@ -89,20 +96,30 @@ func DisplayAllNodes(c *gin.Context) {
 	}
 
 	// Get all rows and add into SessionListStructs
-	NodeLists := make([]NodeStruct, 0)
+	NodeLists := make([]ProcessedNodeStruct, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			NodeListRow := NodeStruct{}
-			if err := rows.Scan(&NodeListRow.NodeId, &NodeListRow.XCoord, &NodeListRow.YCoord); err != nil {
+			NodeListRow := ProcessedNodeStruct{}
+			NodeListRow.Label = ""
+			if err := rows.Scan(&NodeListRow.Id, &NodeListRow.X, &NodeListRow.Y); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
+
 			NodeLists = append(NodeLists, NodeListRow)
 		}
+	} else {
+		NodeListRow := ProcessedNodeStruct{}
+		NodeListRow.Id = "start"
+		NodeListRow.Label = ""
+		NodeListRow.X = "0"
+		NodeListRow.Y = "0"
+
+		NodeLists = append(NodeLists, NodeListRow)
 	}
 
 	// Return JSON object of all rows

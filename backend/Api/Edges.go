@@ -20,6 +20,12 @@ type EdgeStruct struct {
 	Angle      string `json:"Angle"`
 }
 
+type ProcessedEdgeStruct struct {
+	From  string `json:"from"`
+	To    string `json:"to"`
+	Label string `json:"label"`
+}
+
 // CREATE TABLE IF NOT EXISTS testdb.test_edges4
 // (
 // `EdgeNodeId` char(100) NOT NULL,
@@ -104,14 +110,15 @@ func DisplayAllEdges(c *gin.Context) {
 	}
 
 	// Get all rows and add into SessionListStructs
-	EdgeLists := make([]EdgeStruct, 0)
+	EdgeLists := make([]ProcessedEdgeStruct, 0)
 
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
 			// Individual row processing
-			EdgeListRow := EdgeStruct{}
-			if err := rows.Scan(&EdgeListRow.NodeId, &EdgeListRow.EdgeNodeId, &EdgeListRow.Distance, &EdgeListRow.Angle); err != nil {
+			EdgeListRow := ProcessedEdgeStruct{}
+			edgeListRowDiscard := EdgeStruct{}
+			if err := rows.Scan(&EdgeListRow.From, &EdgeListRow.To, &EdgeListRow.Label, &edgeListRowDiscard.Angle); err != nil {
 				fmt.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
@@ -160,7 +167,7 @@ func AddEdge(c *gin.Context) {
 			fmt.Println(BugName)
 		default:
 			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB1"})
 			return
 		}
 
@@ -173,7 +180,7 @@ func AddEdge(c *gin.Context) {
 			fmt.Println(SessionId)
 		default:
 			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB2"})
 			return
 		}
 
@@ -184,7 +191,7 @@ func AddEdge(c *gin.Context) {
 		req, err := db.Query(SqlCommand)
 		if err != nil {
 			fmt.Println(err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB3"})
 			return
 		}
 		req.Close()
