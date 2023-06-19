@@ -10,6 +10,7 @@
 #include "Classify.h"
 #include "Traversal.h"
 #include "Communicate.h"
+#include "SimpleTraversal.h"
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
@@ -29,6 +30,8 @@
 BluetoothSerial SerialBT;
 Camera D8M;
 
+SimpleTraversal traversal;
+
 const uint8_t redPin = 19;
 const uint8_t greenPin = 18;
 const uint8_t bluePin = 5;
@@ -41,8 +44,10 @@ Communicate communicate;
 #define CHECK_NEW_SESSION_TIMEOUT 20
 
 
-// const char* ssid = "Ben";
-// const char* password = "begforit";
+char* ssid = "Ben";
+char* password = "test1234";
+char* serverId = "http://90.196.3.86:8081";
+
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
@@ -246,9 +251,10 @@ void communicationCode(void* pvParameters) {
 
   #ifdef ENABLE_HTTP_SERVER
     //wifi setup
-  if (!communicate.getInitialised()){
-    communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
-  }
+  // if (!communicate.getInitialised()){
+  //   communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
+  // }
+  traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
     
   #endif
 
@@ -263,12 +269,12 @@ void communicationCode(void* pvParameters) {
       debugOutput(ypr[0], false);
     #endif
     #ifdef ENABLE_HTTP_SERVER
-      if (!communicate.getInSession()){
-        communicate.ping();
-        communicate.checkNewSession();
+      if (!traversal.communicate.getInSession()){
+        traversal.communicate.ping();
+        traversal.communicate.checkNewSession();
         vTaskDelay(100);
-      } else if(!communicate.getStatusMapSetup()){
-        communicate.setUpMap();
+      } else if(!traversal.communicate.getStatusMapSetup()){
+        traversal.communicate.setUpMap();
       }
       else{
         Serial.println("All set up");
