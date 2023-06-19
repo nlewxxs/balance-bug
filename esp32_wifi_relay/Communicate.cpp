@@ -1,4 +1,5 @@
 #include "Communicate.h"
+#include <HttpClient.h>
 
 //function to set inital conditions to avoid hardcoding
 void Communicate::init(String _beaconCharge, bool _beaconOn, String _serverName){

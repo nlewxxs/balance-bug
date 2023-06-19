@@ -1,0 +1,35 @@
+module CS_control (
+	
+	input logic clk, en_10, sent,
+	output logic CS
+
+);
+
+	
+	initial CS = 1'b1;
+
+	always_ff @posedge(clk) begin
+		if((CS)&&(en_10)) begin
+			CS <= 1'b0;
+		end
+		else if ((~CS)&&(sent)) begin
+			CS <= 1'b1;
+		end
+		else begin
+			CS <= CS;
+		end
+	end
+		
+endmodule
+		
+			
+			
+
+
+		
+			
+			
+	
+	
+	
+	

@@ -1,0 +1,25 @@
+module pwm_3phase_19Hz (
+	input logic clk_50MHz,
+	input logic enable,
+	output logic pwm_phase1,
+	output logic pwm_phase2,
+	output logic pwm_phase3
+);
+
+logic clk_1900;
+
+clktick tick (.clk(MAX10_CLK1_50),
+				  .rst(0),
+				  .en(1),
+				  .N(16'd26315),
+				  .tick(clk_1900)
+				 );
+				 
+pwm_3_phase pwm (.clk(clk_1900),
+					  .en(enable),
+					  .pwm1(pwm_phase1),
+					  .pwm2(pwm_phase2),
+					  .pwm3(pwm_phase3)
+					 );
+
+endmodule

@@ -1,0 +1,654 @@
+Analysis & Synthesis report for Beacon_system
+Mon Jun 19 18:48:22 2023
+Quartus Prime Version 21.1.1 Build 850 06/23/2022 SJ Lite Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Analysis & Synthesis Summary
+  3. Analysis & Synthesis Settings
+  4. Parallel Compilation
+  5. Analysis & Synthesis Source Files Read
+  6. Analysis & Synthesis Resource Usage Summary
+  7. Analysis & Synthesis Resource Utilization by Entity
+  8. Analysis & Synthesis DSP Block Usage Summary
+  9. Registers Removed During Synthesis
+ 10. General Register Statistics
+ 11. Inverted Register Statistics
+ 12. Multiplexer Restructuring Statistics (Restructuring Performed)
+ 13. Parameter Settings for User Entity Instance: clktick:clk_5Meg
+ 14. Parameter Settings for User Entity Instance: spi_slave:spi0
+ 15. Parameter Settings for User Entity Instance: spi_slave:spi1
+ 16. Parameter Settings for User Entity Instance: clkdiv:clk20
+ 17. Parameter Settings for User Entity Instance: pwm_3phase_3Hz:pwm|clktick:tick
+ 18. Parameter Settings for Inferred Entity Instance: mppt_signals:mppt|lpm_mult:Mult0
+ 19. lpm_mult Parameter Settings by Entity Instance
+ 20. Port Connectivity Checks: "beacon_FSM:fsm"
+ 21. Port Connectivity Checks: "pwm_3phase_3Hz:pwm|clktick:tick"
+ 22. Port Connectivity Checks: "clkdiv:clk20"
+ 23. Port Connectivity Checks: "spi_slave:spi1"
+ 24. Port Connectivity Checks: "spi_slave:spi0"
+ 25. Port Connectivity Checks: "clktick:clk_5Meg"
+ 26. Post-Synthesis Netlist Statistics for Top Partition
+ 27. Elapsed Time Per Partition
+ 28. Analysis & Synthesis Messages
+ 29. Analysis & Synthesis Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 2022  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and any partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details, at
+https://fpgasoftware.intel.com/eula.
+
+
+
++----------------------------------------------------------------------------------+
+; Analysis & Synthesis Summary                                                     ;
++------------------------------------+---------------------------------------------+
+; Analysis & Synthesis Status        ; Successful - Mon Jun 19 18:48:22 2023       ;
+; Quartus Prime Version              ; 21.1.1 Build 850 06/23/2022 SJ Lite Edition ;
+; Revision Name                      ; Beacon_system                               ;
+; Top-level Entity Name              ; beacon_top                                  ;
+; Family                             ; MAX 10                                      ;
+; Total logic elements               ; 310                                         ;
+;     Total combinational functions  ; 274                                         ;
+;     Dedicated logic registers      ; 169                                         ;
+; Total registers                    ; 169                                         ;
+; Total pins                         ; 39                                          ;
+; Total virtual pins                 ; 0                                           ;
+; Total memory bits                  ; 0                                           ;
+; Embedded Multiplier 9-bit elements ; 1                                           ;
+; Total PLLs                         ; 0                                           ;
+; UFM blocks                         ; 0                                           ;
+; ADC blocks                         ; 0                                           ;
++------------------------------------+---------------------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Settings                                                                              ;
++------------------------------------------------------------------+--------------------+--------------------+
+; Option                                                           ; Setting            ; Default Value      ;
++------------------------------------------------------------------+--------------------+--------------------+
+; Device                                                           ; 10M50DAF484C7G     ;                    ;
+; Top-level entity name                                            ; beacon_top         ; Beacon_system      ;
+; Family name                                                      ; MAX 10             ; Cyclone V          ;
+; Use smart compilation                                            ; Off                ; Off                ;
+; Enable parallel Assembler and Timing Analyzer during compilation ; On                 ; On                 ;
+; Enable compact report table                                      ; Off                ; Off                ;
+; Restructure Multiplexers                                         ; Auto               ; Auto               ;
+; Create Debugging Nodes for IP Cores                              ; Off                ; Off                ;
+; Preserve fewer node names                                        ; On                 ; On                 ;
+; Intel FPGA IP Evaluation Mode                                    ; Enable             ; Enable             ;
+; Verilog Version                                                  ; Verilog_2001       ; Verilog_2001       ;
+; VHDL Version                                                     ; VHDL_1993          ; VHDL_1993          ;
+; State Machine Processing                                         ; Auto               ; Auto               ;
+; Safe State Machine                                               ; Off                ; Off                ;
+; Extract Verilog State Machines                                   ; On                 ; On                 ;
+; Extract VHDL State Machines                                      ; On                 ; On                 ;
+; Ignore Verilog initial constructs                                ; Off                ; Off                ;
+; Iteration limit for constant Verilog loops                       ; 5000               ; 5000               ;
+; Iteration limit for non-constant Verilog loops                   ; 250                ; 250                ;
+; Add Pass-Through Logic to Inferred RAMs                          ; On                 ; On                 ;
+; Infer RAMs from Raw Logic                                        ; On                 ; On                 ;
+; Parallel Synthesis                                               ; On                 ; On                 ;
+; DSP Block Balancing                                              ; Auto               ; Auto               ;
+; NOT Gate Push-Back                                               ; On                 ; On                 ;
+; Power-Up Don't Care                                              ; On                 ; On                 ;
+; Remove Redundant Logic Cells                                     ; Off                ; Off                ;
+; Remove Duplicate Registers                                       ; On                 ; On                 ;
+; Ignore CARRY Buffers                                             ; Off                ; Off                ;
+; Ignore CASCADE Buffers                                           ; Off                ; Off                ;
+; Ignore GLOBAL Buffers                                            ; Off                ; Off                ;
+; Ignore ROW GLOBAL Buffers                                        ; Off                ; Off                ;
+; Ignore LCELL Buffers                                             ; Off                ; Off                ;
+; Ignore SOFT Buffers                                              ; On                 ; On                 ;
+; Limit AHDL Integers to 32 Bits                                   ; Off                ; Off                ;
+; Optimization Technique                                           ; Balanced           ; Balanced           ;
+; Carry Chain Length                                               ; 70                 ; 70                 ;
+; Auto Carry Chains                                                ; On                 ; On                 ;
+; Auto Open-Drain Pins                                             ; On                 ; On                 ;
+; Perform WYSIWYG Primitive Resynthesis                            ; Off                ; Off                ;
+; Auto ROM Replacement                                             ; On                 ; On                 ;
+; Auto RAM Replacement                                             ; On                 ; On                 ;
+; Auto DSP Block Replacement                                       ; On                 ; On                 ;
+; Auto Shift Register Replacement                                  ; Auto               ; Auto               ;
+; Allow Shift Register Merging across Hierarchies                  ; Auto               ; Auto               ;
+; Auto Clock Enable Replacement                                    ; On                 ; On                 ;
+; Strict RAM Replacement                                           ; Off                ; Off                ;
+; Allow Synchronous Control Signals                                ; On                 ; On                 ;
+; Force Use of Synchronous Clear Signals                           ; Off                ; Off                ;
+; Auto RAM Block Balancing                                         ; On                 ; On                 ;
+; Auto RAM to Logic Cell Conversion                                ; Off                ; Off                ;
+; Auto Resource Sharing                                            ; Off                ; Off                ;
+; Allow Any RAM Size For Recognition                               ; Off                ; Off                ;
+; Allow Any ROM Size For Recognition                               ; Off                ; Off                ;
+; Allow Any Shift Register Size For Recognition                    ; Off                ; Off                ;
+; Use LogicLock Constraints during Resource Balancing              ; On                 ; On                 ;
+; Ignore translate_off and synthesis_off directives                ; Off                ; Off                ;
+; Timing-Driven Synthesis                                          ; On                 ; On                 ;
+; Report Parameter Settings                                        ; On                 ; On                 ;
+; Report Source Assignments                                        ; On                 ; On                 ;
+; Report Connectivity Checks                                       ; On                 ; On                 ;
+; Ignore Maximum Fan-Out Assignments                               ; Off                ; Off                ;
+; Synchronization Register Chain Length                            ; 2                  ; 2                  ;
+; Power Optimization During Synthesis                              ; Normal compilation ; Normal compilation ;
+; HDL message level                                                ; Level2             ; Level2             ;
+; Suppress Register Optimization Related Messages                  ; Off                ; Off                ;
+; Number of Removed Registers Reported in Synthesis Report         ; 5000               ; 5000               ;
+; Number of Swept Nodes Reported in Synthesis Report               ; 5000               ; 5000               ;
+; Number of Inverted Registers Reported in Synthesis Report        ; 100                ; 100                ;
+; Clock MUX Protection                                             ; On                 ; On                 ;
+; Auto Gated Clock Conversion                                      ; Off                ; Off                ;
+; Block Design Naming                                              ; Auto               ; Auto               ;
+; SDC constraint protection                                        ; Off                ; Off                ;
+; Synthesis Effort                                                 ; Auto               ; Auto               ;
+; Shift Register Replacement - Allow Asynchronous Clear Signal     ; On                 ; On                 ;
+; Pre-Mapping Resynthesis Optimization                             ; Off                ; Off                ;
+; Analysis & Synthesis Message Level                               ; Medium             ; Medium             ;
+; Disable Register Merging Across Hierarchies                      ; Auto               ; Auto               ;
+; Resource Aware Inference For Block RAM                           ; On                 ; On                 ;
++------------------------------------------------------------------+--------------------+--------------------+
+
+
++------------------------------------------+
+; Parallel Compilation                     ;
++----------------------------+-------------+
+; Processors                 ; Number      ;
++----------------------------+-------------+
+; Number detected on machine ; 8           ;
+; Maximum allowed            ; 8           ;
+;                            ;             ;
+; Average used               ; 1.00        ;
+; Maximum used               ; 8           ;
+;                            ;             ;
+; Usage by Processor         ; % Time Used ;
+;     Processor 1            ; 100.0%      ;
+;     Processors 2-8         ;   0.0%      ;
++----------------------------+-------------+
+
+
++---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Source Files Read                                                                                                                                                            ;
++----------------------------------+-----------------+------------------------------+-----------------------------------------------------------------------------------------------------+---------+
+; File Name with User-Entered Path ; Used in Netlist ; File Type                    ; File Name with Absolute Path                                                                        ; Library ;
++----------------------------------+-----------------+------------------------------+-----------------------------------------------------------------------------------------------------+---------+
+; beacon_top.sv                    ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv      ;         ;
+; beacon_FSM.sv                    ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_FSM.sv      ;         ;
+; mppt_signals.sv                  ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv    ;         ;
+; clktick.sv                       ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/clktick.sv         ;         ;
+; pwm_3phase_19Hz.sv               ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/pwm_3phase_19Hz.sv ;         ;
+; encode_decode.sv                 ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/encode_decode.sv   ;         ;
+; pwm_3_phase.sv                   ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/pwm_3_phase.sv     ;         ;
+; spi_slave.sv                     ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/spi_slave.sv       ;         ;
+; clkdiv.sv                        ; yes             ; User SystemVerilog HDL File  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/clkdiv.sv          ;         ;
+; lpm_mult.tdf                     ; yes             ; Megafunction                 ; c:/intelfpga_lite/21.1/quartus/libraries/megafunctions/lpm_mult.tdf                                 ;         ;
+; aglobal211.inc                   ; yes             ; Megafunction                 ; c:/intelfpga_lite/21.1/quartus/libraries/megafunctions/aglobal211.inc                               ;         ;
+; lpm_add_sub.inc                  ; yes             ; Megafunction                 ; c:/intelfpga_lite/21.1/quartus/libraries/megafunctions/lpm_add_sub.inc                              ;         ;
+; multcore.inc                     ; yes             ; Megafunction                 ; c:/intelfpga_lite/21.1/quartus/libraries/megafunctions/multcore.inc                                 ;         ;
+; bypassff.inc                     ; yes             ; Megafunction                 ; c:/intelfpga_lite/21.1/quartus/libraries/megafunctions/bypassff.inc                                 ;         ;
+; altshift.inc                     ; yes             ; Megafunction                 ; c:/intelfpga_lite/21.1/quartus/libraries/megafunctions/altshift.inc                                 ;         ;
+; db/mult_0ls.tdf                  ; yes             ; Auto-Generated Megafunction  ; C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/db/mult_0ls.tdf    ;         ;
++----------------------------------+-----------------+------------------------------+-----------------------------------------------------------------------------------------------------+---------+
+
+
++---------------------------------------------------------------------+
+; Analysis & Synthesis Resource Usage Summary                         ;
++---------------------------------------------+-----------------------+
+; Resource                                    ; Usage                 ;
++---------------------------------------------+-----------------------+
+; Estimated Total logic elements              ; 310                   ;
+;                                             ;                       ;
+; Total combinational functions               ; 274                   ;
+; Logic element usage by number of LUT inputs ;                       ;
+;     -- 4 input functions                    ; 103                   ;
+;     -- 3 input functions                    ; 49                    ;
+;     -- <=2 input functions                  ; 122                   ;
+;                                             ;                       ;
+; Logic elements by mode                      ;                       ;
+;     -- normal mode                          ; 194                   ;
+;     -- arithmetic mode                      ; 80                    ;
+;                                             ;                       ;
+; Total registers                             ; 169                   ;
+;     -- Dedicated logic registers            ; 169                   ;
+;     -- I/O registers                        ; 0                     ;
+;                                             ;                       ;
+; I/O pins                                    ; 39                    ;
+;                                             ;                       ;
+; Embedded Multiplier 9-bit elements          ; 1                     ;
+;                                             ;                       ;
+; Maximum fan-out node                        ; clktick:clk_5Meg|tick ;
+; Maximum fan-out                             ; 88                    ;
+; Total fan-out                               ; 1286                  ;
+; Average fan-out                             ; 2.46                  ;
++---------------------------------------------+-----------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Analysis & Synthesis Resource Utilization by Entity                                                                                                                                                                                                                                            ;
++------------------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+----------------------------------------------------------------------+----------------+--------------+
+; Compilation Hierarchy Node         ; Combinational ALUTs ; Dedicated Logic Registers ; Memory Bits ; UFM Blocks ; DSP Elements ; DSP 9x9 ; DSP 18x18 ; Pins ; Virtual Pins ; ADC blocks ; Full Hierarchy Name                                                  ; Entity Name    ; Library Name ;
++------------------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+----------------------------------------------------------------------+----------------+--------------+
+; |beacon_top                        ; 274 (0)             ; 169 (0)                   ; 0           ; 0          ; 1            ; 1       ; 0         ; 39   ; 0            ; 0          ; |beacon_top                                                          ; beacon_top     ; work         ;
+;    |beacon_FSM:fsm|                ; 15 (15)             ; 3 (3)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|beacon_FSM:fsm                                           ; beacon_FSM     ; work         ;
+;    |clkdiv:clk20|                  ; 50 (50)             ; 25 (25)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|clkdiv:clk20                                             ; clkdiv         ; work         ;
+;    |clktick:clk_5Meg|              ; 35 (35)             ; 17 (17)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|clktick:clk_5Meg                                         ; clktick        ; work         ;
+;    |mppt_signals:mppt|             ; 45 (45)             ; 10 (10)                   ; 0           ; 0          ; 1            ; 1       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|mppt_signals:mppt                                        ; mppt_signals   ; work         ;
+;       |lpm_mult:Mult0|             ; 0 (0)               ; 0 (0)                     ; 0           ; 0          ; 1            ; 1       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|mppt_signals:mppt|lpm_mult:Mult0                         ; lpm_mult       ; work         ;
+;          |mult_0ls:auto_generated| ; 0 (0)               ; 0 (0)                     ; 0           ; 0          ; 1            ; 1       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|mppt_signals:mppt|lpm_mult:Mult0|mult_0ls:auto_generated ; mult_0ls       ; work         ;
+;    |pwm_3phase_3Hz:pwm|            ; 50 (0)              ; 26 (0)                    ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|pwm_3phase_3Hz:pwm                                       ; pwm_3phase_3Hz ; work         ;
+;       |clktick:tick|               ; 34 (34)             ; 19 (19)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|pwm_3phase_3Hz:pwm|clktick:tick                          ; clktick        ; work         ;
+;       |pwm_3_phase:pwm|            ; 16 (16)             ; 7 (7)                     ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|pwm_3phase_3Hz:pwm|pwm_3_phase:pwm                       ; pwm_3_phase    ; work         ;
+;    |spi_slave:spi0|                ; 44 (44)             ; 60 (60)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|spi_slave:spi0                                           ; spi_slave      ; work         ;
+;    |spi_slave:spi1|                ; 35 (35)             ; 28 (28)                   ; 0           ; 0          ; 0            ; 0       ; 0         ; 0    ; 0            ; 0          ; |beacon_top|spi_slave:spi1                                           ; spi_slave      ; work         ;
++------------------------------------+---------------------+---------------------------+-------------+------------+--------------+---------+-----------+------+--------------+------------+----------------------------------------------------------------------+----------------+--------------+
+Note: For table entries with two numbers listed, the numbers in parentheses indicate the number of resources of the given type used by the specific entity alone. The numbers listed outside of parentheses indicate the total resources of the given type used by the specific entity and all of its sub-entities in the hierarchy.
+
+
++-----------------------------------------------------+
+; Analysis & Synthesis DSP Block Usage Summary        ;
++---------------------------------------+-------------+
+; Statistic                             ; Number Used ;
++---------------------------------------+-------------+
+; Simple Multipliers (9-bit)            ; 1           ;
+; Simple Multipliers (18-bit)           ; 0           ;
+; Embedded Multiplier Blocks            ; --          ;
+; Embedded Multiplier 9-bit elements    ; 1           ;
+; Signed Embedded Multipliers           ; 0           ;
+; Unsigned Embedded Multipliers         ; 1           ;
+; Mixed Sign Embedded Multipliers       ; 0           ;
+; Variable Sign Embedded Multipliers    ; 0           ;
+; Dedicated Input Shift Register Chains ; 0           ;
++---------------------------------------+-------------+
+Note: number of Embedded Multiplier Blocks used is only available after a successful fit.
+
+
++---------------------------------------------------------------------------------+
+; Registers Removed During Synthesis                                              ;
++----------------------------------------+----------------------------------------+
+; Register name                          ; Reason for Removal                     ;
++----------------------------------------+----------------------------------------+
+; beacon_FSM:fsm|current_state[3..31]    ; Stuck at GND due to stuck port data_in ;
+; Total Number of Removed Registers = 29 ;                                        ;
++----------------------------------------+----------------------------------------+
+
+
++------------------------------------------------------+
+; General Register Statistics                          ;
++----------------------------------------------+-------+
+; Statistic                                    ; Value ;
++----------------------------------------------+-------+
+; Total registers                              ; 169   ;
+; Number of registers using Synchronous Clear  ; 7     ;
+; Number of registers using Synchronous Load   ; 0     ;
+; Number of registers using Asynchronous Clear ; 0     ;
+; Number of registers using Asynchronous Load  ; 0     ;
+; Number of registers using Clock Enable       ; 86    ;
+; Number of registers using Preset             ; 0     ;
++----------------------------------------------+-------+
+
+
++--------------------------------------------------+
+; Inverted Register Statistics                     ;
++----------------------------------------+---------+
+; Inverted Register                      ; Fan out ;
++----------------------------------------+---------+
+; mppt_signals:mppt|val[2]               ; 5       ;
+; mppt_signals:mppt|val[4]               ; 5       ;
+; mppt_signals:mppt|val[5]               ; 5       ;
+; mppt_signals:mppt|val[6]               ; 5       ;
+; mppt_signals:mppt|val[7]               ; 5       ;
+; mppt_signals:mppt|val[8]               ; 5       ;
+; Total number of inverted registers = 6 ;         ;
++----------------------------------------+---------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------------------+
+; Multiplexer Restructuring Statistics (Restructuring Performed)                                                                                     ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+--------------------------------------+
+; Multiplexer Inputs ; Bus Width ; Baseline Area ; Area if Restructured ; Saving if Restructured ; Registered ; Example Multiplexer Output           ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+--------------------------------------+
+; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |beacon_top|spi_slave:spi0|count[3]  ;
+; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |beacon_top|spi_slave:spi1|count[2]  ;
+; 4:1                ; 4 bits    ; 8 LEs         ; 4 LEs                ; 4 LEs                  ; Yes        ; |beacon_top|mppt_signals:mppt|val[1] ;
+; 4:1                ; 6 bits    ; 12 LEs        ; 6 LEs                ; 6 LEs                  ; Yes        ; |beacon_top|mppt_signals:mppt|val[7] ;
++--------------------+-----------+---------------+----------------------+------------------------+------------+--------------------------------------+
+
+
++---------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: clktick:clk_5Meg ;
++----------------+-------+--------------------------------------+
+; Parameter Name ; Value ; Type                                 ;
++----------------+-------+--------------------------------------+
+; WIDTH          ; 16    ; Signed Integer                       ;
++----------------+-------+--------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: spi_slave:spi0 ;
++----------------+-------+------------------------------------+
+; Parameter Name ; Value ; Type                               ;
++----------------+-------+------------------------------------+
+; WIDTH          ; 24    ; Signed Integer                     ;
++----------------+-------+------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: spi_slave:spi1 ;
++----------------+-------+------------------------------------+
+; Parameter Name ; Value ; Type                               ;
++----------------+-------+------------------------------------+
+; WIDTH          ; 16    ; Signed Integer                     ;
++----------------+-------+------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-----------------------------------------------------------+
+; Parameter Settings for User Entity Instance: clkdiv:clk20 ;
++----------------+-------+----------------------------------+
+; Parameter Name ; Value ; Type                             ;
++----------------+-------+----------------------------------+
+; WIDTH          ; 24    ; Signed Integer                   ;
++----------------+-------+----------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++------------------------------------------------------------------------------+
+; Parameter Settings for User Entity Instance: pwm_3phase_3Hz:pwm|clktick:tick ;
++----------------+-------+-----------------------------------------------------+
+; Parameter Name ; Value ; Type                                                ;
++----------------+-------+-----------------------------------------------------+
+; WIDTH          ; 18    ; Signed Integer                                      ;
++----------------+-------+-----------------------------------------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++-----------------------------------------------------------------------------------+
+; Parameter Settings for Inferred Entity Instance: mppt_signals:mppt|lpm_mult:Mult0 ;
++------------------------------------------------+----------+-----------------------+
+; Parameter Name                                 ; Value    ; Type                  ;
++------------------------------------------------+----------+-----------------------+
+; AUTO_CARRY_CHAINS                              ; ON       ; AUTO_CARRY            ;
+; IGNORE_CARRY_BUFFERS                           ; OFF      ; IGNORE_CARRY          ;
+; AUTO_CASCADE_CHAINS                            ; ON       ; AUTO_CASCADE          ;
+; IGNORE_CASCADE_BUFFERS                         ; OFF      ; IGNORE_CASCADE        ;
+; LPM_WIDTHA                                     ; 8        ; Untyped               ;
+; LPM_WIDTHB                                     ; 8        ; Untyped               ;
+; LPM_WIDTHP                                     ; 16       ; Untyped               ;
+; LPM_WIDTHR                                     ; 16       ; Untyped               ;
+; LPM_WIDTHS                                     ; 1        ; Untyped               ;
+; LPM_REPRESENTATION                             ; UNSIGNED ; Untyped               ;
+; LPM_PIPELINE                                   ; 0        ; Untyped               ;
+; LATENCY                                        ; 0        ; Untyped               ;
+; INPUT_A_IS_CONSTANT                            ; NO       ; Untyped               ;
+; INPUT_B_IS_CONSTANT                            ; NO       ; Untyped               ;
+; USE_EAB                                        ; OFF      ; Untyped               ;
+; MAXIMIZE_SPEED                                 ; 5        ; Untyped               ;
+; DEVICE_FAMILY                                  ; MAX 10   ; Untyped               ;
+; CARRY_CHAIN                                    ; MANUAL   ; Untyped               ;
+; APEX20K_TECHNOLOGY_MAPPER                      ; LUT      ; TECH_MAPPER_APEX20K   ;
+; DEDICATED_MULTIPLIER_CIRCUITRY                 ; AUTO     ; Untyped               ;
+; DEDICATED_MULTIPLIER_MIN_INPUT_WIDTH_FOR_AUTO  ; 0        ; Untyped               ;
+; DEDICATED_MULTIPLIER_MIN_OUTPUT_WIDTH_FOR_AUTO ; 0        ; Untyped               ;
+; CBXI_PARAMETER                                 ; mult_0ls ; Untyped               ;
+; INPUT_A_FIXED_VALUE                            ; Bx       ; Untyped               ;
+; INPUT_B_FIXED_VALUE                            ; Bx       ; Untyped               ;
+; USE_AHDL_IMPLEMENTATION                        ; OFF      ; Untyped               ;
++------------------------------------------------+----------+-----------------------+
+Note: In order to hide this table in the UI and the text report file, please set the "Show Parameter Settings in Synthesis Report" option in "Analysis and Synthesis Settings -> More Settings" to "Off".
+
+
++--------------------------------------------------------------------------+
+; lpm_mult Parameter Settings by Entity Instance                           ;
++---------------------------------------+----------------------------------+
+; Name                                  ; Value                            ;
++---------------------------------------+----------------------------------+
+; Number of entity instances            ; 1                                ;
+; Entity Instance                       ; mppt_signals:mppt|lpm_mult:Mult0 ;
+;     -- LPM_WIDTHA                     ; 8                                ;
+;     -- LPM_WIDTHB                     ; 8                                ;
+;     -- LPM_WIDTHP                     ; 16                               ;
+;     -- LPM_REPRESENTATION             ; UNSIGNED                         ;
+;     -- INPUT_A_IS_CONSTANT            ; NO                               ;
+;     -- INPUT_B_IS_CONSTANT            ; NO                               ;
+;     -- USE_EAB                        ; OFF                              ;
+;     -- DEDICATED_MULTIPLIER_CIRCUITRY ; AUTO                             ;
+;     -- INPUT_A_FIXED_VALUE            ; Bx                               ;
+;     -- INPUT_B_FIXED_VALUE            ; Bx                               ;
++---------------------------------------+----------------------------------+
+
+
++---------------------------------------------+
+; Port Connectivity Checks: "beacon_FSM:fsm"  ;
++-----------+-------+----------+--------------+
+; Port      ; Type  ; Severity ; Details      ;
++-----------+-------+----------+--------------+
+; low_power ; Input ; Info     ; Stuck at GND ;
++-----------+-------+----------+--------------+
+
+
++-------------------------------------------------------------+
+; Port Connectivity Checks: "pwm_3phase_3Hz:pwm|clktick:tick" ;
++-----------+-------+----------+------------------------------+
+; Port      ; Type  ; Severity ; Details                      ;
++-----------+-------+----------+------------------------------+
+; rst       ; Input ; Info     ; Stuck at GND                 ;
+; en        ; Input ; Info     ; Stuck at VCC                 ;
+; N[11..9]  ; Input ; Info     ; Stuck at VCC                 ;
+; N[3..2]   ; Input ; Info     ; Stuck at VCC                 ;
+; N[14..12] ; Input ; Info     ; Stuck at GND                 ;
+; N[8..7]   ; Input ; Info     ; Stuck at GND                 ;
+; N[5..4]   ; Input ; Info     ; Stuck at GND                 ;
+; N[1..0]   ; Input ; Info     ; Stuck at GND                 ;
+; N[17]     ; Input ; Info     ; Stuck at VCC                 ;
+; N[16]     ; Input ; Info     ; Stuck at GND                 ;
+; N[15]     ; Input ; Info     ; Stuck at VCC                 ;
+; N[6]      ; Input ; Info     ; Stuck at VCC                 ;
++-----------+-------+----------+------------------------------+
+
+
++------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "clkdiv:clk20"                                                                                                                                                                               ;
++---------------+--------+----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port          ; Type   ; Severity ; Details                                                                                                                                                                            ;
++---------------+--------+----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; rst           ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; en            ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N             ; Input  ; Warning  ; Input port expression (32 bits) is wider than the input port (24 bits) it drives.  The 8 most-significant bit(s) in the expression will be dangling if they have no other fanouts. ;
+; N[18..17]     ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N[8..7]       ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N[4..0]       ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N[23..22]     ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; N[20..19]     ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; N[16..14]     ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; N[12..11]     ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; N[6..5]       ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; N[21]         ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N[13]         ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N[10]         ; Input  ; Info     ; Stuck at VCC                                                                                                                                                                       ;
+; N[9]          ; Input  ; Info     ; Stuck at GND                                                                                                                                                                       ;
+; tick_phase180 ; Output ; Warning  ; Declared by entity but not connected by instance. Logic that only feeds a dangling port will be removed.                                                                           ;
++---------------+--------+----------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "spi_slave:spi1"                                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; sent ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++----------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "spi_slave:spi0"                                                                     ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; Port ; Type   ; Severity ; Details                                                                             ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+; sent ; Output ; Info     ; Connected to dangling logic. Logic that only feeds a dangling port will be removed. ;
++------+--------+----------+-------------------------------------------------------------------------------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Port Connectivity Checks: "clktick:clk_5Meg"                                                                                                                             ;
++---------+-------+----------+---------------------------------------------------------------------------------------------------------------------------------------------+
+; Port    ; Type  ; Severity ; Details                                                                                                                                     ;
++---------+-------+----------+---------------------------------------------------------------------------------------------------------------------------------------------+
+; en      ; Input ; Info     ; Stuck at VCC                                                                                                                                ;
+; rst     ; Input ; Info     ; Stuck at GND                                                                                                                                ;
+; N       ; Input ; Warning  ; Input port expression (5 bits) is smaller than the input port (16 bits) it drives.  Extra input bit(s) "N[15..5]" will be connected to GND. ;
+; N[4..3] ; Input ; Info     ; Stuck at VCC                                                                                                                                ;
+; N[2..0] ; Input ; Info     ; Stuck at GND                                                                                                                                ;
++---------+-------+----------+---------------------------------------------------------------------------------------------------------------------------------------------+
+
+
++-----------------------------------------------------+
+; Post-Synthesis Netlist Statistics for Top Partition ;
++-----------------------+-----------------------------+
+; Type                  ; Count                       ;
++-----------------------+-----------------------------+
+; boundary_port         ; 39                          ;
+; cycloneiii_ff         ; 169                         ;
+;     ENA               ; 86                          ;
+;     SCLR              ; 7                           ;
+;     plain             ; 76                          ;
+; cycloneiii_lcell_comb ; 277                         ;
+;     arith             ; 80                          ;
+;         2 data inputs ; 69                          ;
+;         3 data inputs ; 11                          ;
+;     normal            ; 197                         ;
+;         1 data inputs ; 15                          ;
+;         2 data inputs ; 41                          ;
+;         3 data inputs ; 38                          ;
+;         4 data inputs ; 103                         ;
+; cycloneiii_mac_mult   ; 1                           ;
+; cycloneiii_mac_out    ; 1                           ;
+;                       ;                             ;
+; Max LUT depth         ; 6.70                        ;
+; Average LUT depth     ; 3.58                        ;
++-----------------------+-----------------------------+
+
+
++-------------------------------+
+; Elapsed Time Per Partition    ;
++----------------+--------------+
+; Partition Name ; Elapsed Time ;
++----------------+--------------+
+; Top            ; 00:00:01     ;
++----------------+--------------+
+
+
++-------------------------------+
+; Analysis & Synthesis Messages ;
++-------------------------------+
+Info: *******************************************************************
+Info: Running Quartus Prime Analysis & Synthesis
+    Info: Version 21.1.1 Build 850 06/23/2022 SJ Lite Edition
+    Info: Processing started: Mon Jun 19 18:48:02 2023
+Info: Command: quartus_map --read_settings_files=on --write_settings_files=off Beacon_system -c Beacon_system
+Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
+Info (20030): Parallel compilation is enabled and will use 8 of the 8 processors detected
+Warning (10275): Verilog HDL Module Instantiation warning at beacon_top.sv(36): ignored dangling comma in List of Port Connections File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 36
+Warning (10275): Verilog HDL Module Instantiation warning at beacon_top.sv(71): ignored dangling comma in List of Port Connections File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 71
+Info (12021): Found 1 design units, including 1 entities, in source file beacon_top.sv
+    Info (12023): Found entity 1: beacon_top File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file beacon_fsm.sv
+    Info (12023): Found entity 1: beacon_FSM File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_FSM.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file mppt_signals.sv
+    Info (12023): Found entity 1: mppt_signals File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file clktick.sv
+    Info (12023): Found entity 1: clktick File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/clktick.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file pwm_3phase_19hz.sv
+    Info (12023): Found entity 1: pwm_3phase_3Hz File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/pwm_3phase_19Hz.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file encode_decode.sv
+    Info (12023): Found entity 1: encode_decode File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/encode_decode.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file pwm_3_phase.sv
+    Info (12023): Found entity 1: pwm_3_phase File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/pwm_3_phase.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file spi_slave.sv
+    Info (12023): Found entity 1: spi_slave File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/spi_slave.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file clkdiv.sv
+    Info (12023): Found entity 1: clkdiv File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/clkdiv.sv Line: 1
+Info (12021): Found 1 design units, including 1 entities, in source file cs_control.sv
+    Info (12023): Found entity 1: CS_control File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/CS_control.sv Line: 1
+Info (12127): Elaborating entity "beacon_top" for the top level hierarchy
+Info (12128): Elaborating entity "clktick" for hierarchy "clktick:clk_5Meg" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 23
+Info (12128): Elaborating entity "spi_slave" for hierarchy "spi_slave:spi0" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 36
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.sv(41): object "SS_fallingedge" assigned a value but never read File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/spi_slave.sv Line: 41
+Info (12128): Elaborating entity "spi_slave" for hierarchy "spi_slave:spi1" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 47
+Warning (10036): Verilog HDL or VHDL warning at spi_slave.sv(41): object "SS_fallingedge" assigned a value but never read File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/spi_slave.sv Line: 41
+Info (12128): Elaborating entity "encode_decode" for hierarchy "encode_decode:block" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 60
+Info (12128): Elaborating entity "clkdiv" for hierarchy "clkdiv:clk20" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 71
+Info (12128): Elaborating entity "pwm_3phase_3Hz" for hierarchy "pwm_3phase_3Hz:pwm" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 82
+Info (12128): Elaborating entity "clktick" for hierarchy "pwm_3phase_3Hz:pwm|clktick:tick" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/pwm_3phase_19Hz.sv Line: 16
+Info (12128): Elaborating entity "pwm_3_phase" for hierarchy "pwm_3phase_3Hz:pwm|pwm_3_phase:pwm" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/pwm_3phase_19Hz.sv Line: 24
+Info (12128): Elaborating entity "beacon_FSM" for hierarchy "beacon_FSM:fsm" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 99
+Info (12128): Elaborating entity "mppt_signals" for hierarchy "mppt_signals:mppt" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 113
+Warning (10230): Verilog HDL assignment warning at mppt_signals.sv(22): truncated value with size 32 to match size of target (10) File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv Line: 22
+Warning (10230): Verilog HDL assignment warning at mppt_signals.sv(25): truncated value with size 32 to match size of target (10) File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv Line: 25
+Info (278001): Inferred 1 megafunctions from design logic
+    Info (278003): Inferred multiplier megafunction ("lpm_mult") from the following logic: "mppt_signals:mppt|Mult0" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv Line: 151
+Info (12130): Elaborated megafunction instantiation "mppt_signals:mppt|lpm_mult:Mult0" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv Line: 151
+Info (12133): Instantiated megafunction "mppt_signals:mppt|lpm_mult:Mult0" with the following parameter: File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/mppt_signals.sv Line: 151
+    Info (12134): Parameter "LPM_WIDTHA" = "8"
+    Info (12134): Parameter "LPM_WIDTHB" = "8"
+    Info (12134): Parameter "LPM_WIDTHP" = "16"
+    Info (12134): Parameter "LPM_WIDTHR" = "16"
+    Info (12134): Parameter "LPM_WIDTHS" = "1"
+    Info (12134): Parameter "LPM_REPRESENTATION" = "UNSIGNED"
+    Info (12134): Parameter "INPUT_A_IS_CONSTANT" = "NO"
+    Info (12134): Parameter "INPUT_B_IS_CONSTANT" = "NO"
+    Info (12134): Parameter "MAXIMIZE_SPEED" = "5"
+Info (12021): Found 1 design units, including 1 entities, in source file db/mult_0ls.tdf
+    Info (12023): Found entity 1: mult_0ls File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/db/mult_0ls.tdf Line: 29
+Warning (12241): 2 hierarchies have connectivity warnings - see the Connectivity Checks report folder
+Info (286030): Timing-Driven Synthesis is running
+Info (144001): Generated suppressed messages file C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/output_files/Beacon_system.map.smsg
+Info (16010): Generating hard_block partition "hard_block:auto_generated_inst"
+    Info (16011): Adding 0 node(s), including 0 DDIO, 0 PLL, 0 transceiver and 0 LCELL
+Warning (21074): Design contains 11 input pin(s) that do not drive logic
+    Warning (15610): No output dependent on input pin "lights_on_flag" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 3
+    Warning (15610): No output dependent on input pin "mosi1" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 3
+    Warning (15610): No output dependent on input pin "SW[1]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[2]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[3]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[4]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[5]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[6]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[7]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[8]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+    Warning (15610): No output dependent on input pin "SW[9]" File: C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/beacon_top.sv Line: 4
+Info (21057): Implemented 351 device resources after synthesis - the final resource count might be different
+    Info (21058): Implemented 18 input pins
+    Info (21059): Implemented 21 output pins
+    Info (21061): Implemented 311 logic cells
+    Info (21062): Implemented 1 DSP elements
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 20 warnings
+    Info: Peak virtual memory: 4812 megabytes
+    Info: Processing ended: Mon Jun 19 18:48:22 2023
+    Info: Elapsed time: 00:00:20
+    Info: Total CPU time (on all processors): 00:00:46
+
+
++------------------------------------------+
+; Analysis & Synthesis Suppressed Messages ;
++------------------------------------------+
+The suppressed messages can be found in C:/Users/Jacob Larcombe/OneDrive - Imperial College London/Beacons/Verilog_files/output_files/Beacon_system.map.smsg.
+
+

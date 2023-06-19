@@ -18,7 +18,7 @@ int onFlag = 30;
 int powerFlag = 31;
 
 
-int curr0, curr1, curr2;
+int spiTrigger = 7; // change as needed
 int fpga_cs = 4;
 int currentState = 0;
 int toSendOut = 0;
@@ -43,40 +43,30 @@ byte sendBuffer[] = {0x0, 0x0};   // a string to send
 WiFiUDP Udp;
 
 //Your Domain name with URL path or IP address with path
-String serverName = "http://192.168.1.16:8081"; // local ip of the backend host (NOT localhost)
+String serverName = "http://90.196.3.86:8081"; // local ip of the backend host (NOT localhost)
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
 unsigned long lastTime = 0;
-// Timer set to 10 minutes (600000)
-//unsigned long timerDelay = 600000;
-// Set timer to 5 seconds (5000)
-unsigned long timerDelay = 5000;
+unsigned long timerDelay = 10;
+
+// setup up communication to server
+Communicate backEndComms;
 
 
 void getCurrentState(int spiReturn){
   // SPI returns an integer number which is val and the state number
-  // need to extract the state number
+  // need to extract the state number - i.e. bits 10 and 11
   // state mapping:
   // 0: IDLE
   // 1: charge_buck
   // 2: charge_boost
   // 3: beacons_panel
   // 4: bacons_cap
+  currentState = (spiReturn & 3072) >> 10;   // shift right by 10
   currentState = 0;   // change to be correct
 }
 
-int sendChargeBuck(){
-  Serial.println("Sending to buck controller");
-  // will send a voltage(mV) measurment as a response
-  return 4672;
-}
-
-int sendChargeBoost(){
-  Serial.println("Sending to boost controller");
-  // will send a voltage(mV) measurement as a response
-  return 3456;
-}
 
 int sendLEDDrivers(){
   Serial.println("Sending to LED drivers");
@@ -97,14 +87,15 @@ void fpgaTransfer(){
   digitalWrite(4, LOW); // SPI is active-low
   delay(10);              
 
-  for (int i = 256; i < 356; i++){
-    buf = SPI.transfer16(i);
-    Serial.print("MOSI: ");
-    Serial.print(i);
-    Serial.print(" \tMISO: ");
-    Serial.println(buf);
-    delayMicroseconds(1);
-  }
+  // for (int i = 256; i < 356; i++){
+  //   buf = SPI.transfer16(i);
+  //   Serial.print("MOSI: ");
+  //   Serial.print(i);
+  //   Serial.print(" \tMISO: ");
+  //   Serial.println(buf);
+  //   delayMicroseconds(1);
+  // }
+  SPI.transfer16(toSendFPGA);
 
   digitalWrite(4, HIGH); // stop FPGA sending
   delay(10);
@@ -130,78 +121,41 @@ void printWifiStatus() {
 void fpgaWifiLoop(void * pvParameters){
   // this loop for core 1 takes an spi transfer, sends it out where it needs to go
   // gets the return value, and spi transfers it back to the fpga on the next iteration
-  // update current state from system
-  // getCurrentState();
-  // // read if there is any SPI incoming
-  // toSendOut = SPI.transfer(toSendFPGA);
-  // // direct on based on current state
-  // if (currentState == 1){
-  //   // charge buck
-  //   toSendFPGA = sendChargeBuck();
-  // } else if (currentState == 2){
-  //   toSendFPGA = sendChargeBoost();
-  // } else if ((currentState == 3) || (currentState == 4)){
-  //   toSendFPGA = sendLEDDrivers();
-  // }
-  fpgaTransfer();
-  toSendOut = buf;
-  Serial.print("toSendOut:  ");
-  Serial.println(toSendOut);
-  Serial.println("LooP");
-  toSendFPGA = sendLEDDrivers();
-  delay(5000);
+  if (digitalRead(spiTrigger)){
+    fpgaTransfer();
+    toSendOut = buf;
+    Serial.print("toSendOut:  ");
+    Serial.println(toSendOut);
+    Serial.println("LooP");
+    toSendFPGA = sendLEDDrivers();
+  }
+  vTaskDelay(10);  
 }
 
 void serverBackendLoop(void * pvParameters){
   // this loop runs the backend polling code every 10ms
   // its queries the backend via http to get whether the LEDs should be on,
   // and sends it whether there is power in the system to turn on the LEDs
-    // Send an HTTP POST request every 10 minutes
   if ((millis() - lastTime) > timerDelay) {
     //Check WiFi connection status
     if(WiFi.status()== WL_CONNECTED){
-      // WiFiClient client;
-      HTTPClient http;      
-      // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-      String serverPath = serverName + "/Beacon/BeaconPingSide?chargeStatus=" + digitalRead(powerFlag);
-      Serial.println(serverPath);
-    
-      // Your Domain name with URL path or IP address with path
-      http.begin(serverPath.c_str());
-      
-      // HTTP GET request
-      int httpResponseCode = http.GET();
-
-      if (httpResponseCode>0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode); // HTTP response code e.g. 200
-        String payload = http.getString();
-        Serial.println(payload); // HTTP response package e..g JSON object
-        // payload should be whether to turn on LEDs
-        if (payload == "1"){
-          digitalWrite(onFlag, 1);
-        } else {
-          digitalWrite(onFlag, 0);
-        }
-      }
-      else {
-        Serial.print("Error code: ");
-        Serial.println(httpResponseCode);
-      }
-        
-      // Free resources
-      http.end();
+      // read becon charge flag and update server with that
+      backEndComms.setBeaconCharge(String(digitalRead(powerFlag)));
+      // speak to the server
+      backEndComms.pingBeaconOn();
+      // read the new beacon status and write the flag
+      digitalWrite(onFlag, backEndComms.getBeaconOn());
     }
-    else {
-      Serial.println("WiFi Disconnected");
-    }
-    lastTime = millis();
   }
+  vTaskDelay(10);
 }
 
 void setup() {
   Serial.begin(115200);
   delay(2000);
+
+  backEndComms.init(String(0), 0, serverName);
+
   Serial.println("test");
   // setup SPI pins
   SPI.begin();
