@@ -67,7 +67,7 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
       calculateCoords();
       communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
       communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
-      prevNode = nodeNameCtr++;
+      prevNode = nodeNameCtr;
       nodeNameCtr++;
     }
   }
