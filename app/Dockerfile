@@ -21,6 +21,9 @@ RUN npm install react-select
 
 # Expose port 3000 for the React development server
 EXPOSE 3000
+RUN npm install react-graph-vis vis-network
+
 
 # Set the entrypoint to start the React development server
 CMD ["npm", "start"]
+# ENTRYPOINT [ "/bin/bash" ]

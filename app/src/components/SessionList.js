@@ -6,7 +6,7 @@ const SessionList = (props) => {
   const navigate = useNavigate();
   
   const handleClick = (name, id) => {
-    navigate(`/Display/`+ name + "?=" + id);
+    navigate(`/Display/` + id);
   };
   
   console.log("Sessions", sessions);

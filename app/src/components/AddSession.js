@@ -88,7 +88,7 @@ function AddSession() {
     }
 
     const navigateToPath = (name, id) => {
-        const path = "/Display/" + name + "?=" + id;
+        const path = "/Display/" + id;
         // console.log(path);
         navigate(path);
     }
