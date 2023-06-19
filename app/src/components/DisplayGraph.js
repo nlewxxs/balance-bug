@@ -59,7 +59,6 @@ function DisplayGraph() {
       .catch(error => console.log(error));
     }
 
-
     const urlEdges = "http://90.196.3.86:8081/Edges/DisplayAll?SessionId=" + sessionIdString;
 
     const getEdges = () => {
@@ -77,8 +76,10 @@ function DisplayGraph() {
       .catch(error => console.log(error));
     }
     useEffect( () => {
-        getNodes();
-        getEdges();
+        setNodes([{ id: 0, label: '', x:0, y: 0},]);
+        setEdges([]);
+        // getNodes();
+        // getEdges();
         // setGraph(generateGraph(nodes, edges));
     }, [] );
     
@@ -116,7 +117,6 @@ function DisplayGraph() {
       edges: {
         color: '#000000',
       },
-      format: 'png',
       physics: false,
       interaction: {
         selectable: false, // Disable node and edge selection
