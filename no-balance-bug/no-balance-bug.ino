@@ -181,6 +181,7 @@ void setup() {
   delay(1000);
 }
 
+
 void loop() {
 
   // -------- READ FROM IMU ---------- // 
@@ -218,6 +219,7 @@ void loop() {
     debugOutput(tmp);
 
     Image newImage;   
+    
 
     classifyElement stuffs = newImage.classify(frame.boxes);
     newImage.debugInfo();
