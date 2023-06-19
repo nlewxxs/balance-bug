@@ -3,6 +3,7 @@ package Api
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -71,6 +72,20 @@ func CreateNodeTable(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "could not create table"})
 		return
 	}
+
+	//wait for init entry to be created
+	duration := time.Second
+ 	time.Sleep(duration)
+
+	SqlCommand2 := fmt.Sprintf("INSERT INTO `testdb.%s_nodes` (`NodeId`, `XCoord`, `YCoord`) VALUES(0,0,0);", SessionId)
+
+	_, err2 := db.Exec(SqlCommand2)
+	if err2 != nil {
+		fmt.Println(err2.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB1"})
+		return
+	}
+	// req2.Close()
 	// Return JSON object of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
