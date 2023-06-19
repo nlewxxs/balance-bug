@@ -23,6 +23,8 @@
 // // #define YDIST 100
 // // #define ERRMARGIN 5
 
+#define MOVE_THEN_DIR_OFFSET 30.0
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
 
@@ -225,6 +227,53 @@ void loop() {
   vTaskDelay(10);
 }
 
+void getDistance(){
+
+}
+
+void forward(int _leftSpeed, int _rightSpeed, float distance){
+  while (getDistance() < distance){
+    leftStepper.setSpeed(_leftSpeed);
+    rightStepper.setSpeed(_rightSpeed);
+    leftStepper.runSpeed();
+    rightStepper.runSpeed();
+  }
+  traversal.setMovementDecision(Decision.Stationary);
+}
+
+void correctAngle(float _targetAngle) {
+  //system_angle = system_angle + _targetAngle;
+  //if (system_angle > 360) {
+  //   system_angle = system_angle - 360;
+  // }
+}
+
+void left(int _rightSpeed, float _targetAngle){
+  //update live angle
+  //while (newAngle < _targetAngle){
+    rightStepper.setSpeed(_rightSpeed);
+    rightStepper.runSpeed();
+    leftStepper.setSpeed(-_rightSpeed);
+    leftStepper.runSpeed();
+  //}
+
+  correctAngle(float _targetAngle)
+  traversal.setMovementDecision(Decision.Stationary);
+}
+
+void right(int _leftSpeed, float _targetAngle){
+  //update live angle
+  //while (newAngle < _targetAngle){
+    leftStepper.setSpeed(_leftSpeed);
+    leftStepper.runSpeed();
+    rightStepper.setSpeed(-_leftSpeed);
+    rightStepper.runSpeed();
+  //}
+
+  correctAngle(float _targetAngle)
+  traversal.setMovementDecision(Decision.Stationary);
+}
+
 void setColour(uint8_t r, uint8_t g, uint8_t b){
   analogWrite(redPin, r);
   analogWrite(greenPin, g);
@@ -239,6 +288,67 @@ float convertYaw(float yaw){
     yaw = yaw - 360.0;
   }
   return yaw;
+}
+
+void move(){
+  traversal.makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
+  switch (getDecision()){
+    case Stationary:
+      Serial.println("stationary");
+      break;
+    case Forward:
+      Serial.println("Moving Forward");
+      forward(200, 200, 5);
+      break;
+    case Left:
+      Serial.println("Moving Left");
+      left(200, 10);
+      break;
+    case Right:
+      Serial.println("Moving Right");
+      right(200, 10);
+      break;
+    case Backwards:
+      Serial.println("Backwards not implemented yet");
+      break;
+    case MoveThenLeft:
+      Serial.println("MoveThenLeft");
+      forward(200,200, MOVE_THEN_DIR_OFFSET);
+
+      while(getDecision() != Forward){
+        left(200, 10);
+        //RUN IMAGE CLASSIFICATION HERE NIK
+        traversal.makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
+      }
+      break;
+    
+    case MoveThenRight:
+      Serial.println("MoveThenRight");
+      forward(200,200, MOVE_THEN_DIR_OFFSET);
+
+      while(getDecision() != Forward){
+        right(200, 10);
+        //RUN IMAGE CLASSIFICATION HERE NIK
+        traversal.makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
+      }
+      break;
+    
+    default:
+      Serial.println("Error");
+      break;
+  }
+
+  enum Decision{
+  Stationary,
+  Forward,
+  Left,
+  Right,
+  Backwards,
+  MoveThenLeft,
+  MoveThenRight
+};
+  
+
 }
 
 void communicationCode(void* pvParameters) {

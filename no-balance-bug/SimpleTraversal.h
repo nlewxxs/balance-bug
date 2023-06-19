@@ -33,6 +33,7 @@ class SimpleTraversal {
     void setDistance(float _distance);
     void setAngle(float _angle);
     void setTurnAngle(float _angle);
+    void setMovementDecision(Decision _movementDecision);
     void makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
     Decision getDecision();
 
