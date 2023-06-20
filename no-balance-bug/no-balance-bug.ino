@@ -312,17 +312,6 @@ float convertYaw(float yaw){
   return yaw;
 }
 
-//   enum Decision{
-//   Stationary,
-//   Forward,
-//   Left,
-//   Right,
-//   Backwards,
-//   MoveThenLeft,
-//   MoveThenRight
-// };
-  
-
 void communicationCode(void* pvParameters) {
   // Serial.println(xPortGetCoreID());
 
@@ -356,38 +345,6 @@ void communicationCode(void* pvParameters) {
       else{
         Serial.println("All set up");
       }
-      // if (millis() - lastTime > 5000) {
-      //   //Check WiFi connection status
-      //   if (WiFi.status() == WL_CONNECTED) {
-      //     // WiFiClient client;
-      //     HTTPClient http;
-      //     // String serverPath = serverName + "/Nodes/Add?SessionId=1&NodeId=3&XCoord=72&YCoord=56";
-      //     String serverPath = serverName + "/Edges/Add?SessionId=1&NodeId=2&EdgeNodeId=3&Distance=34.2&Angle=72.0";
-      //     // Serial.println(serverPath);
-      //     // Your Domain name with URL path or IP address with path
-      //     http.begin(serverPath.c_str());
-      //     // HTTP GET request
-      //     int httpResponseCode = http.GET();
-
-      //     if (httpResponseCode > 0) {
-      //       debugOutput("HTTP Response code: ", false);
-      //       debugOutput(httpResponseCode);  // HTTP response code e.g. 200
-      //       String payload = http.getString();
-      //       debugOutput(payload);  // HTTP response package e..g JSON object
-      //     } else {
-      //       debugOutput("Error code: ", false);
-      //       debugOutput(httpResponseCode);
-      //     }
-
-      //     // Free resources
-      //     http.end();
-      //   } else {
-      //     debugOutput("WiFi Disconnected");
-      //   }
-      //   // this delay is not actually necessary as the time waiting for http request is enough for idle tasks to run ?
-      //   // vTaskDelay(5000); //delay important to allow idle tasks to execute else processor reboots
-      //   lastTime = millis();
-      // }
     #endif
     vTaskDelay(100);
   }
