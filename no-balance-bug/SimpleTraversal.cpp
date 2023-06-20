@@ -22,7 +22,7 @@ void SimpleTraversal::setTurnAngle(float _angle) {}
 
 void SimpleTraversal::setBugId(String _bugId) { bugId = _bugId; }
 
-void setMovementDecision(Decision _movementDecision) { movementDecision = _movementDecision; }
+void SimpleTraversal::setMovementDecision(Decision _movementDecision) { movementDecision = _movementDecision; }
 
 //getters
 Decision SimpleTraversal::getDecision(){ return movementDecision; }

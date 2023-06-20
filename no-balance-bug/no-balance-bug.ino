@@ -8,13 +8,13 @@
 #include <BluetoothSerial.h>
 #include "Camera.h"
 #include "Classify.h"
-#include "Traversal.h"
+// #include "Traversal.h" // for the time being
 #include "Communicate.h"
 #include "SimpleTraversal.h"
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
-// #define ENABLE_HTTP_SERVER
+#define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
 #define ENABLE_CAMERA
 // #define ENABLE_MOTORS
@@ -23,7 +23,8 @@
 // // #define YDIST 100
 // // #define ERRMARGIN 5
 
-#define MOVE_THEN_DIR_OFFSET 30.0
+// how much we move forwards before taking action in centimetres
+#define MOVE_THEN_DIR_OFFSET 30.0 
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
@@ -32,18 +33,12 @@ BluetoothSerial SerialBT;
 Camera D8M;
 
 SimpleTraversal traversal;
-
-const uint8_t redPin = 19;
-const uint8_t greenPin = 18;
-const uint8_t bluePin = 5;
 String bugId =  "MazEERunnEEr";
 
 TaskHandle_t communication;  // task on core 0 for communication
-
 Communicate communicate;
 
 #define CHECK_NEW_SESSION_TIMEOUT 20
-
 
 char* ssid = "Ben";
 char* password = "test1234";
@@ -117,12 +112,7 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000); // 400kHz I2C clock
 
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);
-
   // initialize device
-  setColour(170, 0, 255); // purple
   mpu.initialize();
   debugOutput("Testing device connections...");
   debugOutput(mpu.testConnection() ? F("MPU6050 connection successful") : F("MPU6050 connection failed"));
@@ -149,15 +139,12 @@ void setup() {
 
       mpu.setDMPEnabled(true);
       dmpReady = true;
-      setColour(0, 255, 0); // bueno, set green 
-      delay(600);
-      setColour(0, 0, 0); // kill
+
   } else {
       // ERROR!
     debugOutput((F("DMP Initialization failed (code ")));
     (devStatus);
     debugOutput(F(")"));
-    setColour(255, 0, 0);
   }
 
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
@@ -172,13 +159,14 @@ void setup() {
   
 	leftStepper.setMaxSpeed(maxSpeed);
 	leftStepper.setAcceleration(acceleration);
+
 	rightStepper.setMaxSpeed(maxSpeed);
 	rightStepper.setAcceleration(acceleration);
 
   leftStepper.setSpeed(-2000);
   rightStepper.setSpeed(2000);
   
-  delay(1000);
+  delay(500);
 }
 
 void loop() {
@@ -208,7 +196,7 @@ void loop() {
   #ifdef ENABLE_CAMERA
     D8M.update();
     Matrix frame = D8M.getBoxMatrix();
-    char tmp[64];
+    char tmp[128];
   
     for (int i = 0; i < 11; i++){
       sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
@@ -218,81 +206,33 @@ void loop() {
     debugOutput(tmp);
 
     Image newImage;   
-
-    classifyElement stuffs = newImage.classify(frame.boxes);
+    classifyElement classification = newImage.classify(frame.boxes);
     newImage.debugInfo();
+    traversal.makeDecision(classification.isEnd, classification.isNode, 
+                          classification.isPath, classification.isClear, 
+                          classification.leftWall, classification.rightWall, 
+                          classification.leftTurn, classification.rightTurn);
+    move();
 
   #endif
 
   vTaskDelay(10);
 }
 
-void getDistance(){
-
+int getDistance(){
+  return 400; // arbitrary, testing purposes
 }
 
-void forward(int _leftSpeed, int _rightSpeed, float distance){
-  while (getDistance() < distance){
-    leftStepper.setSpeed(_leftSpeed);
-    rightStepper.setSpeed(_rightSpeed);
-    leftStepper.runSpeed();
-    rightStepper.runSpeed();
-  }
-  traversal.setMovementDecision(Decision.Stationary);
-}
-
-void correctAngle(float _targetAngle) {
-  //system_angle = system_angle + _targetAngle;
-  //if (system_angle > 360) {
-  //   system_angle = system_angle - 360;
-  // }
-}
-
-void left(int _rightSpeed, float _targetAngle){
-  //update live angle
-  //while (newAngle < _targetAngle){
-    rightStepper.setSpeed(_rightSpeed);
-    rightStepper.runSpeed();
-    leftStepper.setSpeed(-_rightSpeed);
-    leftStepper.runSpeed();
-  //}
-
-  correctAngle(float _targetAngle)
-  traversal.setMovementDecision(Decision.Stationary);
-}
-
-void right(int _leftSpeed, float _targetAngle){
-  //update live angle
-  //while (newAngle < _targetAngle){
-    leftStepper.setSpeed(_leftSpeed);
-    leftStepper.runSpeed();
-    rightStepper.setSpeed(-_leftSpeed);
-    rightStepper.runSpeed();
-  //}
-
-  correctAngle(float _targetAngle)
-  traversal.setMovementDecision(Decision.Stationary);
-}
-
-void setColour(uint8_t r, uint8_t g, uint8_t b){
-  analogWrite(redPin, r);
-  analogWrite(greenPin, g);
-  analogWrite(bluePin, b);
-}
-
-float convertYaw(float yaw){
-  while (yaw < 0.0){
-    yaw = yaw + 360.0;
-  }
-  while (yaw > 360.0){
-    yaw = yaw - 360.0;
-  }
-  return yaw;
-}
+// i gots a function for this already dumbass
+// void correctAngle(float _targetAngle) {
+//   //system_angle = system_angle + _targetAngle;
+//   //if (system_angle > 360) {
+//   //   system_angle = system_angle - 360;
+//   // }
+// }
 
 void move(){
-  traversal.makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
-  switch (getDecision()){
+  switch (traversal.getDecision()){
     case Stationary:
       Serial.println("stationary");
       break;
@@ -313,43 +253,74 @@ void move(){
       break;
     case MoveThenLeft:
       Serial.println("MoveThenLeft");
-      forward(200,200, MOVE_THEN_DIR_OFFSET);
-
-      while(getDecision() != Forward){
-        left(200, 10);
-        //RUN IMAGE CLASSIFICATION HERE NIK
-        traversal.makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
-      }
+      forward(200,200, MOVE_THEN_DIR_OFFSET);    
       break;
-    
     case MoveThenRight:
       Serial.println("MoveThenRight");
       forward(200,200, MOVE_THEN_DIR_OFFSET);
-
-      while(getDecision() != Forward){
-        right(200, 10);
-        //RUN IMAGE CLASSIFICATION HERE NIK
-        traversal.makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
-      }
       break;
-    
     default:
       Serial.println("Error");
       break;
   }
-
-  enum Decision{
-  Stationary,
-  Forward,
-  Left,
-  Right,
-  Backwards,
-  MoveThenLeft,
-  MoveThenRight
-};
-  
-
 }
+
+void forward(int _leftSpeed, int _rightSpeed, float distance){
+  while (getDistance() < distance){
+    leftStepper.setSpeed(_leftSpeed);
+    rightStepper.setSpeed(_rightSpeed);
+    leftStepper.runSpeed();
+    rightStepper.runSpeed();
+  }
+  traversal.setMovementDecision(Stationary);
+}
+
+void left(int _rightSpeed, float _targetAngle){
+  //update live angle
+  //while (newAngle < _targetAngle){
+    rightStepper.setSpeed(_rightSpeed);
+    rightStepper.runSpeed();
+    leftStepper.setSpeed(-_rightSpeed);
+    leftStepper.runSpeed();
+  //}
+
+  HEADING_SETPOINT = convertYaw(_targetAngle);
+  traversal.setMovementDecision(Stationary);
+}
+
+void right(int _leftSpeed, float _targetAngle){
+  //update live angle
+  //while (newAngle < _targetAngle){
+    leftStepper.setSpeed(_leftSpeed);
+    leftStepper.runSpeed();
+    rightStepper.setSpeed(-_leftSpeed);
+    rightStepper.runSpeed();
+  //}
+
+  HEADING_SETPOINT = convertYaw(_targetAngle);
+  traversal.setMovementDecision(Stationary);
+}
+
+float convertYaw(float yaw){
+  while (yaw < 0.0){
+    yaw = yaw + 360.0;
+  }
+  while (yaw > 360.0){
+    yaw = yaw - 360.0;
+  }
+  return yaw;
+}
+
+//   enum Decision{
+//   Stationary,
+//   Forward,
+//   Left,
+//   Right,
+//   Backwards,
+//   MoveThenLeft,
+//   MoveThenRight
+// };
+  
 
 void communicationCode(void* pvParameters) {
   // Serial.println(xPortGetCoreID());

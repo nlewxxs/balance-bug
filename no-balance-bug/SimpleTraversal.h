@@ -6,7 +6,6 @@
 #include "Communicate.h"
 #include <HardwareSerial.h>
 
-
 //define decision enumeration
 enum Decision{
   Stationary,
@@ -55,6 +54,4 @@ class SimpleTraversal {
     void calculateCoords();
 };
 
-
 #endif
-
