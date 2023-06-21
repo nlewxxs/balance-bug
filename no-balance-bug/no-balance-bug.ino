@@ -14,9 +14,10 @@
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
-#define ENABLE_HTTP_SERVER
+// #define ENABLE_HTTP_SERVER
 // #define ENABLE_BLUETOOTH
 #define ENABLE_CAMERA
+// #define ENABLE_TRAVERSAL
 // #define ENABLE_MOTORS
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
@@ -209,12 +210,14 @@ void loop() {
     Image newImage;   
     classifyElement classification = newImage.classify(frame.boxes);
     newImage.debugInfo();
+
+    #ifdef ENABLE_TRAVERSAL
     traversal.makeDecision(classification.isEnd, classification.isNode, 
                           classification.isPath, classification.isClear, 
                           classification.leftWall, classification.rightWall, 
                           classification.leftTurn, classification.rightTurn);
     move();
-
+    #endif
   #endif
 
   vTaskDelay(10);
