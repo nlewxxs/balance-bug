@@ -244,10 +244,10 @@ void Communicate::setUpMap(){
 
 void Communicate::addNode(String _nodeId, String _xCoord, String _yCoord){
   if(mapSetup) {
-    String pathName = serverName + "/Nodes/Add?BugId=" + bugId + "&NodeId=" + _nodeId + "&xCoord=" + _xCoord + "&yCoord=" + _yCoord;
+    String pathName = serverName + "/Nodes/Add?BugId=" + bugId + "&NodeId=" + String(_nodeId) + "&XCoord=" + String(_xCoord) + "&YCoord=" + (_yCoord);
     httpNode.begin(pathName.c_str());
 
-    String params = "BugId=" + bugId + "&NodeId=" + _nodeId + "&xCoord=" + _xCoord + "&yCoord=" + _yCoord;
+    String params = "BugId=" + bugId + "&NodeId=" + String(_nodeId) + "&XCoord=" + (_xCoord) + "&YCoord=" + String(_yCoord);
 
     int httpNodeResponseCode = httpNode.PUT(params);
 
@@ -278,10 +278,10 @@ void Communicate::addNode(String _nodeId, String _xCoord, String _yCoord){
 
 void Communicate::addEdge(String _nodeId, String _edgeNodeId, String _distance, String _angle){
   if(mapSetup) {
-    String pathName = serverName + "/Edges/Add?BugId=" + bugId + "&NodeId=" + _nodeId + "&EdgeNodeId=" + _edgeNodeId + "&Distance=" + _distance + "&Angle=" + _angle;
+    String pathName = serverName + "/Edges/Add?BugId=" + String(bugId) + "&NodeId=" + String(_nodeId) + "&EdgeNodeId=" + String(_edgeNodeId) + "&Distance=" + String(_distance) + "&Angle=" + String(_angle);
     httpEdge.begin(pathName.c_str());
 
-    String params = "BugId=" + bugId + "&NodeId=" + _nodeId + "&EdgeNodeId=" + _edgeNodeId + "&Distance=" + _distance + "&Angle=" + _angle;
+    String params = "BugId=" + String(bugId) + "&NodeId=" + String(_nodeId) + "&EdgeNodeId=" + String(_edgeNodeId) + "&Distance=" + String(_distance) + "&Angle=" + String(_angle);
     int httpEdgeResponseCode = httpEdge.PUT(params);
 
     if (httpEdgeResponseCode>0) {
