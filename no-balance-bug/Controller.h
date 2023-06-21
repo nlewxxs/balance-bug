@@ -13,6 +13,7 @@ class Controller {
     float getDistance();
     float getLeftOutput();
     float getRightOutput();
+    bool getMoving();
 };
 
 

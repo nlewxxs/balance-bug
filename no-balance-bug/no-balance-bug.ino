@@ -15,16 +15,12 @@
 // MACROS
 // #define ENABLE_YAW_OUTPUT
 // #define ENABLE_HTTP_SERVER
-<<<<<<< Updated upstream
 #define ENABLE_BLUETOOTH
 // #define ENABLE_CAMERA
-// #define ENABLE_TRAVERSAL
+#define ENABLE_TRAVERSAL
 #define ENABLE_MOTORS
-=======
 // #define ENABLE_BLUETOOTH
 #define ENABLE_CAMERA
-// #define ENABLE_MOTORS
->>>>>>> Stashed changes
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
 // // #define YDIST 100
@@ -51,7 +47,6 @@ Communicate communicate;
 char* ssid = "Ben";
 char* password = "test1234";
 char* serverId = "http://90.196.3.86:8081";
-char* serverId = "http://44.203.160.76:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 unsigned long lastTime = 0;
@@ -137,6 +132,15 @@ void setup() {
   }
 
   controller.setup();
+  
+  #ifdef ENABLE_HTTP_SERVER
+    //wifi setup
+  // if (!communicate.getInitialised()){
+  //   communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
+  // }
+    traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
+    
+  #endif
 
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
@@ -163,56 +167,34 @@ void loop() {
     mpu.dmpGetGyro(&gyro, fifoBuffer);
   }
 
-  #ifdef ENABLE_CAMERA
-    D8M.update();
-    Matrix frame = D8M.getBoxMatrix();
-    char tmp[128];
-  
-    for (int i = 0; i < 11; i++){
-      sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
-      debugOutput(tmp, false);
+  #ifdef ENABLE_TRAVERSAL
+  if (!controller.getMoving()) {
+    switch (traversal.getDecision()){
+      case Stationary:
+        break;
+      case Forward:
+        move(0.05);
+        break;
+      case Left:
+        rotate(5);
+        break;
+      case Right:
+        rotate(-5);
+        break;
+      case Backwards:
+        move(-0.05);
+        break;
+      case MoveThenLeft:
+        move(0.05);   
+        break;
+      case MoveThenRight:
+        move(0.05);
+        break;
+      default:
+        break;
     }
-    sprintf(tmp, "%d,%d,%d,%d", frame.boxes[12][0], frame.boxes[12][1], frame.boxes[12][2], frame.boxes[12][3]);
-    debugOutput(tmp);
-
-    // Image newImage;   
-    // classifyElement classification = newImage.classify(frame.boxes);
-    // newImage.debugInfo();
-
-    #ifdef ENABLE_TRAVERSAL
-    if (!controller.getMoving()) {
-      traversal.makeDecision(classification.isEnd, classification.isNode, 
-                          classification.isPath, classification.isClear, 
-                          classification.leftWall, classification.rightWall, 
-                          classification.leftTurn, classification.rightTurn);
-      switch (traversal.getDecision()){
-        case Stationary:
-          break;
-        case Forward:
-          move(0.05);
-          break;
-        case Left:
-          rotate(5);
-          break;
-        case Right:
-          rotate(-5);
-          break;
-        case Backwards:
-          move(-0.05);
-          break;
-        case MoveThenLeft:
-          move(0.05);   
-          break;
-        case MoveThenRight:
-          move(0.05);
-          break;
-        default:
-          break;
-      }
-    }
-    controller.update(-ypr[0]*180/M_PI);
-    move();
-    #endif
+  }
+  controller.update(-ypr[0]*180/M_PI);
   #endif
 
   vTaskDelay(10);
@@ -243,20 +225,9 @@ float convertYaw(float yaw){
 void communicationCode(void* pvParameters) {
   // Serial.println(xPortGetCoreID());
 
-  #ifdef ENABLE_HTTP_SERVER
-    //wifi setup
-  // if (!communicate.getInitialised()){
-  //   communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
-  // }
-    traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
-    
-  #endif
-
   // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
   for (;;) {
-    
-
-    // -------- OUTPUTS ---------- //
+      // -------- OUTPUTS ---------- //
 
     #ifdef ENABLE_YAW_OUTPUT
       debugOutput("Yaw: ", false);
@@ -274,6 +245,32 @@ void communicationCode(void* pvParameters) {
         Serial.println("All set up");
       }
     #endif
+
+    #ifdef ENABLE_TRAVERSAL    
+      if(!controller.getMoving()) {
+        D8M.update();
+        Matrix frame = D8M.getBoxMatrix();
+        char tmp[128];
+      
+        for (int i = 0; i < 11; i++){
+          sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
+          debugOutput(tmp, false);
+        }
+        sprintf(tmp, "%d,%d,%d,%d", frame.boxes[12][0], frame.boxes[12][1], frame.boxes[12][2], frame.boxes[12][3]);
+        debugOutput(tmp);
+
+        Image newImage;   
+        classifyElement classification = newImage.classify(frame.boxes);
+        newImage.debugInfo();
+      
+        traversal.makeDecision(classification.isEnd, classification.isNode, 
+                        classification.isPath, classification.isClear, 
+                        classification.leftWall, classification.rightWall, 
+                        classification.leftTurn, classification.rightTurn);
+      }
+    #endif
+
+
     SerialBT.print(controller.getDistance());
     SerialBT.print(", ");
     SerialBT.print(-ypr[0]*180/M_PI);

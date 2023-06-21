@@ -38,15 +38,6 @@ bool Image::hasWall(const int lowerL[4], const int lowerR[4], const int upperL[4
       OuterU = ((upperR[0] <= bound[2]) && (upperR[0] > bound[3])) && (lowerL[0] > 320) && (upperR[1] < 180);
     }
 
-    Serial.print("A");
-    Serial.println(lowerR[2]);
-    Serial.print("b");
-    Serial.println(lowerR[0]);
-
-    Serial.println(OuterLower);
-    Serial.println(InnerLower);
-    Serial.println(InnerU);
-    Serial.println(OuterU);
     
 
     return OuterLower || InnerLower || InnerU || InnerU || OuterU;
