@@ -29,7 +29,7 @@ function DisplayGraph() {
 
 
 
-    const urlNodes = "http://44.203.160.76:8081/Nodes/DisplayAll?SessionId=" + sessionIdString;
+    const urlNodes = "http://54.165.136.137:8081/Nodes/DisplayAll?SessionId=" + sessionIdString;
 
     // const processNodes = () => {
     //   setProcessedNodesJson([{ id: 1, label: '', x:0, y:0 },
@@ -59,7 +59,7 @@ function DisplayGraph() {
       .catch(error => console.log(error));
     }
 
-    const urlEdges = "http://44.203.160.76:8081/Edges/DisplayAll?SessionId=" + sessionIdString;
+    const urlEdges = "http://54.165.136.137:8081/Edges/DisplayAll?SessionId=" + sessionIdString;
 
     const getEdges = () => {
       fetchData(urlEdges)
