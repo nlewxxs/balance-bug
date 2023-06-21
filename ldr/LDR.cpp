@@ -7,11 +7,15 @@ void LDR::init(uint8_t _pin){
 
 void LDR::update(){
   reading = analogRead(pin);
-  Serial.print(reading);
 }
 
 bool LDR::isWall(){
   update();
   return (reading > LDR_THRESHOLD) ? 1 : 0;
+}
+
+int LDR::getReading(){
+  update();
+  return reading;
 }
 
