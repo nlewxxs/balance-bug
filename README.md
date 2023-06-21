@@ -56,7 +56,7 @@ Type: `200`
 
 ### UpdateBugName
 
-`GET /BugInformation/UpdateBugName`
+`PATCH /BugInformation/UpdateBugName`
 
 Params: `BugId, BugName`
 
@@ -65,7 +65,7 @@ Type: `200`
 
 ### Ping
 
-`GET /BugInformation/Ping`
+`PATCH /BugInformation/Ping`
 
 Params: `BugId`
 
