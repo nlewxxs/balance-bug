@@ -7,11 +7,11 @@ const int leftPathBounds[4]   = {0,280,320,320};
 const int middlePathBounds[4] = {240,240,400,480};
 const int rightPathBounds[4]  = {320,280,640,320};
 
-const int leftWallBoundSimplified[4] = {40,100,160,240};
+const int leftWallBoundSimplified[4] = {60,100,160,240};
 const int rightWallBoundSimplified[4] = {600,540,480,400};
 
 // all below should be false
-
+// xmin, ymin, xmax, ymax
 bool Image::outsideBounds(const int box[4], const int bound[4]){
     bool outX = (box[2] < bound[0]) || (box[0] > bound[2]);
     bool outY = (box[3] < bound[1]) || (box[1] > bound[3]);
@@ -149,7 +149,7 @@ classifyElement Image::classify(int grid[13][4]) {
     }
 
     // Right Wall
-    if (hasWall(grid[6], grid[7], grid[2], grid[3], 480, rightWallBoundSimplified, false)) {
+    if (hasWall(grid[10], grid[11], grid[6], grid[7], 480, rightWallBoundSimplified, false)) {
         // std::cout << "RIGHT WALL"
         info.rightWall = true;
     } else {
