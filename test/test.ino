@@ -1,15 +1,24 @@
-#include "Classify.h"
-
-Image myimage;
-int input_grid[12][4] = {{0,0,0,0}, {270,120,283,137}, {0,0,0,0}, {0,0,0,0}, {4,254,159,359}, {160,246,319,287}, {320,243,479,359}, {480,250,637,338}, {4,360,84,437}, {0,0,0,0}, {399,360,478,476}, {313,0,315,54}};
-// ,,,,,,,,,,,
+int n_overflows = 0;  // keeps track of how many times we've crossed that boundary so far.
+float rawReadings[2] = {-170, 170};
+float processedReading; // we store the signs of the last 2 readings. 
 
 void setup(){
-  Serial.begin(115200);
-  myimage.classify(input_grid);
-  myimage.debugInfo();
 }
 
 void loop(){
-
+  calculateAdjustment();
+  Serial.println(applyAdjustment(170));
 }
+
+void calculateAdjustment(){
+  if ((rawReadings[0] < -150) && (rawReadings[1] > 150)) { // crossed over from -180 to 180;
+    n_overflows -= 1; // we need to subtract 360
+  } else if ((rawReadings[0] > 150) && (rawReadings[1] < -150)) { // crossed from 180 to -180
+    n_overflows += 1; // we need to add 360
+  }
+}
+
+float applyAdjustment(float raw){
+  return raw + ((float) n_overflows * 360.0);
+}
+
