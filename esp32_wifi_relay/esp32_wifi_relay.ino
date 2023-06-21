@@ -17,10 +17,12 @@ TaskHandle_t backend;
 int onFlag = 14;
 int powerFlag = 12;
 
-#define SCK 25
-#define MISO 33
-#define MOSI 32
-int spiTriggerPin = 2; // change as needed
+bool prev = false;
+
+#define SCK 14
+#define MISO 12
+#define MOSI 13
+int spiTriggerPin = 34; // change as needed
 int spiTrigger = 0;
 int fpga_cs = 26;
 int currentState = 0;
@@ -30,8 +32,8 @@ int toSendFPGA = 0;
 uint16_t buf = 0;      // fpga SPI recv buffer
 
 int status = WL_IDLE_STATUS;
-const char* ssid = "Mi 9T Pro";
-const char* password = "randompass";
+const char* ssid = "Ben"; //Mi 9T Pro
+const char* password = "test1234";
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 unsigned int localPort = 2390;
@@ -53,12 +55,14 @@ String serverName = "http://192.168.243.152:8081"; // local ip of the backend ho
 unsigned long lastTime = 0;
 unsigned long timerDelay = 10;
 
+
+
 // setup up communication to server
 Communicate backEndComms;
 
 void IRAM_ATTR spiStartCallback(){
   spiTrigger = 1;
-  //Serial.println("SPI Trigger");
+  // Serial.println("SPI Trigger");
 }
 
 void getCurrentState(int spiReturn){
@@ -92,7 +96,7 @@ int sendLEDDrivers(){
 
 bool fpgaTransfer(){
   digitalWrite(fpga_cs, LOW); // SPI is active-low
-  delay(10);              
+  delay(50);              
 
   // for (int i = 256; i < 356; i++){
   //   buf = SPI.transfer16(i);
@@ -114,7 +118,7 @@ bool fpgaTransfer(){
   } else {
     return false;
   }
-
+  vTaskDelay(100);
 }
 
 void printWifiStatus() {
@@ -176,17 +180,22 @@ void fpgaWifiLoop(void * pvParameters){
 //}
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(2000);
-
+  pinMode(fpga_cs, OUTPUT);
+  pinMode(SCK, OUTPUT);
   backEndComms.init(String(0), 0, serverName);
   pinMode(powerFlag, INPUT);
-  //pinMode(spiTriggerPin, INPUT);
+  pinMode(spiTriggerPin, INPUT);
   pinMode(onFlag, OUTPUT);
   
   Serial.println("test");
   // setup SPI pins
-  SPI.begin();
+  // SPI.begin(SCK, MISO, MOSI, );
+  // SPI.begin(SCK, MISO, MOSI, 27);
+  //vspi.begin(VSPI_CLK, VSPI_MISO, VSPI_MOSI, VSPI_SS);
+
+  SPI.begin(SCK, MISO, MOSI, 27);
   //SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
   Serial.println("SPI started");
   // setup state number pins
@@ -238,20 +247,31 @@ void setup() {
 void loop() {  
    // this loop for core 1 takes an spi transfer, sends it out where it needs to go
   // gets the return value, and spi transfers it back to the fpga on the next iteration
-  if (spiTrigger==1){
-    spiTrigger = 0;
-    if(fpgaTransfer()){
-      // true so correct transaction
-      toSendOut = (uint16_t) (buf >> 3); // shift right by three bits to clear out stop sequence
-      Serial.print("toSendOut:  ");
-      Serial.println(toSendOut);
-      Serial.println("LooP");
-      toSendFPGA = sendLEDDrivers();
-    } else {
-      // bad transaction, ignore
-      Serial.println("SPI bad");
+  Serial.print("spi trigger: ");
+  Serial.println(spiTrigger);
+  // if(digitalRead(spiTriggerPin) == LOW){
+  //   Serial.print("spi high trigger found: ");
+  //   spiTrigger == 1;
+  //   Serial.print("spi trigger found: ");
+  //   Serial.println(spiTrigger);
+    if (spiTrigger==1){
+      spiTrigger = 0;
+      if(fpgaTransfer()){
+        Serial.println("OK");
+        // true so correct transaction
+        toSendOut = (uint16_t) (buf >> 3); // shift right by three bits to clear out stop sequence
+        Serial.print("toSendOut:  ");
+        Serial.println(toSendOut);
+        Serial.println("LooP");
+        toSendFPGA = sendLEDDrivers();
+      } else {
+        // bad transaction, ignore
+        // Serial.println("SPI bad");
+      }
+      
     }
-    
-  }
-  vTaskDelay(100);  
+    vTaskDelay(100);  
+
+  // }
+  
 }
