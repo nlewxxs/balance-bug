@@ -178,9 +178,10 @@ void loop() {
 
   if (update) {
     update = false;
-    float tiltReading = ypr[1] * 180/M_PI;
+    float tiltReading = -ypr[1] * 180/M_PI;
     float headingReading = ypr[0] * 180/M_PI;
-    controller.update(tiltReading, headingReading);
+    float pitchRate = gyro.y;
+    controller.update(tiltReading, pitchRate, headingReading);
   }
 
   // controller.update(tiltReading, headingReading);
@@ -193,18 +194,27 @@ void communicationCode(void* pvParameters) {
   for (;;) {
     float L = controller.getLeftOutput();
     float R = controller.getRightOutput();
-    SerialBT.print("L: ");
+    float LV = controller.getLinearVelocity();
+    float PR = gyro.y;
+    SerialBT.print("/*L: ");
     SerialBT.print(L);
     SerialBT.print(", R: ");
     SerialBT.print(R);
     SerialBT.print(", Pit: ");
-    SerialBT.print(ypr[1] * 180/M_PI);
-    SerialBT.print(", Dis: ");
-    SerialBT.print(controller.getDistance());
+    SerialBT.print(-ypr[1] * 180/M_PI);
+    // SerialBT.print(", Dis: ");
+    // SerialBT.print(controller.getDistance());
+    SerialBT.print(", LV: ");
+    SerialBT.print(LV);
     // SerialBT.print(", I: ");
     // SerialBT.println(T_integral[1]);
     SerialBT.print(", GY: ");
-    SerialBT.println(gyro.y);
+    SerialBT.print(gyro.y);
+    SerialBT.print(", V: ");
+    SerialBT.print(LV-PR);
+    SerialBT.print(", Vout: ");
+    SerialBT.print(controller.getVOut());
+    SerialBT.println("*/");
 
     //bluetooth tuning code
     #ifdef btTuning
@@ -315,19 +325,33 @@ void communicationCode(void* pvParameters) {
         controller.updateValues("MTO", MTO);
         SerialBT.print("Set MTO to ");
         SerialBT.println(MTO, 4);
+      } else if (test.substring(0,2) == "MV") {
+        float MV = test.substring(2,test.length()-1).toFloat();
+        // preferences.putFloat("B3", B3);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        controller.updateValues("MV", MV);
+        SerialBT.print("Set MV to ");
+        SerialBT.println(MV, 4);
+      } else if (test.substring(0,1) == "F") {
+        // float MTO = test.substring(3,test.length()-1).toFloat();
+        // preferences.putFloat("B3", B3);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        // controller.updateValues("MTO", MTO);
+        controller.moveForwards();
+        SerialBT.println("Move forwards");
       } else if (test[0] == 'C') {
         SerialBT.print("P1: ");
         SerialBT.print(controller.getValue("P1"), 4);
         SerialBT.print(" I1: ");
         SerialBT.print(controller.getValue("I1"), 4);
         SerialBT.print(" D1: ");
-        SerialBT.print(controller.getValue("D1"), 4);
+        SerialBT.print(controller.getValue("D1"), 7);
         SerialBT.print(" P2: ");
         SerialBT.print(controller.getValue("P2"), 4);
         SerialBT.print(" I2: ");
         SerialBT.print(controller.getValue("I2"), 4);
         SerialBT.print(" D2: ");
-        SerialBT.print(controller.getValue("D2"), 4);
+        SerialBT.print(controller.getValue("D2"), 7);
         SerialBT.print(" Pp1: ");
         SerialBT.print(controller.getValue("Pp1"), 4);
         SerialBT.print(" Ii1: ");
@@ -352,6 +376,8 @@ void communicationCode(void* pvParameters) {
         SerialBT.print(controller.getValue("B2"), 4);
         SerialBT.print(" B3: ");
         SerialBT.print(controller.getValue("B3"), 4);
+        SerialBT.print(" MV: ");
+        SerialBT.print(controller.getValue("MV"), 4);
         SerialBT.print(" MTO: ");
         SerialBT.print(controller.getValue("MTO"), 4);
       }

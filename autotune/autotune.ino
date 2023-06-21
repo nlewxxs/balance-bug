@@ -5,12 +5,37 @@
 #include "MPU6050_6Axis_MotionApps20.h"
 #include <AccelStepper.h>
 #include <BluetoothSerial.h>
-#include "Controller.h"
+#include <QuickPID.h>
 // #include <Preferences.h>
+
+// Define motor interface type
+#define motorInterfaceType 1
+#define stepsPerRevolution 200
+#define HEADING_SETPOINT 0
+#define POSITION_SETPOINT 0
+
+// Define pin connections
+const int leftDirPin = 26; //A1
+const int leftStepPin = 25; //A2
+// Define pin connections
+const int rightDirPin = 33; //A3
+const int rightStepPin = 32; //A4
+//4 is sda is orange, 3 is scl is yellow
+
+const int leftMicro1 = 5; // 7 is blue - GPIO5
+const int leftMicro2 = 18; // 6 is white - GPIO18
+const int leftMicro3 = 19; // 5 is red - GPIO19
+const int rightMicro1 = 15; // 12 is blue - GPIO15
+const int rightMicro2 = 4; // 11 is white - GPIO4
+const int rightMicro3 = 14; // 10 is red - GPIO14
+
+// Creates an instance
+AccelStepper leftStepper(motorInterfaceType, leftStepPin, leftDirPin);
+AccelStepper rightStepper(motorInterfaceType, rightStepPin, rightDirPin);
 
 hw_timer_t *motorTimer = NULL;
 
-Controller controller;
+// Controller controller;
 // Preferences preferences;
 
 BluetoothSerial SerialBT;
@@ -19,7 +44,7 @@ BluetoothSerial SerialBT;
 #error Bluetooth is not enabled! please run 'make menuconfig' to enable it
 #endif
 
-#define btTuning
+// #define btTuning
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //
 // ----------------- CORE 0 DEFINITIONS ----------------- //
@@ -54,6 +79,20 @@ VectorInt16 gyro;
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 
 bool update = false;
+
+float Kp_p = 4;
+
+float Kp = 160;
+float Ki = 58;
+float Kd = 0.001;
+
+float Input, Output, Setpoint;
+
+float leftWheelDrive;
+float rightWheelDrive;
+
+QuickPID myPID(&Input, &Output, &Setpoint);
+
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
@@ -124,7 +163,7 @@ void setup() {
       // Serial.println(F(")"));
   }
   
-  controller.setup();
+  // controller.setup();
   // Serial.println("1");
   motorTimer = timerBegin(0, 80, true);
   // Serial.println("2");
@@ -151,6 +190,20 @@ void setup() {
   // controller.updateValues("S2", preferences.getInt("S2"));
   // #endif
 
+  Setpoint = 0;
+  myPID.SetTunings(Kp, Ki, Kd);
+  myPID.SetMode(myPID.Control::automatic);
+  myPID.SetOutputLimits(-1000, 1000);
+
+  leftStepper.setMaxSpeed(1000);
+  rightStepper.setMaxSpeed(1000);
+  digitalWrite(leftMicro1, LOW);
+  digitalWrite(leftMicro2, HIGH);
+  digitalWrite(leftMicro3, LOW);
+  digitalWrite(rightMicro1, LOW);
+  digitalWrite(rightMicro2, HIGH);
+  digitalWrite(rightMicro3, LOW);
+
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
     communicationCode, // Task function.
@@ -175,13 +228,27 @@ void loop() {
   }
 
   // -------- PID CONTROLLER ---------- //
-
   if (update) {
     update = false;
-    float tiltReading = ypr[1] * 180/M_PI;
-    float headingReading = ypr[0] * 180/M_PI;
-    controller.update(tiltReading, headingReading);
+    Input = ypr[1] * 180/M_PI;
+    myPID.Compute();
+    leftWheelDrive = Output;
+    rightWheelDrive = -Output;
+    leftWheelDrive = constrain(leftWheelDrive, -1000, 1000);
+    rightWheelDrive = constrain(rightWheelDrive, -1000, 1000);
   }
+  
+  leftStepper.setSpeed(leftWheelDrive);
+	leftStepper.runSpeed();
+  rightStepper.setSpeed(rightWheelDrive);
+	rightStepper.runSpeed();
+
+  // if (update) {
+  //   update = false;
+  //   float tiltReading = ypr[1] * 180/M_PI;
+  //   float headingReading = ypr[0] * 180/M_PI;
+  //   controller.update(tiltReading, headingReading);
+  // }
 
   // controller.update(tiltReading, headingReading);
 
@@ -191,20 +258,26 @@ void loop() {
 void communicationCode(void* pvParameters) {
   // -------- OUTPUTS ---------- //
   for (;;) {
-    float L = controller.getLeftOutput();
-    float R = controller.getRightOutput();
+    float L = leftWheelDrive;
+    float R = rightWheelDrive;
     SerialBT.print("L: ");
     SerialBT.print(L);
     SerialBT.print(", R: ");
     SerialBT.print(R);
     SerialBT.print(", Pit: ");
     SerialBT.print(ypr[1] * 180/M_PI);
-    SerialBT.print(", Dis: ");
-    SerialBT.print(controller.getDistance());
-    // SerialBT.print(", I: ");
-    // SerialBT.println(T_integral[1]);
-    SerialBT.print(", GY: ");
-    SerialBT.println(gyro.y);
+    SerialBT.print(", P: ");
+    SerialBT.print(myPID.GetKp());
+    SerialBT.print(", I: ");
+    SerialBT.print(myPID.GetKi());
+    SerialBT.print(", D: ");
+    SerialBT.println(myPID.GetKd());
+    // SerialBT.print(", Dis: ");
+    // SerialBT.print(controller.getDistance());
+    // // SerialBT.print(", I: ");
+    // // SerialBT.println(T_integral[1]);
+    // SerialBT.print(", GY: ");
+    // SerialBT.println(gyro.y);
 
     //bluetooth tuning code
     #ifdef btTuning
@@ -355,8 +428,8 @@ void communicationCode(void* pvParameters) {
         SerialBT.print(" MTO: ");
         SerialBT.print(controller.getValue("MTO"), 4);
       }
-      #endif
     }
+    #endif
     vTaskDelay(100);
   }
 }

@@ -8,14 +8,17 @@
 class Controller {
   public:
     void setup();
-    void update(float pitch, float heading);
+    void update(float pitch, float pitchRate, float heading);
     float getDistance();
+    float getLinearVelocity();
     float getLeftOutput();
     float getRightOutput();
     void updateValues(String param, float val);
     void updateValues(String param, int val);
     void updateSpeed();
     float getValue(String param);
+    void moveForwards();
+    float getVOut();
 };
 
 
