@@ -15,10 +15,16 @@
 // MACROS
 // #define ENABLE_YAW_OUTPUT
 // #define ENABLE_HTTP_SERVER
+<<<<<<< Updated upstream
 #define ENABLE_BLUETOOTH
 // #define ENABLE_CAMERA
 // #define ENABLE_TRAVERSAL
 #define ENABLE_MOTORS
+=======
+// #define ENABLE_BLUETOOTH
+#define ENABLE_CAMERA
+// #define ENABLE_MOTORS
+>>>>>>> Stashed changes
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
 // // #define YDIST 100
@@ -45,6 +51,7 @@ Communicate communicate;
 char* ssid = "Ben";
 char* password = "test1234";
 char* serverId = "http://90.196.3.86:8081";
+char* serverId = "http://44.203.160.76:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 unsigned long lastTime = 0;

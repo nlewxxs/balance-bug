@@ -7,8 +7,8 @@ const int leftPathBounds[4]   = {0,280,320,320};
 const int middlePathBounds[4] = {240,240,400,480};
 const int rightPathBounds[4]  = {320,280,640,320};
 
-const int leftWallBoundSimplified[4] = {60,100,160,240};
-const int rightWallBoundSimplified[4] = {600,540,480,400};
+const int leftWallBoundSimplified[4] = {10,100,160,240};
+const int rightWallBoundSimplified[4] = {650,540,480,400};
 
 // all below should be false
 // xmin, ymin, xmax, ymax
@@ -28,15 +28,20 @@ bool Image::hasWall(const int lowerL[4], const int lowerR[4], const int upperL[4
       OuterLower = (lowerL[2] > bound[0]);
       InnerLower = ((lowerR[2] >= bound[2]) && (lowerR[2] < bound[3]));
 
-      InnerU = (upperL[2] >= bound[1]);
-      OuterU = ((upperR[2] >= bound[2]) && (upperR[2] < bound[3]));
+      InnerU = (upperL[2] >= bound[1]) && (upperL[1] < 180);
+      OuterU = ((upperR[2] >= bound[2]) && (upperR[2] < bound[3]))&& (upperR[1] < 180);
     } else {
-      OuterLower = (lowerL[2] < bound[0]) && (lowerL[2] > 320);
-      InnerLower = ((lowerR[2] <= bound[2]) && (lowerR[2] < bound[3])) && (lowerL[2] > 320);
+      OuterLower = (lowerR[0] < bound[0]) && (lowerR[2] > 320);
+      InnerLower = ((lowerR[0] <= bound[2]) && (lowerR[0] < bound[3])) && (lowerL[0] > 320);
 
-      InnerU = (upperL[2] <= bound[1]) && (lowerL[2] > 320);
-      OuterU = ((upperR[2] <= bound[2]) && (upperR[2] > bound[3])) && (lowerL[2] > 320);
+      InnerU = (upperL[0] <= bound[1]) && (upperL[0] > 320) && (upperL[1] < 180);
+      OuterU = ((upperR[0] <= bound[2]) && (upperR[0] > bound[3])) && (lowerL[0] > 320) && (upperR[1] < 180);
     }
+
+    Serial.print("A");
+    Serial.println(lowerR[2]);
+    Serial.print("b");
+    Serial.println(lowerR[0]);
 
     Serial.println(OuterLower);
     Serial.println(InnerLower);
