@@ -135,7 +135,7 @@ void Controller::update(float pitch, float pitchRate, float heading) {
   // }
   
   float linearVelocity = getLinearVelocity();
-  float velocity = pitchRate + linearVelocity; // move forwards to catch falling rover, move back to stop moving wheels
+  float velocity = pitchRate + linearVelocity; //pitchrate is actually -pitchrate (gyro reading backwards) move forwards to catch falling rover, move back to stop moving wheels
   // float velocity = pitchRate - linearVelocity; // move forwards to catch falling rover, move back to stop moving wheels
 
   if (moving && velocity >= velocitySetpoint) {

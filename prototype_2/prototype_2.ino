@@ -178,7 +178,7 @@ void loop() {
 
   if (update) {
     update = false;
-    float tiltReading = -ypr[1] * 180/M_PI;
+    float tiltReading = ypr[1] * 180/M_PI;
     float headingReading = ypr[0] * 180/M_PI;
     float pitchRate = gyro.y;
     controller.update(tiltReading, pitchRate, headingReading);
@@ -201,7 +201,7 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(", R: ");
     SerialBT.print(R);
     SerialBT.print(", Pit: ");
-    SerialBT.print(-ypr[1] * 180/M_PI);
+    SerialBT.print(ypr[1] * 180/M_PI);
     // SerialBT.print(", Dis: ");
     // SerialBT.print(controller.getDistance());
     SerialBT.print(", LV: ");
