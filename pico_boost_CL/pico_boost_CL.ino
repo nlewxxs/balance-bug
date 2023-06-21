@@ -14,7 +14,7 @@ float open_loop, closed_loop; // Duty Cycles
 float va,vb,vref,iL,dutyref,current_mA, vCap; // Measurement Variables
 unsigned int sensorValue0,sensorValue1,sensorValue2,sensorValue3, sensorValue4;  // ADC sample values declaration
 float ev=0,cv=0,ei=0,oc=0; //internal signals
-float Ts=0.0001; //1 kHz control frequency. It's better to design the control period as integral multiple of switching period.
+float Ts=0.00005; //1 kHz control frequency. It's better to design the control period as integral multiple of switching period.
 float kpv=8,kiv=15,kdv=0; // voltage pid.
 float u0v,u1v,delta_uv,e0v,e1v,e2v; // u->output; e->error; 0->this time; 1->last time; 2->last last time
 float kpi=0.02512,kii=39.4,kdi=0; // float kpi=0.02512,kii=39.4,kdi=0; // current pid.
@@ -26,7 +26,7 @@ boolean Boost_mode = 0;
 boolean CL_mode = 0;
 unsigned int loopTrigger;
 unsigned int com_count=0;   // a variables to count the interrupts. Used for program debugging.
-
+float maxInCurrent = 0.6;
 int voltageTarget;
 int eV;
 int charging;
@@ -199,28 +199,41 @@ void spiFPGATransfer(){
   //Serial.println(buf2);
 
   // decode
-  state = (buf1 & 28) >> 2; // extract just the state pin to say whether charging cap or not
-  newTargetVal = ((buf1 % 4) * 256) + buf2;
-  if (targetVal < 50){
-    targetVal = storedTargetVal;
-  }
-  
-  if ((newTargetVal > targetVal/2) && (newTargetVal < targetVal*2)){
-    // remove anomolous values where the data has been shifted in transfer
-    targetVal = newTargetVal;
-    if ((state == 0) || (state == 4)){
-      // idle
-      Serial.print("State0");
-      //Serial.println(state);
-      storedTargetVal = targetVal;
+  // first conduct the error check, the last seven bits should be a specific pattern
+  if((buf2 & 127) == 101){
+    // test correct, continue
+    state = (buf1 & 3584) >> 9; // extract just the state pin to say whether charging cap or not
+    targetVal = ((buf1 % 4) * 256) + buf2; 
 
-      targetVal = 0;      
-    }
+  } else {
+    Serial.println("Bad SPI");
   }
+
+  // state = (buf1 & 28) >> 2; // extract just the state pin to say whether charging cap or not
+  // newTargetVal = ((buf1 % 4) * 256) + buf2;
+  // if (targetVal < 50){
+  //   targetVal = storedTargetVal;
+  // }
+  
+  // if ((newTargetVal > targetVal/2) && (newTargetVal < targetVal*2)){
+  //   // remove anomolous values where the data has been shifted in transfer
+  //   targetVal = newTargetVal;
+  //   if ((state == 0) || (state == 4)){
+  //     // idle
+  //     Serial.print("State0");
+  //     //Serial.println(state);
+  //     storedTargetVal = targetVal;
+
+  //     targetVal = 0;      
+  //   }
+  // }
   //Serial.println(state);
   //Serial.println(newTargetVal);
-  Serial.println(targetVal);
-  cv = 0.6 * targetVal/1024;    // set point is current between 600mA and 0
+  Serial.print("Target Value: ");
+  Serial.print(targetVal);
+  Serial.print("\t\t State: ");
+  Serial.println(state);
+  
 }
 
 float getVCap(){
@@ -246,8 +259,8 @@ void setup() {
   SPI.setClockDivider(SPI_CLOCK_DIV128);
   // TimerA0 initialization for control-loop interrupt.
   
-  TCA0.SINGLE.PER = 999; //
-  TCA0.SINGLE.CMP1 = 999; //
+  TCA0.SINGLE.PER = 1999; //
+  TCA0.SINGLE.CMP1 = 1999; //
   TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV16_gc | TCA_SINGLE_ENABLE_bm; //16 prescaler, 1M.
   TCA0.SINGLE.INTCTRL = TCA_SINGLE_CMP1_bm; 
 
@@ -296,49 +309,31 @@ void setup() {
       
       // Sample all of the measurements and check which control mode we are in
       sampling();
-      CL_mode = digitalRead(3); // input from the OL_CL switch
-      Boost_mode = digitalRead(2); // input from the Buck_Boost switch
 
-      if (Boost_mode){
-        if (CL_mode) { //Closed Loop Boost
-            // The closed loop path has a voltage controller cascaded with a current controller. The voltage controller
-            // creates a current demand based upon the voltage error. This demand is saturated to give current limiting.
-            // The current loop then gives a duty cycle demand based upon the error between demanded current and measured
-            // current
-            //cv = 0.05;
-            ei=iL-cv; //current error
-            closed_loop=pidi(ei);  //current pid
-            //closed_loop = cv;
-            // change to boost
-            //closed_loop = 1/(1-closed_loop);
-            closed_loop=saturation(closed_loop,0.99,0.01);  //duty_cycle saturation
-            pwm_modulate(closed_loop); //pwm modulation
-        }else{ // Open Loop Boost
-            // this is the voltage controller
-            current_limit = 1;
-            // voltage error
-            voltageTarget = 9;
-            eV= va - voltageTarget;
-            closed_loop = pidv(eV);
-            closed_loop = pidi(closed_loop - iL);
-            //closed_loop = 1- closed_loop;
-            closed_loop = saturation(closed_loop, 0.99, 0.13);
-            pwm_modulate(closed_loop);
-        }
-      }else{      
-        if (CL_mode) { // Closed Loop Buck
-            pwm_modulate(1);
-        }else{ // Open Loop Buck
-            current_limit = 3; // Buck has a higher current limit
-            oc = iL-current_limit; // Calculate the difference between current measurement and current limit
-            if ( oc > 0) {
-              open_loop=open_loop-0.001; // We are above the current limit so less duty cycle
-            } else {
-              open_loop=open_loop+0.001; // We are below the current limit so more duty cycle
-            }
-            open_loop=saturation(open_loop,dutyref,0.02); // saturate the duty cycle at the reference or a min of 0.01
-            pwm_modulate(open_loop); // and send it out
-        }
+      //if (CL_mode) { //Closed Loop switch to control mode
+      if  (state==2){     // checks if state is a charge state
+          // The closed loop path has a voltage controller cascaded with a current controller. The voltage controller
+          // creates a current demand based upon the voltage error. This demand is saturated to give current limiting.
+          // The current loop then gives a duty cycle demand based upon the error between demanded current and measured
+          // current
+          cv = maxInCurrent * targetVal/1024;    // set point is current between 600mA and 0
+          ei=iL-cv; //current error
+          closed_loop=pidi(ei);  //current pid
+          //closed_loop = cv;
+          // change to boost
+          //closed_loop = 1/(1-closed_loop);
+          closed_loop=saturation(closed_loop,0.99,0.01);  //duty_cycle saturation
+          pwm_modulate(closed_loop); //pwm modulation
+      }else{ // Open Loop Boost path with just current controller (or when state is 1, 2, ,3, i.e. charging capacitor)
+          // this is the voltage controller
+          // sets to target of 9V, sufficiently high enough above 7V to prevent droops and brown outs
+          voltageTarget = 9 ;
+          eV= va - voltageTarget;
+          closed_loop = pidv(eV);
+          closed_loop = pidi(closed_loop - iL);
+          //closed_loop = 1- closed_loop;
+          closed_loop = saturation(closed_loop, 0.99, 0.13);
+          pwm_modulate(closed_loop);
       }
 
       com_count++;              //used for debugging.

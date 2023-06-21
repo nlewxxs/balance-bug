@@ -14,12 +14,15 @@ TaskHandle_t spiFPGA;
 TaskHandle_t backend;
 
 // check and change
-int onFlag = 30;
-int powerFlag = 31;
+int onFlag = 14;
+int powerFlag = 12;
 
-
-int spiTrigger = 7; // change as needed
-int fpga_cs = 4;
+#define SCK 25
+#define MISO 33
+#define MOSI 32
+int spiTriggerPin = 2; // change as needed
+int spiTrigger = 0;
+int fpga_cs = 26;
 int currentState = 0;
 int toSendOut = 0;
 int toSendFPGA = 0;
@@ -27,23 +30,23 @@ int toSendFPGA = 0;
 uint16_t buf = 0;      // fpga SPI recv buffer
 
 int status = WL_IDLE_STATUS;
-const char* ssid = "Ben";
-const char* password = "test1234";
+const char* ssid = "Mi 9T Pro";
+const char* password = "randompass";
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 unsigned int localPort = 2390;
 int listen = 0;
 
 // target devices
-IPAddress broadcastIP(192,168,72,255);
+IPAddress broadcastIP(192,168,149,255);
 
 char packetBuffer[255]; //buffer to hold incoming packet
-byte sendBuffer[] = {0x0, 0x0};   // a string to send 
+byte sendBuffer[2] = {0x0, 0x0};   // a string to send 
 
 WiFiUDP Udp;
 
 //Your Domain name with URL path or IP address with path
-String serverName = "http://90.196.3.86:8081"; // local ip of the backend host (NOT localhost)
+String serverName = "http://192.168.243.152:8081"; // local ip of the backend host (NOT localhost)
 
 // the following variables are unsigned longs because the time, measured in
 // milliseconds, will quickly become a bigger number than can be stored in an int.
@@ -53,16 +56,20 @@ unsigned long timerDelay = 10;
 // setup up communication to server
 Communicate backEndComms;
 
+void IRAM_ATTR spiStartCallback(){
+  spiTrigger = 1;
+  //Serial.println("SPI Trigger");
+}
 
 void getCurrentState(int spiReturn){
   // SPI returns an integer number which is val and the state number
-  // need to extract the state number - i.e. bits 10 and 11
+  // need to extract the state number - i.e. bits 10 and 11 - and 12
   // state mapping:
   // 0: IDLE
   // 1: charge_buck
   // 2: charge_boost
   // 3: beacons_panel
-  // 4: bacons_cap
+  // 4: beacons_cap
   currentState = (spiReturn & 3072) >> 10;   // shift right by 10
   currentState = 0;   // change to be correct
 }
@@ -83,8 +90,8 @@ int sendLEDDrivers(){
   return 0;
 }
 
-void fpgaTransfer(){
-  digitalWrite(4, LOW); // SPI is active-low
+bool fpgaTransfer(){
+  digitalWrite(fpga_cs, LOW); // SPI is active-low
   delay(10);              
 
   // for (int i = 256; i < 356; i++){
@@ -95,10 +102,19 @@ void fpgaTransfer(){
   //   Serial.println(buf);
   //   delayMicroseconds(1);
   // }
-  SPI.transfer16(toSendFPGA);
-
-  digitalWrite(4, HIGH); // stop FPGA sending
+  buf = SPI.transfer16(toSendFPGA);
+  // check if last three bits are expected 101 pattern
+  // return true if transaction correct
+  Serial.println(buf);
+  digitalWrite(fpga_cs, HIGH); // stop FPGA sending
   delay(10);
+  if ((buf&7) ==5){
+    // last three bits are 101
+    return true;
+  } else {
+    return false;
+  }
+
 }
 
 void printWifiStatus() {
@@ -121,41 +137,53 @@ void printWifiStatus() {
 void fpgaWifiLoop(void * pvParameters){
   // this loop for core 1 takes an spi transfer, sends it out where it needs to go
   // gets the return value, and spi transfers it back to the fpga on the next iteration
-  if (digitalRead(spiTrigger)){
-    fpgaTransfer();
-    toSendOut = buf;
-    Serial.print("toSendOut:  ");
-    Serial.println(toSendOut);
-    Serial.println("LooP");
-    toSendFPGA = sendLEDDrivers();
+  if (spiTrigger==1){
+    spiTrigger = 0;
+    if(fpgaTransfer()){
+      // true so correct transaction
+      toSendOut = (uint16_t) (buf >> 3); // shift right by three bits to clear out stop sequence
+      Serial.print("toSendOut:  ");
+      Serial.println(toSendOut);
+      Serial.println("LooP");
+      toSendFPGA = sendLEDDrivers();
+    } else {
+      // bad transaction, ignore
+      Serial.println("SPI bad");
+    }
+    
   }
-  vTaskDelay(10);  
+  vTaskDelay(100);  
 }
 
-void serverBackendLoop(void * pvParameters){
-  // this loop runs the backend polling code every 10ms
-  // its queries the backend via http to get whether the LEDs should be on,
-  // and sends it whether there is power in the system to turn on the LEDs
-  if ((millis() - lastTime) > timerDelay) {
-    //Check WiFi connection status
-    if(WiFi.status()== WL_CONNECTED){
-      // read becon charge flag and update server with that
-      backEndComms.setBeaconCharge(String(digitalRead(powerFlag)));
-      // speak to the server
-      backEndComms.pingBeaconOn();
-      // read the new beacon status and write the flag
-      digitalWrite(onFlag, backEndComms.getBeaconOn());
-    }
-  }
-  vTaskDelay(10);
-}
+//void serverBackendLoop(void * pvParameters){
+//  // this loop runs the backend polling code every 10ms
+//  // its queries the backend via http to get whether the LEDs should be on,
+//  // and sends it whether there is power in the system to turn on the LEDs
+//
+//  Serial.println("Backend Polling");
+//  //Check WiFi connection status
+//  if(WiFi.status()== WL_CONNECTED){
+//    // read becon charge flag and update server with that
+//    //backEndComms.setBeaconCharge(String(digitalRead(powerFlag)));
+//    // speak to the server
+//    backEndComms.pingBeaconOn();
+//    // read the new beacon status and write the flag
+//    digitalWrite(onFlag, backEndComms.getBeaconOn());
+//    Serial.println("onFlag Set");
+//  }
+//
+//  //vTaskDelay(1000);
+//}
 
 void setup() {
   Serial.begin(115200);
   delay(2000);
 
   backEndComms.init(String(0), 0, serverName);
-
+  pinMode(powerFlag, INPUT);
+  //pinMode(spiTriggerPin, INPUT);
+  pinMode(onFlag, OUTPUT);
+  
   Serial.println("test");
   // setup SPI pins
   SPI.begin();
@@ -183,27 +211,47 @@ void setup() {
   // if you get a connection, report back via serial:
   Udp.begin(localPort);
 
-  //setup mulitasking
-  xTaskCreatePinnedToCore(
-                    fpgaWifiLoop,   /* Task function. */
-                    "fpga to wifi",     /* name of task. */
-                    10000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
-                    &spiFPGA,      /* Task handle to keep track of created task */
-                    0);          /* pin task to core 0 */                  
-  delay(500); 
+  attachInterrupt(spiTriggerPin, spiStartCallback, FALLING);
 
-  xTaskCreatePinnedToCore(
-                    serverBackendLoop,   /* Task function. */
-                    "server backend comms",     /* name of task. */
-                    10000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
-                    &backend,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 0 */                  
-  delay(500); 
+  //setup mulitasking
+  // xTaskCreatePinnedToCore(
+  //                   fpgaWifiLoop,   /* Task function. */
+  //                   "fpga to wifi",     /* name of task. */
+  //                   10000,       /* Stack size of task */
+  //                   NULL,        /* parameter of the task */
+  //                   1,           /* priority of the task */
+  //                   &spiFPGA,      /* Task handle to keep track of created task */
+  //                   0);          /* pin task to core 0 */                  
+  // delay(500); 
+//
+//  xTaskCreatePinnedToCore(
+//                    serverBackendLoop,   /* Task function. */
+//                    "server backend comms",     /* name of task. */
+//                    10000,       /* Stack size of task */
+//                    NULL,        /* parameter of the task */
+//                    1,           /* priority of the task */
+//                    &backend,      /* Task handle to keep track of created task */
+//                    1);          /* pin task to core 0 */                  
+//  delay(500); 
 }
 
 void loop() {  
+   // this loop for core 1 takes an spi transfer, sends it out where it needs to go
+  // gets the return value, and spi transfers it back to the fpga on the next iteration
+  if (spiTrigger==1){
+    spiTrigger = 0;
+    if(fpgaTransfer()){
+      // true so correct transaction
+      toSendOut = (uint16_t) (buf >> 3); // shift right by three bits to clear out stop sequence
+      Serial.print("toSendOut:  ");
+      Serial.println(toSendOut);
+      Serial.println("LooP");
+      toSendFPGA = sendLEDDrivers();
+    } else {
+      // bad transaction, ignore
+      Serial.println("SPI bad");
+    }
+    
+  }
+  vTaskDelay(100);  
 }
