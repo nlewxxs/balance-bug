@@ -65,8 +65,8 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
     if (_isNode) {
       Serial.println("Adding Node");
       calculateCoords();
-      communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
-      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
+      // communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
+      // communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
       prevNode = nodeNameCtr;
       nodeNameCtr++;
     }

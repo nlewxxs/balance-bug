@@ -14,12 +14,11 @@
 
 // MACROS
 // #define ENABLE_YAW_OUTPUT
-// #define ENABLE_HTTP_SERVER
+#define ENABLE_HTTP_SERVER
 #define ENABLE_BLUETOOTH
 // #define ENABLE_CAMERA
 #define ENABLE_TRAVERSAL
 #define ENABLE_MOTORS
-// #define ENABLE_BLUETOOTH
 #define ENABLE_CAMERA
 // #define ENABLE_TRIANGULATE
 // //#define XDIST 100
@@ -36,6 +35,10 @@ BluetoothSerial SerialBT;
 Camera D8M;
 Controller controller;
 
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! please run 'make menuconfig' to enable it
+#endif
+
 SimpleTraversal traversal;
 String bugId =  "MazEERunnEEr";
 
@@ -44,13 +47,13 @@ Communicate communicate;
 
 #define CHECK_NEW_SESSION_TIMEOUT 20
 
-char* ssid = "Ben";
-char* password = "test1234";
-char* serverId = "http://90.196.3.86:8081";
+char* ssid = "JJ's Galaxy S22+";
+char* password = "sbsx6554";
+char* serverId = "http://54.165.136.137:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
-unsigned long lastTime = 0;
-unsigned long timerDelay = 5000;
+// unsigned long lastTime = 0;
+// unsigned long timerDelay = 5000;
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
 
@@ -132,15 +135,6 @@ void setup() {
   }
 
   controller.setup();
-  
-  #ifdef ENABLE_HTTP_SERVER
-    //wifi setup
-  // if (!communicate.getInitialised()){
-  //   communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
-  // }
-    traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
-    
-  #endif
 
   //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
@@ -170,25 +164,26 @@ void loop() {
   #ifdef ENABLE_TRAVERSAL
   if (!controller.getMoving()) {
     switch (traversal.getDecision()){
+      debugOutput(traversal.getDecision());
       case Stationary:
         break;
       case Forward:
-        move(0.05);
+        move(0.01);
         break;
       case Left:
-        rotate(5);
+        rotate(-15);
         break;
       case Right:
-        rotate(-5);
+        rotate(15);
         break;
       case Backwards:
-        move(-0.05);
+        move(-0.01);
         break;
       case MoveThenLeft:
-        move(0.05);   
+        moveDir(0.01, -10);
         break;
       case MoveThenRight:
-        move(0.05);
+        moveDir(0.01, 10);
         break;
       default:
         break;
@@ -205,41 +200,72 @@ int getDistance(){
 }
 
 void move(float amount) {
-  controller.updatePositionSetpoint(amount);
+  controller.updatePositionSetpoint(controller.getDistance() + amount);
 }
 
 void rotate(float amount) {
-  controller.updateHeadingSetpoint(amount);
+  float rotationSet = -ypr[0]*180/M_PI + amount;
+  while (rotationSet < -180) {
+    rotationSet += 360;
+  }
+  while (rotationSet > 180) {
+    rotationSet -= 360;
+  }
+  controller.updateHeadingSetpoint(rotationSet);
 }
 
-float convertYaw(float yaw){
-  while (yaw < 0.0){
-    yaw = yaw + 360.0;
+void moveDir(float distance, float rotation) {
+  controller.updatePositionSetpoint(controller.getDistance() + distance);
+  float rotationSet = -ypr[0]*180/M_PI + rotation;
+  while (rotationSet < -180) {
+    rotationSet += 360;
   }
-  while (yaw > 360.0){
-    yaw = yaw - 360.0;
+  while (rotationSet > 180) {
+    rotationSet -= 360;
   }
-  return yaw;
+  controller.setNextHeadingSetpoint(rotationSet);
 }
+
+// float convertYaw(float yaw){
+//   while (yaw < 0.0){
+//     yaw = yaw + 360.0;
+//   }
+//   while (yaw > 360.0){
+//     yaw = yaw - 360.0;
+//   }
+//   return yaw;
+// }
 
 void communicationCode(void* pvParameters) {
   // Serial.println(xPortGetCoreID());
+  
+  #ifdef ENABLE_HTTP_SERVER
+    //wifi setup
+  // if (!communicate.getInitialised()){
+  //   communicate.init("", "", "http://90.196.3.86:8081", bugId, CHECK_NEW_SESSION_TIMEOUT);
+  // }
+    traversal.init(ssid, password, serverId, "MazEERunnEEr", CHECK_NEW_SESSION_TIMEOUT);
+    debugOutput("traversal init");
+    
+  #endif
 
   // looping code - this takes up entirety of cpu time along with controller so NEEDS the delay to allow idle tasks to execute
   for (;;) {
       // -------- OUTPUTS ---------- //
 
-    #ifdef ENABLE_YAW_OUTPUT
-      debugOutput("Yaw: ", false);
-      debugOutput(ypr[0], false);
-    #endif
+    // #ifdef ENABLE_YAW_OUTPUT
+    //   debugOutput("Yaw: ", false);
+    //   debugOutput(ypr[0], false);
+    // #endif
     #ifdef ENABLE_HTTP_SERVER
       if (!traversal.communicate.getInSession()){
         traversal.communicate.ping();
         traversal.communicate.checkNewSession();
+        debugOutput("stuck in pinging");
         vTaskDelay(100);
       } else if(!traversal.communicate.getStatusMapSetup()){
         traversal.communicate.setUpMap();
+        debugOutput("traversal state 2");
       }
       else{
         Serial.println("All set up");
@@ -267,15 +293,22 @@ void communicationCode(void* pvParameters) {
                         classification.isPath, classification.isClear, 
                         classification.leftWall, classification.rightWall, 
                         classification.leftTurn, classification.rightTurn);
+        debugOutput("made a decision: ");
+        debugOutput(traversal.getDecision());
       }
     #endif
 
 
+    SerialBT.print("RRR");
     SerialBT.print(controller.getDistance());
+    SerialBT.print(", ");
+    SerialBT.print(controller.getPositionSetpoint());
     SerialBT.print(", ");
     SerialBT.print(-ypr[0]*180/M_PI);
     SerialBT.print(", ");
-    SerialBT.println(controller.getLeftOutput());
+    SerialBT.print(controller.getLeftOutput());
+    SerialBT.print(", HS:");
+    SerialBT.println(controller.getHeadingSetpoint());
 
     vTaskDelay(100);
   }

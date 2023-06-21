@@ -8,6 +8,7 @@
 
 float positionSetpoint = 0;
 float headingSetpoint = 0;
+float nextHeadingSetpoint = 0;
 
 // Define pin connections
 const int leftDirPin = 32; //A4
@@ -23,6 +24,9 @@ const int leftMicro3 = 19; // 5 is red - GPIO19
 const int rightMicro1 = 15; // 12 is blue - GPIO15
 const int rightMicro2 = 4; // 11 is white - GPIO4
 const int rightMicro3 = 14; // 10 is red - GPIO14
+
+bool waiting = false;
+bool goNext = false;
 
 // Creates an instance
 AccelStepper leftStepper(motorInterfaceType, leftStepPin, leftDirPin);
@@ -86,6 +90,12 @@ void Controller::update(float heading) {
   Ki_heading = 0;
   Kd_heading = 0;
 
+  if (goNext) {
+    headingSetpoint = nextHeadingSetpoint;
+    nextHeadingSetpoint = 0;
+    goNext = false;
+  }
+
   // position control first
   float positionReading = getDistance();
   P_error[1] = positionSetpoint - positionReading;
@@ -95,9 +105,11 @@ void Controller::update(float heading) {
 
   // P_integral[0] = P_integral[1];  // time shift integral readings after out calculated
   // P_error[0] = P_error[1];
-  if (P_error[1] > 0.01) {
+  // if ()
+
+  if (P_error[1] > 0.005) {
     P_out = 200;
-  } else if (P_error[1] < -0.01) {
+  } else if (P_error[1] < -0.005) {
     P_out = -200;
   } else {
     P_out = 0;
@@ -112,6 +124,10 @@ void Controller::update(float heading) {
   H_integral[0] = H_integral[1];  // time shift integral readings after out calculated
   H_error[0] = H_error[1];
 
+  // if (abs(H_error[1]) < 0.05) {
+  //   H_out = 0;
+  // }
+
   leftWheelDrive = -(P_out + H_out);  // voltage / pwm that will actually drive the wheels
   rightWheelDrive = (P_out - H_out);
 
@@ -124,12 +140,31 @@ void Controller::update(float heading) {
 	rightStepper.runSpeed();
 }
 
+float Controller::getHeadingSetpoint() {
+  return headingSetpoint;
+}
+
+void Controller::setNextHeadingSetpoint(float setpoint) {
+  nextHeadingSetpoint = setpoint;
+  waiting = true;
+}
+
+float Controller::getPositionSetpoint() {
+  return positionSetpoint;
+}
+
 bool Controller::getMoving() {
   if (P_out != 0) {
     return true;
   }
 
-  if (abs(H_error[1]) < 0.01) {
+  if (abs(H_error[1]) > 0.5) {
+    return true;
+  }
+
+  if (waiting && P_out == 0) {
+    waiting = false;
+    goNext = true;
     return true;
   }
 

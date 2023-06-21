@@ -257,7 +257,7 @@ void Communicate::addNode(String _nodeId, String _xCoord, String _yCoord){
       String payload = httpNode.getString();
       Serial.println(payload);
 
-      if(httpNodeResponseCode == 200){
+      if(httpNodeResponseCode == 201){
         Serial.println("Successfully added Node");
       }
       else{
