@@ -17,7 +17,7 @@ function LoadSession() {
 //        getSessions();  
 //    }, 1000); 
     
-    const url = "http://90.196.3.86:8081/Session/DisplayAll"
+    const url = "http://44.203.160.76:8081/Session/DisplayAll"
     const getSessions = () => {
         fetchData(url)
         .then(response => {
