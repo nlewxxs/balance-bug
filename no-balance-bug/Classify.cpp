@@ -122,11 +122,13 @@ classifyElement Image::classify(int grid[13][4]) {
     }
 
     // Path or End
-    if (outsideBounds(grid[1],  middlePathBounds) &&
-        outsideBounds(grid[2],  middlePathBounds) &&
+    if (
         outsideBounds(grid[5],  middlePathBounds) &&
         outsideBounds(grid[6], middlePathBounds) ){
         // std::cout << "PATH AHEAD"
+
+        // outsideBounds(grid[1],  middlePathBounds) &&
+        // outsideBounds(grid[2],  middlePathBounds) &&
         info.isClear = true;
         info.isEnd  = false;
     } else {
