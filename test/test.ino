@@ -3,11 +3,12 @@ float rawReadings[2] = {-170, 170};
 float processedReading; // we store the signs of the last 2 readings. 
 
 void setup(){
+  Serial.begin(115200);
+  calculateAdjustment();
+  Serial.println(applyAdjustment(170.0));
 }
 
 void loop(){
-  calculateAdjustment();
-  Serial.println(applyAdjustment(170));
 }
 
 void calculateAdjustment(){
@@ -19,6 +20,6 @@ void calculateAdjustment(){
 }
 
 float applyAdjustment(float raw){
-  return raw + ((float) n_overflows * 360.0);
+  return raw + ((float) (n_overflows * 360.0));
 }
 
