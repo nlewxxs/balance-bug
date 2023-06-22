@@ -13,15 +13,15 @@ import (
 var router *gin.Engine
 
 
-// Setup Gin Routes
+//Setup Test Gin Routes
 func SetupRoutes() *gin.Engine {
-	// Use Gin as router
+	//Use Gin as Test router
 	router := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	router.Use(cors.New(config))
 
-	// Set routes for API
+	//Set Internal Test Routes for API
 	router.GET("/Session/DisplayAll", DisplaySessionList)
 	router.GET("/Session/Add", AddSession)
 
@@ -39,12 +39,11 @@ func SetupRoutes() *gin.Engine {
 	router.GET("/BugInformation/Online", OnlineBugInformation)
 	router.GET("/BugInformation/DisplayAll", DisplayBugInformation)
 
-	// Set up Gin Server
+	//Set up Gin Server
 	return router
 }
 
-// Perform Reuest
-// and return response
+//Perform Request for internal testing
 func performRequest(r http.Handler, method, path string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest(method, path, nil)
 	w := httptest.NewRecorder()
@@ -52,7 +51,7 @@ func performRequest(r http.Handler, method, path string) *httptest.ResponseRecor
 	return w
 }
 
-// Init Test Function
+//Setup Test Function
 func TestMain(t *testing.T) {
 	SetupMySQL()
 	router = SetupRoutes()
