@@ -40,6 +40,7 @@ Controller controller;
 #endif
 
 SimpleTraversal traversal;
+classifyElement classification;
 String bugId =  "MazEERunnEEr";
 
 TaskHandle_t communication;  // task on core 0 for communication
@@ -73,6 +74,8 @@ VectorInt16 gyro;
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 bool moved = false;
 bool decisionMade = false;
+bool movingRight = false;
+bool movingLeft = false;
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
@@ -170,33 +173,63 @@ void loop() {
   }
 
   #ifdef ENABLE_TRAVERSAL
-  if (!controller.getMoving() && decisionMade) {
-    switch (traversal.getDecision()){
-      debugOutput(traversal.getDecision());
-      case Stationary:
-        break;
-      case Forward:
-        move(0.02);
-        break;
-      case Left:
-        rotate(-20);
-        break;
-      case Right:
-        rotate(20);
-        break;
-      case Backwards:
-        move(-0.02);
-        break;
-      case MoveThenLeft:
-        moveDir(0.3, -90);
-        break;
-      case MoveThenRight:
-        moveDir(0.3, 90);
-        break;
-      default:
-        break;
+  if (!controller.getMoving()) {
+    if (movingRight && !classification.isClear) {
+      rotate(5);
+      for (int g = 0; g < 10; g++){
+        D8M.update();
+      }
+      Matrix frame = D8M.getBoxMatrix();
+      char tmp[128];
+
+      Image newImage;   
+      classification = newImage.classify(frame.boxes);
+      newImage.debugInfo();
+    } else if (movingLeft && !classification.isClear) {
+      rotate(-5);
+      for (int g = 0; g < 10; g++){
+        D8M.update();
+      }
+      Matrix frame = D8M.getBoxMatrix();
+      char tmp[128];
+
+      Image newImage;   
+      classification = newImage.classify(frame.boxes);
+      newImage.debugInfo();
+    } else if (decisionMade) {
+      switch (traversal.getDecision()){
+        debugOutput(traversal.getDecision());
+        case Stationary:
+          break;
+        case Forward:
+          move(0.02);
+          break;
+        case Left:
+          rotate(-20);
+          break;
+        case Right:
+          rotate(20);
+          break;
+        case Backwards:
+          move(-0.02);
+          break;
+        case MoveThenLeft:
+          moveDir(0.5, false);
+          break;
+        case MoveThenRight:
+          moveDir(0.5, true);
+          break;
+        default:
+          break;
+      }
+      decisionMade = false;
     }
-    decisionMade = false;
+    if (movingRight && classification.isClear) {
+      movingRight = false;
+    }
+    if (movingLeft && classification.isClear) {
+      movingLeft = false;
+    }
   }
   controller.update(ypr[0] * 180/M_PI);
   #endif
@@ -213,10 +246,15 @@ void rotate(float amount) {
   controller.updateHeadingSetpoint(rotationSet);
 }
 
-void moveDir(float distance, float rotation) {
+void moveDir(float distance, bool isRight) {
   controller.updatePositionSetpoint(controller.getDistance() + distance);
-  float rotationSet = ypr[0] * 180/M_PI + rotation;
+  float rotationSet = ypr[0] * 180/M_PI + (isRight ? 45 : -45);
   controller.setNextHeadingSetpoint(rotationSet);
+  if (isRight) {
+    movingRight = true;
+  } else {
+    movingLeft = true;
+  }
 }
 
 // float convertYaw(float yaw){
@@ -266,20 +304,20 @@ void communicationCode(void* pvParameters) {
     #endif
 
     #ifdef ENABLE_TRAVERSAL    
-      if(!controller.getMoving()) {
+      if(!controller.getMoving() && !movingRight && !movingLeft) {
         D8M.update();
         Matrix frame = D8M.getBoxMatrix();
         char tmp[128];
       
-        for (int i = 0; i < 11; i++){
-          sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
-          debugOutput(tmp, false);
-        }
-        sprintf(tmp, "%d,%d,%d,%d", frame.boxes[12][0], frame.boxes[12][1], frame.boxes[12][2], frame.boxes[12][3]);
-        debugOutput(tmp);
+        // for (int i = 0; i < 11; i++){
+        //   sprintf(tmp, "%d,%d,%d,%d,", frame.boxes[i][0], frame.boxes[i][1], frame.boxes[i][2], frame.boxes[i][3]);
+        //   debugOutput(tmp, false);
+        // }
+        // sprintf(tmp, "%d,%d,%d,%d", frame.boxes[12][0], frame.boxes[12][1], frame.boxes[12][2], frame.boxes[12][3]);
+        // debugOutput(tmp);
 
         Image newImage;   
-        classifyElement classification = newImage.classify(frame.boxes);
+        classification = newImage.classify(frame.boxes);
         newImage.debugInfo();
       
         traversal.makeDecision(classification.isEnd, classification.isNode, 
