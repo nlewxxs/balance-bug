@@ -47,6 +47,7 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
     //process movementDecision based on result from Classify
     if(_rightTurn){
       Serial.println("Move Then Right");
+      turningRight = true;
       movementDecision = MoveThenRight;
     }
     else if(_isClear/*&& isPath*/){
@@ -55,11 +56,12 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
     }
     else if(_leftTurn){
       Serial.println("Move Then Left");
+      turningRight = false;
       movementDecision = MoveThenLeft;
     }
     else {
       Serial.println("Is End");
-      movementDecision = Left;
+      movementDecision = turningRight ? Left : Right; //THIS IS 100% THE CORRECT WAY DONT CHANGE
     }
 
     //send API request if Classify detects as a node
@@ -68,8 +70,8 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
       calculateCoords();
 
       
-      communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
-      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
+      communicate.addNode(String(nodeNameCtr), String(coords.x * 10), String(coords.y * 10));
+      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance * 10), String(angle));
       prevNode = nodeNameCtr;
       nodeNameCtr++;
     }

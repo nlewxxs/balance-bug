@@ -50,7 +50,7 @@ Communicate communicate;
 
 char* ssid = "JJ's Galaxy S22+";
 char* password = "sbsx6554";
-char* serverId = "http://54.164.252.2:8081";
+char* serverId = "http://54.152.2.20:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 // unsigned long lastTime = 0;
@@ -176,7 +176,7 @@ void loop() {
   if (!controller.getMoving()) {
     // SerialBT.print("clear: ");
     // SerialBT.println(classification.isClear);
-    if (movingRight && !classification.isClear) {
+    if (movingRight && !classification.isPath) {
       rotate(5);
       for (int g = 0; g < 10; g++){
         D8M.update();
@@ -188,7 +188,7 @@ void loop() {
       classification = newImage.classify(frame.boxes);
       // newImage.debugInfo();
       debugOutput(newImage.printInfo());
-    } else if (movingLeft && !classification.isClear) {
+    } else if (movingLeft && !classification.isPath) {
       rotate(-5);
       for (int g = 0; g < 10; g++){
         D8M.update();
@@ -217,10 +217,10 @@ void loop() {
           move(-0.1);
           break;
         case MoveThenLeft:
-          moveDir(0.1, false);
+          moveDir(0.5, false);
           break;
         case MoveThenRight:
-          moveDir(0.1, true);
+          moveDir(0.5, true);
           break;
         case DeadEnd:
           moveDir(0, true);
@@ -229,11 +229,11 @@ void loop() {
       }
       decisionMade = false;
     }
-    if (movingRight && classification.isClear) {
+    if (movingRight && classification.isPath) {
       movingRight = false;
       // move(0.5);
     }
-    if (movingLeft && classification.isClear) {
+    if (movingLeft && classification.isPath) {
       movingLeft = false;
       // move(0.5);
     }
@@ -310,7 +310,7 @@ void communicationCode(void* pvParameters) {
       }
     #endif
 
-    #ifdef ENABLE_TRAVERSAL    
+    #ifdef ENABLE_TRAVERSAL
       if(!controller.getMoving() && !movingRight && !movingLeft) {
         for (int g = 0; g < 10; g++){
           D8M.update();
@@ -343,22 +343,22 @@ void communicationCode(void* pvParameters) {
                       frame.boxes[7][0], frame.boxes[7][1], frame.boxes[7][2], frame.boxes[7][3]);
         SerialBT.println(newtmp);
 
-        // if (SerialBT.available()) {
-        //   String test = SerialBT.readString();
-        //   if (test.substring(0,1) == "F") {
-        //     move(0.05);]
-        //   } else if (test.substring(0,1) == "L") {
-        //     rotate(-15);
-        //   } else if (test.substring(0,1) == "R") {
-        //     rotate(15);
-        //   } else if (test.substring(0,1) == "B") {
-        //     move(-0.05);
-        //   } else if (test.substring(0,2) == "ML") {
-        //     moveDir(0.05, -10);
-        //   } else if (test.substring(0,2) == "MR") {
-        //     moveDir(0.05, 10);
-        //   }
-        // }
+        if (SerialBT.available()) {
+          String test = SerialBT.readString();
+          if (test.substring(0,1) == "F") {
+            move(test.substring(1,test.length()-1).toFloat());
+          } else if (test.substring(0,1) == "L") {
+            rotate(-test.substring(1,test.length()-1).toFloat());
+          } else if (test.substring(0,1) == "R") {
+            rotate(test.substring(1,test.length()-1).toFloat());
+          } else if (test.substring(0,1) == "B") {
+            move(-test.substring(1,test.length()-1).toFloat());
+          } else if (test.substring(0,2) == "ML") {
+            moveDir(0.1, false);
+          } else if (test.substring(0,2) == "MR") {
+            moveDir(0.1, true);
+          }
+        }
       }
     #endif
 
