@@ -1,0 +1,1 @@
+To run, create new quartus project to ensure that BSP path is set correctly
