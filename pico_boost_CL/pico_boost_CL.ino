@@ -161,13 +161,19 @@ void spiFPGATransfer(){
   //Serial.println("SPI Transfer");
   // first panel voltage
   sampling();
-  vbScaled = vb/6 * 256; // 8 bit value, its position between 0 and 256 is the voltage proportion between 0 and 6
+  vbScaled = vb/6 * 255; // 8 bit value, its position between 0 and 256 is the voltage proportion between 0 and 6
   //buf1 = SPI.transfer(vbScaled);
-  
   // next panel current
-  iScaled = iL/0.8 * 256;   // 8 bit value, prooprtional to current between 0 and 0.8A
-  vCapScaled = vCap/18 * 256;   // 8 bit value, scaled proportionally to 0 to 18V
+  iScaled = -1*iL/0.8 * 255;   // 8 bit value, prooprtional to current between 0 and 0.8A
+  vCapScaled = vCap/18 * 255;   // 8 bit value, scaled proportionally to 0 to 18V
   //buf2 = SPI.transfer(iScaled);
+  Serial.print("IL: ");
+  Serial.print(iL);
+  Serial.print("\t\tVb Scaled:  ");
+  Serial.print(vbScaled);
+  Serial.print("\t\tI_panel Scaled: ");
+  Serial.println(iScaled);
+
   digitalWrite(fpgaCS, LOW); // SPI is active-low
 
   toSend = (vbScaled*256 + iScaled);
@@ -191,7 +197,7 @@ void spiFPGATransfer(){
   Serial.print("sent vcap:  ");
   Serial.print(vCapScaled);
   Serial.print("\t\t sent power:  ");
-  Serial.println(vbScaled*256 + iScaled);
+  Serial.print(vbScaled*256 + iScaled);
 
   //Serial.print("Bufs:  ");
   //Serial.print(buf1);
@@ -200,10 +206,14 @@ void spiFPGATransfer(){
 
   // decode
   // first conduct the error check, the last seven bits should be a specific pattern
+  Serial.print("\t\tstop code:  ");
+  Serial.print((buf2&127));
+  Serial.print("\t\tstate");
+  Serial.println((((buf1&3584)>>9)));
   if((buf2 & 127) == 101){
     // test correct, continue
     state = (buf1 & 3584) >> 9; // extract just the state pin to say whether charging cap or not
-    targetVal = ((buf1 % 4) * 256) + buf2; 
+    targetVal = ((buf1 & 511) * 2) + (buf2>>7); 
 
   } else {
     Serial.println("Bad SPI");

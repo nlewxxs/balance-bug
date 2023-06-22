@@ -32,15 +32,15 @@ int toSendFPGA = 0;
 uint16_t buf = 0;      // fpga SPI recv buffer
 
 int status = WL_IDLE_STATUS;
-const char* ssid = "Ben"; //Mi 9T Pro
-const char* password = "test1234";
+const char* ssid = "Mi 9T Pro"; //Mi 9T Pro
+const char* password = "randompass";
 int keyIndex = 0;            // your network key Index number (needed only for WEP)
 
 unsigned int localPort = 2390;
 int listen = 0;
 
 // target devices
-IPAddress broadcastIP(192,168,149,255);
+IPAddress broadcastIP(192,168,107,255);
 
 char packetBuffer[255]; //buffer to hold incoming packet
 byte sendBuffer[2] = {0x0, 0x0};   // a string to send 
@@ -91,6 +91,7 @@ int sendLEDDrivers(){
   Udp.beginPacket(broadcastIP, 2390);
   Udp.write(sendBuffer, 2);
   Udp.endPacket();
+  Serial.println("Packets Sent");
   return 0;
 }
 
@@ -109,10 +110,15 @@ bool fpgaTransfer(){
   buf = SPI.transfer16(toSendFPGA);
   // check if last three bits are expected 101 pattern
   // return true if transaction correct
-  Serial.println(buf);
+
   digitalWrite(fpga_cs, HIGH); // stop FPGA sending
   delay(10);
-  if ((buf&7) ==5){
+  Serial.println(buf, BIN);
+  Serial.print("Stop bits:  ");
+  Serial.print((buf&32771));
+  Serial.print("\t\tVal");
+  Serial.println(((buf&4092)>>2));
+  if ((buf&32771) ==32769){
     // last three bits are 101
     return true;
   } else {
@@ -196,6 +202,7 @@ void setup() {
   //vspi.begin(VSPI_CLK, VSPI_MISO, VSPI_MOSI, VSPI_SS);
 
   SPI.begin(SCK, MISO, MOSI, 27);
+  SPI.setFrequency(125000);
   //SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
   Serial.println("SPI started");
   // setup state number pins
@@ -247,8 +254,8 @@ void setup() {
 void loop() {  
    // this loop for core 1 takes an spi transfer, sends it out where it needs to go
   // gets the return value, and spi transfers it back to the fpga on the next iteration
-  Serial.print("spi trigger: ");
-  Serial.println(spiTrigger);
+  //Serial.print("spi trigger: ");
+  //Serial.println(spiTrigger);
   // if(digitalRead(spiTriggerPin) == LOW){
   //   Serial.print("spi high trigger found: ");
   //   spiTrigger == 1;
