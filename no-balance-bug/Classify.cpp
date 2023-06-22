@@ -4,7 +4,7 @@ const int leftWallBounds[4]  = {0,240,320,60};
 const int rightWallBounds[4] = {320,240,640,480};
 
 const int leftPathBounds[4]   = {0,280,320,320};
-const int middlePathBounds[4] = {240,240,480,400};
+const int middlePathBounds[4] = {240,240,400,480};
 const int rightPathBounds[4]  = {320,280,640,320};
 
 const int leftWallBoundSimplified[4] = {10,100,160,240};
@@ -15,6 +15,12 @@ const int rightWallBoundSimplified[4] = {650,540,480,400};
 bool Image::outsideBounds(const int box[4], const int bound[4]){
     bool outX = (box[2] < bound[0]) || (box[0] > bound[2]);
     bool outY = (box[3] < bound[1]) || (box[1] > bound[3]);
+    return outX || outY;
+}
+
+bool Image::outsideBoundsMiddle(const int box[4], const int bound[4]){
+    bool outX = (box[2] < bound[0]) || (box[0] > bound[2]);
+    bool outY = (box[3] < bound[3]) && (box[1] > bound[1]);
     return outX || outY;
 }
 
@@ -123,8 +129,8 @@ classifyElement Image::classify(int grid[13][4]) {
 
     // Path or End
     if (
-        outsideBounds(grid[5],  middlePathBounds) &&
-        outsideBounds(grid[6], middlePathBounds) ){
+        outsideBoundsMiddle(grid[5],  middlePathBounds) &&
+        outsideBoundsMiddle(grid[6], middlePathBounds) ){
         // std::cout << "PATH AHEAD"
 
         // outsideBounds(grid[1],  middlePathBounds) &&
