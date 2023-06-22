@@ -72,6 +72,7 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 VectorInt16 gyro;
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
 bool moved = false;
+bool decisionMade = false;
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< /
 
@@ -169,34 +170,35 @@ void loop() {
   }
 
   #ifdef ENABLE_TRAVERSAL
-  if (!controller.getMoving()) {
+  if (!controller.getMoving() && decisionMade) {
     switch (traversal.getDecision()){
       debugOutput(traversal.getDecision());
       case Stationary:
         break;
       case Forward:
-        move(0.01);
+        move(0.02);
         break;
       case Left:
-        rotate(-15);
+        rotate(-20);
         break;
       case Right:
-        rotate(15);
+        rotate(20);
         break;
       case Backwards:
-        move(-0.01);
+        move(-0.02);
         break;
       case MoveThenLeft:
-        moveDir(0.05, -10);
+        moveDir(0.3, -90);
         break;
       case MoveThenRight:
-        moveDir(0.05, 10);
+        moveDir(0.3, 90);
         break;
       default:
         break;
     }
+    decisionMade = false;
   }
-  controller.update(ypr[0]);
+  controller.update(ypr[0] * 180/M_PI);
   #endif
 
   vTaskDelay(10);
@@ -207,13 +209,13 @@ void move(float amount) {
 }
 
 void rotate(float amount) {
-  float rotationSet = ypr[0] + amount;
+  float rotationSet = ypr[0] * 180/M_PI + amount;
   controller.updateHeadingSetpoint(rotationSet);
 }
 
 void moveDir(float distance, float rotation) {
   controller.updatePositionSetpoint(controller.getDistance() + distance);
-  float rotationSet = ypr[0] + rotation;
+  float rotationSet = ypr[0] * 180/M_PI + rotation;
   controller.setNextHeadingSetpoint(rotationSet);
 }
 
@@ -284,6 +286,7 @@ void communicationCode(void* pvParameters) {
                         classification.isPath, classification.isClear, 
                         classification.leftWall, classification.rightWall, 
                         classification.leftTurn, classification.rightTurn);
+        decisionMade = true;
         debugOutput("made a decision: ");
         debugOutput(traversal.getDecision());
 
@@ -311,7 +314,7 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(", ");
     SerialBT.print(controller.getPositionSetpoint());
     SerialBT.print(", ");
-    SerialBT.print(ypr[0]);
+    SerialBT.print(ypr[0] * 180/M_PI);
     SerialBT.print(", ");
     SerialBT.print(controller.getLeftOutput());
     SerialBT.print(", HS:");
