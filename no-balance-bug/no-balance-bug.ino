@@ -84,6 +84,9 @@ void debugOutput(T o, bool newline = true) {
   #endif
 }
 
+int n_overflows = 0;  // keeps track of how many times we've crossed that boundary so far.
+float yawHistory[2] = {0, 0};
+
 void setup() {
 
   #ifdef ENABLE_CAMERA
@@ -159,6 +162,10 @@ void loop() {
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
     mpu.dmpGetGyro(&gyro, fifoBuffer);
+    yawHistory[0] = yawHistory[1];
+    yawHistory[1] = ypr[0] * 180/M_PI;
+    calculateAdjustment();
+    ypr[0] = applyAdjustment(yawHistory[1]) / (180/M_PI);
   }
 
   #ifdef ENABLE_TRAVERSAL
@@ -189,7 +196,7 @@ void loop() {
         break;
     }
   }
-  controller.update(-ypr[0]*180/M_PI);
+  controller.update(ypr[0]);
   #endif
 
   vTaskDelay(10);
@@ -204,25 +211,13 @@ void move(float amount) {
 }
 
 void rotate(float amount) {
-  float rotationSet = -ypr[0]*180/M_PI + amount;
-  while (rotationSet < -180) {
-    rotationSet += 360;
-  }
-  while (rotationSet > 180) {
-    rotationSet -= 360;
-  }
+  float rotationSet = ypr[0] + amount;
   controller.updateHeadingSetpoint(rotationSet);
 }
 
 void moveDir(float distance, float rotation) {
   controller.updatePositionSetpoint(controller.getDistance() + distance);
-  float rotationSet = -ypr[0]*180/M_PI + rotation;
-  while (rotationSet < -180) {
-    rotationSet += 360;
-  }
-  while (rotationSet > 180) {
-    rotationSet -= 360;
-  }
+  float rotationSet = ypr[0] + rotation;
   controller.setNextHeadingSetpoint(rotationSet);
 }
 
@@ -304,7 +299,7 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(", ");
     SerialBT.print(controller.getPositionSetpoint());
     SerialBT.print(", ");
-    SerialBT.print(-ypr[0]*180/M_PI);
+    SerialBT.print(ypr[0]);
     SerialBT.print(", ");
     SerialBT.print(controller.getLeftOutput());
     SerialBT.print(", HS:");
@@ -312,4 +307,16 @@ void communicationCode(void* pvParameters) {
 
     vTaskDelay(100);
   }
+}
+
+void calculateAdjustment(){
+  if ((yawHistory[0] < -150) && (yawHistory[1] > 150)) { // crossed over from -180 to 180;
+    n_overflows -= 1; // we need to subtract 360
+  } else if ((yawHistory[0] > 150) && (yawHistory[1] < -150)) { // crossed from 180 to -180
+    n_overflows += 1; // we need to add 360
+  }
+}
+
+float applyAdjustment(float raw){
+  return raw + (n_overflows * 360.0);
 }
