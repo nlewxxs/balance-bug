@@ -41,7 +41,7 @@ MPU6050 mpu;  // default address 0x68 used
  * ========================================================================= */
 
 // Choose between OUTPUT_READABLE_EULER, OUTPUT_READABLE_QUATERNION, OUTPUT_READABLE_YAWPITCHROLL
-// #define OUTPUT_READABLE_YAWPITCHROLL
+#define OUTPUT_READABLE_YAWPITCHROLL
 // #define INTERRUPT_PIN 2  // use pin 2 on Arduino Uno & most boards
 
 // MPU control/status vars
@@ -61,6 +61,9 @@ VectorFloat gravity;    // [x, y, z]            gravity vector
 VectorInt16 gyro;       // [x, y, z]            angular velocity
 float euler[3];         // [psi, theta, phi]    Euler angle container
 float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+
+int n_overflows = 0;  // keeps track of how many times we've crossed that boundary so far.
+float yawHistory[2] = {0, 0};
 
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
@@ -118,12 +121,12 @@ void loop() {
     // read a packet from FIFO
     if (mpu.dmpGetCurrentFIFOPacket(fifoBuffer)) { 
 
-        mpu.dmpGetGyro(&gyro, fifoBuffer);
-        // char tmp[64];
-        // sprintf(tmp, "Gyro X: %f  | Gyro Y: %f  | Gyro Z: %f", gyro.x, gyro.y, gyro.z);
-        // Serial.println(tmp);
-        Serial.print("Gyro X: ");
-        Serial.println(gyro.x);
+        // mpu.dmpGetGyro(&gyro, fifoBuffer);
+        // // char tmp[64];
+        // // sprintf(tmp, "Gyro X: %f  | Gyro Y: %f  | Gyro Z: %f", gyro.x, gyro.y, gyro.z);
+        // // Serial.println(tmp);
+        // Serial.print("Gyro X: ");
+        // Serial.println(gyro.x);
 
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
@@ -155,6 +158,16 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            yawHistory[0] = yawHistory[1];
+            yawHistory[1] = ypr[0] * 180/M_PI;
+            calculateAdjustment();
+            ypr[0] = applyAdjustment(yawHistory[1]) / (180/M_PI);
+            Serial.print("Adjustment: ");
+            Serial.print(n_overflows);
+            Serial.println(yawHistory[0]);
+            Serial.println(yawHistory[1]);
+
+
             Serial.print("pitch:\t");
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\troll:\t");
@@ -165,3 +178,21 @@ void loop() {
 
     }
 }
+
+void calculateAdjustment(){
+  if ((yawHistory[0] < -150) && (yawHistory[1] > 150)) { // crossed over from -180 to 180;
+    n_overflows -= 1; // we need to subtract 360
+  } else if ((yawHistory[0] > 150) && (yawHistory[1] < -150)) { // crossed from 180 to -180
+    n_overflows += 1; // we need to add 360
+  }
+}
+
+float applyAdjustment(float raw){
+  return raw + (n_overflows * 360.0);
+}
+
+
+
+
+
+
