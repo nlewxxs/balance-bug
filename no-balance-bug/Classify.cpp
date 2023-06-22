@@ -4,7 +4,7 @@ const int leftWallBounds[4]  = {0,240,320,60};
 const int rightWallBounds[4] = {320,240,640,480};
 
 const int leftPathBounds[4]   = {0,280,320,320};
-const int middlePathBounds[4] = {240,240,400,480};
+const int middlePathBounds[4] = {240,240,480,400};
 const int rightPathBounds[4]  = {320,280,640,320};
 
 const int leftWallBoundSimplified[4] = {10,100,160,240};
