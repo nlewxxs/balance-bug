@@ -3,12 +3,16 @@
 const int leftWallBounds[4]  = {0,240,320,60};
 const int rightWallBounds[4] = {320,240,640,480};
 
-const int leftPathBounds[4]   = {0,280,320,320};
+const int leftPathBounds[4]   = {0,340,320,350};
 const int middlePathBounds[4] = {240,240,400,480};
-const int rightPathBounds[4]  = {320,280,640,320};
+const int rightPathBounds[4]  = {320,340,640,350};
 
 const int leftWallBoundSimplified[4] = {10,100,160,240};
 const int rightWallBoundSimplified[4] = {650,540,480,400};
+
+String Image::printInfo(){
+  return "isNode: " + String(info.isNode) + ", isPath: " + String(info.isPath) + ", isClear: " + String(info.isClear) + ", leftWall: " + String(info.leftWall) + ", rightWall" + String(info.rightWall) + ", leftTurn" + String(info.leftTurn) + ", rightTurn: " + String(info.rightTurn);
+}
 
 // all below should be false
 // xmin, ymin, xmax, ymax
@@ -18,11 +22,11 @@ bool Image::outsideBounds(const int box[4], const int bound[4]){
     return outX || outY;
 }
 
-bool Image::outsideBoundsMiddle(const int box[4], const int bound[4]){
-    bool outX = (box[2] < bound[0]) || (box[0] > bound[2]);
-    bool outY = (box[3] < bound[3]) && (box[1] > bound[1]);
-    return outX || outY;
-}
+// bool Image::outsideBoundsMiddle(const int box[4], const int bound[4]){
+//     bool outX = (box[2] < 480) || (box[0] > 280);
+//     bool outY = (box[3] < 360)  (box[1] > 300);
+//     return outX || outY;
+// }
 
 bool Image::hasWall(const int lowerL[4], const int lowerR[4], const int upperL[4], const int upperR[4],const int xLR, const int bound[4], bool L) {
     bool OuterLower;
@@ -129,8 +133,8 @@ classifyElement Image::classify(int grid[13][4]) {
 
     // Path or End
     if (
-        outsideBoundsMiddle(grid[5],  middlePathBounds) &&
-        outsideBoundsMiddle(grid[6], middlePathBounds) ){
+        outsideBounds(grid[5],  middlePathBounds) &&
+        outsideBounds(grid[6], middlePathBounds) ){
         // std::cout << "PATH AHEAD"
 
         // outsideBounds(grid[1],  middlePathBounds) &&

@@ -14,7 +14,8 @@ enum Decision{
   Right,
   Backwards,
   MoveThenLeft,
-  MoveThenRight
+  MoveThenRight,
+  DeadEnd
 };
 
 //coordinates

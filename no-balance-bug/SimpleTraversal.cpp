@@ -46,7 +46,7 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
     //process movementDecision based on result from Classify
     if (_isEnd) {
       Serial.println("Is End");
-      movementDecision = Left;
+      movementDecision = DeadEnd;
     }
     else if(_isPath && _isClear){
       Serial.println("Move");
@@ -56,7 +56,7 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
       Serial.println("Move Then Left");
       movementDecision = MoveThenLeft;
     }
-    else if(_leftTurn){
+    else if(_rightTurn){
       Serial.println("Move Then Right");
       movementDecision = MoveThenRight;
     }

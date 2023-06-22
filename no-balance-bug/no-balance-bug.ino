@@ -50,7 +50,7 @@ Communicate communicate;
 
 char* ssid = "JJ's Galaxy S22+";
 char* password = "sbsx6554";
-char* serverId = "http://44.202.116.215:8081";
+char* serverId = "http://54.164.252.2:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 // unsigned long lastTime = 0;
@@ -174,6 +174,8 @@ void loop() {
 
   #ifdef ENABLE_TRAVERSAL
   if (!controller.getMoving()) {
+    // SerialBT.print("clear: ");
+    // SerialBT.println(classification.isClear);
     if (movingRight && !classification.isClear) {
       rotate(5);
       for (int g = 0; g < 10; g++){
@@ -202,7 +204,7 @@ void loop() {
         case Stationary:
           break;
         case Forward:
-          move(0.02);
+          move(0.1);
           break;
         case Left:
           rotate(-20);
@@ -211,7 +213,7 @@ void loop() {
           rotate(20);
           break;
         case Backwards:
-          move(-0.02);
+          move(-0.1);
           break;
         case MoveThenLeft:
           moveDir(0.5, false);
@@ -219,6 +221,8 @@ void loop() {
         case MoveThenRight:
           moveDir(0.5, true);
           break;
+        case DeadEnd:
+          moveDir(0, true);
         default:
           break;
       }
@@ -226,9 +230,11 @@ void loop() {
     }
     if (movingRight && classification.isClear) {
       movingRight = false;
+      move(0.5);
     }
     if (movingLeft && classification.isClear) {
       movingLeft = false;
+      move(0.5);
     }
   }
   controller.update(ypr[0] * 180/M_PI);
@@ -319,6 +325,7 @@ void communicationCode(void* pvParameters) {
         Image newImage;   
         classification = newImage.classify(frame.boxes);
         newImage.debugInfo();
+        debugOutput(newImage.printInfo());
       
         traversal.makeDecision(classification.isEnd, classification.isNode, 
                         classification.isPath, classification.isClear, 
@@ -356,7 +363,9 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(", ");
     SerialBT.print(controller.getLeftOutput());
     SerialBT.print(", HS:");
-    SerialBT.println(controller.getHeadingSetpoint());
+    SerialBT.print(controller.getHeadingSetpoint());
+    //SerialBT.print(", im:");
+    //SerialBT.println(newImage.printInfo());
 
     vTaskDelay(100);
   }
