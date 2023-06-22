@@ -14,7 +14,7 @@ float open_loop, closed_loop; // Duty Cycles
 float va,vb,vref,iL,dutyref,current_mA, vCap; // Measurement Variables
 unsigned int sensorValue0,sensorValue1,sensorValue2,sensorValue3, sensorValue4;  // ADC sample values declaration
 float ev=0,cv=0,ei=0,oc=0; //internal signals
-float Ts=0.00005; //1 kHz control frequency. It's better to design the control period as integral multiple of switching period.
+float Ts=0.000025; //1 kHz control frequency. It's better to design the control period as integral multiple of switching period.
 float kpv=8,kiv=15,kdv=0; // voltage pid.
 float u0v,u1v,delta_uv,e0v,e1v,e2v; // u->output; e->error; 0->this time; 1->last time; 2->last last time
 float kpi=0.02512,kii=39.4,kdi=0; // float kpi=0.02512,kii=39.4,kdi=0; // current pid.
@@ -269,8 +269,8 @@ void setup() {
   SPI.setClockDivider(SPI_CLOCK_DIV128);
   // TimerA0 initialization for control-loop interrupt.
   
-  TCA0.SINGLE.PER = 1999; //
-  TCA0.SINGLE.CMP1 = 1999; //
+  TCA0.SINGLE.PER = 249; //
+  TCA0.SINGLE.CMP1 = 249; //
   TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV16_gc | TCA_SINGLE_ENABLE_bm; //16 prescaler, 1M.
   TCA0.SINGLE.INTCTRL = TCA_SINGLE_CMP1_bm; 
 

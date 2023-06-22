@@ -86,8 +86,8 @@ int sendLEDDrivers(){
   // return the average 
   //temporary:
   // sends the value hex 130
-  sendBuffer[0] = 0xFF;
-  sendBuffer[1] = 0x2;
+  sendBuffer[0] = (byte) (toSendOut & 255);
+  sendBuffer[1] = (byte) (toSendOut >> 8);
   Udp.beginPacket(broadcastIP, 2390);
   Udp.write(sendBuffer, 2);
   Udp.endPacket();
@@ -116,8 +116,9 @@ bool fpgaTransfer(){
   Serial.println(buf, BIN);
   Serial.print("Stop bits:  ");
   Serial.print((buf&32771));
-  Serial.print("\t\tVal");
+  Serial.print("\t\tVal:  ");
   Serial.println(((buf&4092)>>2));
+  toSendOut = ((buf&4092)>>2);
   if ((buf&32771) ==32769){
     // last three bits are 101
     return true;
@@ -266,7 +267,6 @@ void loop() {
       if(fpgaTransfer()){
         Serial.println("OK");
         // true so correct transaction
-        toSendOut = (uint16_t) (buf >> 3); // shift right by three bits to clear out stop sequence
         Serial.print("toSendOut:  ");
         Serial.println(toSendOut);
         Serial.println("LooP");
