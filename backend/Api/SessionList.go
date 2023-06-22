@@ -1,5 +1,6 @@
 package Api
 
+//imports
 import (
 	"fmt"
 	"log"
@@ -17,6 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
+//structs
 type SessionListStruct struct {
 	TimeStamp   string `json:"TimeStamp"`
 	BugName     string `json:"BugName"`
@@ -24,8 +26,7 @@ type SessionListStruct struct {
 	SessionName string `json:"SessionName"`
 }
 
-// CRUD: Create Read Update Delete API Format
-// DISPLAY SESSION IDs
+//Display Session Ids
 func DisplaySessionList(c *gin.Context) {
 	rows, err := db.Query("SELECT * FROM testdb.SessionList")
 	if err != nil {
@@ -33,13 +34,14 @@ func DisplaySessionList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 	}
 
-	// Get all rows and add into SessionListStructs
+	//make sessionlist for output
 	SessionLists := make([]SessionListStruct, 0)
 
+	//process the rows
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
-			// Individual row processing
+			//process each row individually
 			SessionListRow := SessionListStruct{}
 			if err := rows.Scan(&SessionListRow.TimeStamp, &SessionListRow.BugName, &SessionListRow.SessionId, &SessionListRow.SessionName); err != nil {
 				fmt.Println(err.Error())
@@ -50,28 +52,24 @@ func DisplaySessionList(c *gin.Context) {
 		}
 	}
 
-	// Return JSON object of all rows
+	//return JSON
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 	c.JSON(http.StatusOK, &SessionLists)
 }
 
+//add session
 func AddSession(c *gin.Context) {
+	//input queries
 	BugNameNew := c.Query("BugName")
 	SessionIdNew := uuid.New().String()
 	SessionNameNew := c.Query("SessionName")
 
-	//location, err := time.LoadLocation("Europe/London")
-
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-	// 	return
-	// }
-
+	//create timestamp
 	t := time.Now() //.In(location)
 	TimeStampNew := t.Format("2006-01-02 15:04:05")
 
-	// Validate entry
+	//check input query exists
 	if len(TimeStampNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
 	} else if len(BugNameNew) == 0 {
@@ -81,7 +79,6 @@ func AddSession(c *gin.Context) {
 	} else if len(SessionNameNew) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.SessionName"})
 	} else {
-		// Create todo item
 		var SessionListNew SessionListStruct
 
 		SessionListNew.TimeStamp = TimeStampNew
@@ -89,7 +86,7 @@ func AddSession(c *gin.Context) {
 		SessionListNew.SessionId = SessionIdNew
 		SessionListNew.SessionName = SessionNameNew
 
-		// Insert item to DB
+		//query db to insert
 		req, err := db.Query("INSERT INTO testdb.SessionList(`Timestamp`, `BugName`, `SessionId`, `SessionName`) VALUES(?, ?, ?, ?);", SessionListNew.TimeStamp, SessionListNew.BugName, SessionListNew.SessionId, SessionListNew.SessionName)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -97,47 +94,44 @@ func AddSession(c *gin.Context) {
 		}
 		req.Close()
 
-		// Log message
+		//log
 		log.Println("created SessionList entry", SessionListNew)
 
-		// Return success response
+		//return JSON
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusCreated, &SessionListNew)
 	}
 }
 
+//CheckNewSession
 func CheckNewSession(c *gin.Context) {
+	//input queries
 	BugId := c.Query("BugId")
 	timeDiff := c.Query("TimeDiff")
 
+	//timedifference to respond to
 	TimeDiffExtracted, err := strconv.ParseFloat(timeDiff, 32)
 	if err != nil {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "invalid TimeDiff format, please enter a valid float"})
 		return
 	}
 
+	//create current timestamp
 	t := time.Now() //.In(location)
 	CurrentTime := t.Format("2006-01-02 15:04:05")
 
-	//location, err := time.LoadLocation("Europe/London")
-
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-	// 	return
-	// }
-
-	// Validate entry
+	//check entry is valid
 	if len(CurrentTime) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.ConnTime"})
 	} else if len(BugId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionList.BugName"})
 	} else {
-		// Create todo item
 		var SessionListNew SessionListStruct
 
 		SessionListNew.TimeStamp = CurrentTime
 
+		//query db for BugId-BugName Translation
 		BugNameQuery := db.QueryRow("SELECT `BugName` FROM `BugInformation` WHERE `BugId`=?;", BugId)
 		switch err := BugNameQuery.Scan(&SessionListNew.BugName); err {
 		case sql.ErrNoRows:
@@ -151,20 +145,23 @@ func CheckNewSession(c *gin.Context) {
 			return
 		}
 
+		//Check if matching SessionId exists with timestamp difference specified
 		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE TIMESTAMPDIFF(SECOND, TimeStamp, ?) < ? ORDER BY `TimeStamp` DESC LIMIT 1;", CurrentTime, TimeDiffExtracted)
 		switch err := SessionIdQuery.Scan(&SessionListNew.SessionId); err {
 		case sql.ErrNoRows:
+			//no matching SessionList
 			log.Println("Did not find matching SessionList")
 
-			// Return success response
+			//respond "0"
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 			c.JSON(http.StatusOK, "0")
 			return
 		case nil:
+			//Create SessionList entry
 			log.Println("Found matching SessionList entry")
 
-			// Return success response
+			//respond "1"
 			c.Header("Access-Control-Allow-Origin", "*")
 			c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 			c.JSON(http.StatusOK, "1")
@@ -176,26 +173,22 @@ func CheckNewSession(c *gin.Context) {
 	}
 }
 
+//Ping Session
 func PingSession(c *gin.Context) {
 	var SessionListNew SessionListStruct
 
+	//input querys
 	SessionListNew.SessionId = c.Query("SessionId")
 
-	//location, err := time.LoadLocation("Europe/London")
-
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-	// 	return
-	// }
-
+	//create appropriate timestamp
 	t := time.Now() //.In(location)
 	SessionListNew.TimeStamp = t.Format("2006-01-02 15:04:05")
 
-	// Validate entry
+	//check entry is correct
 	if len(SessionListNew.SessionId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a SessionId"})
 	} else {
-		// Insert item to DB
+		//query to update the database
 		req, err := db.Query("UPDATE testdb.SessionList SET `TimeStamp`=? WHERE SessionId=?;", SessionListNew.TimeStamp, SessionListNew.SessionId)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -204,10 +197,10 @@ func PingSession(c *gin.Context) {
 		}
 		req.Close()
 
-		// Log message
+		//log
 		log.Println("updated SessionList entry", SessionListNew)
 
-		// Return success response
+		//return JSON
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusOK, &SessionListNew)

@@ -1,5 +1,6 @@
 package Api
 
+//import
 import (
 	"fmt"
 	"net/http"
@@ -12,10 +13,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+//TurnOn Beacon
 func TurnOn(c *gin.Context) {
+	//input Queries
 	BugId := c.Query("BugId")
 	BeaconOn := c.Query("BeaconOn")
 
+	//check that the length of the inputqueries exists
 	if (len(BugId) == 0) || (len(BeaconOn) == 0) {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a BugId"})
 	} else {
@@ -24,7 +28,8 @@ func TurnOn(c *gin.Context) {
 		var OnExists string
 		var On string
 		var ChargeStatus string
-
+		
+		//query db for BugId-BugName translation
 		BugNameQuery := db.QueryRow("SELECT `BugName` FROM testdb.BugInformation WHERE `BugId`=?;", BugId)
 		switch err := BugNameQuery.Scan(&BugName); err {
 		case sql.ErrNoRows:
@@ -38,6 +43,7 @@ func TurnOn(c *gin.Context) {
 			return
 		}
 
+		//query db for SessionId-BugName translation
 		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList WHERE `BugName`=?;", BugName)
 		switch err := SessionIdQuery.Scan(&SessionId); err {
 		case sql.ErrNoRows:
@@ -51,6 +57,7 @@ func TurnOn(c *gin.Context) {
 			return
 		}
 
+		//check if beacons are connected to that session
 		TurnOnExistsQuery := db.QueryRow("SELECT `SessionId` FROM testdb.BeaconOn WHERE `SessionId`=?;", SessionId)
 
 		//nothing connected
@@ -69,6 +76,7 @@ func TurnOn(c *gin.Context) {
 			return
 		}
 
+		//query the ChargeStatus
 		ChargeQuery := db.QueryRow("SELECT `ChargeStatus` FROM testdb.BeaconCharge WHERE `SessionId`=?;", SessionId)
 
 		switch err := ChargeQuery.Scan(&ChargeStatus); err {
@@ -89,6 +97,7 @@ func TurnOn(c *gin.Context) {
 			return
 		}
 
+		//Query if the BeaconOn field is already on
 		OnQuery := db.QueryRow("SELECT `On` FROM testdb.BeaconOn WHERE SessionId=?;", SessionId)
 		switch err := OnQuery.Scan(&On); err {
 		case sql.ErrNoRows:
@@ -132,7 +141,7 @@ func TurnOn(c *gin.Context) {
 			return
 		}
 
-		// Return success response
+		//return JSON
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusOK, "3")

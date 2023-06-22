@@ -1,5 +1,6 @@
 package Api
 
+//imports
 import (
 	"fmt"
 	"log"
@@ -15,6 +16,7 @@ import (
 
 )
 
+//structs
 type BugInformationStruct struct {
 	BugId    string `json:"BugId"`
 	BugName  string `json:"BugName"`
@@ -26,18 +28,19 @@ type BugNameIdStruct struct {
 	BugId   string `json:"BugId"`
 }
 
-// CRUD: Create Read Update Delete API Format
-// DISPLAY SESSION IDs
+//display bug information
 func DisplayBugInformation(c *gin.Context) {
+	//make query
 	rows, err := db.Query("SELECT * FROM testdb.BugInformation")
 	if err != nil {
 		fmt.Println(err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 	}
 
-	// Get all rows and add into SessionListStructs
+	//Get all rows, add into the BugInformationList Struct
 	BugInformationList := make([]BugInformationStruct, 0)
 
+	//go through each row
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -48,78 +51,41 @@ func DisplayBugInformation(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 				break
 			}
+			//append information
 			BugInformationList = append(BugInformationList, BugInformationRow)
 		}
 	}
 
-	// Return JSON object of all rows
+	//return JSON of all rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 	c.JSON(http.StatusOK, &BugInformationList)
 }
 
-// func AddBugInformation(c *gin.Context) {
-
-// 	BugIdNew := c.Query("BugId")
-// 	BugNameNew := c.Query("BugName")
-// 	//location, err := time.LoadLocation("Europe/London")
-
-// 	// if err != nil {
-// 	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load time zone"})
-// 	// 	return
-// 	// }
-
-// 	LastSeenNew := time.Now() //.In(location)
-
-// 	// Validate entry
-// 	if len(BugIdNew) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
-// 	} else if len(BugNameNew) == 0 {
-// 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugName"})
-// 	} else {
-// 		var BugInformationNew BugInformationStruct
-
-// 		BugInformationNew.BugId = BugIdNew
-// 		BugInformationNew.BugName = BugNameNew
-// 		BugInformationNew.LastSeen = LastSeenNew.Format("2006-01-02 15:04:05")
-
-// 		// Insert item to DB
-// 		_, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
-// 		if err != nil {
-// 			fmt.Println(err.Error())
-// 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
-// 		}
-
-// 		// Log message
-// 		log.Println("created BugInformation entry", BugInformationNew)
-
-// 		// Return success response
-// 		c.Header("Access-Control-Allow-Origin", "*")
-// 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
-// 		c.JSON(http.StatusCreated, &BugInformationNew)
-// 	}
-// }
-
+//Ping
 func PingBugInformation(c *gin.Context) {
+	//variables
 	var BugInformationNew BugInformationStruct
 
+	//input query
 	BugInformationNew.BugId = c.Query("BugId")
 
+	//get time and format timestamp
 	t := time.Now() //.In(location)
 	BugInformationNew.LastSeen = t.Format("2006-01-02 15:04:05")
 
-	// Validate entry
+	//check Query was inputted
 	if len(BugInformationNew.BugId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
 	} else {
-		// Insert item to DB
+		//Query bugname
 		var BugName string
 		BugNameQuery := db.QueryRow("SELECT `BugName` FROM testdb.BugInformation WHERE `BugId`=?;", BugInformationNew.BugId)
 		switch err := BugNameQuery.Scan(&BugName); err {
 		case sql.ErrNoRows:
 			BugInformationNew.BugName = BugInformationNew.BugId
 
-			// Insert item to DB
+			//insert
 			req, err := db.Query("INSERT INTO testdb.BugInformation(`BugId`, `BugName`, `LastSeen`) VALUES(?, ?, ?);", BugInformationNew.BugId, BugInformationNew.BugName, BugInformationNew.LastSeen)
 			if err != nil {
 				fmt.Println(err.Error())
@@ -128,6 +94,8 @@ func PingBugInformation(c *gin.Context) {
 			req.Close();
 		case nil:
 			fmt.Println(BugName)
+
+			//update field
 			req, err := db.Query("UPDATE testdb.BugInformation SET `LastSeen`=? WHERE BugId=?;", BugInformationNew.LastSeen, BugInformationNew.BugId)
 			if err != nil {
 				fmt.Println(err.Error())
@@ -135,16 +103,15 @@ func PingBugInformation(c *gin.Context) {
 			}
 			req.Close();
 
-			// Log message
+			//log
 			log.Println("updated BugInformation entry", BugInformationNew)
-
-			// Return success response
 		default:
 			fmt.Println(err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB"})
 			return
 		}
-		// BugNameQuery.Close();
+
+		//return JSON
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusOK, &BugInformationNew)

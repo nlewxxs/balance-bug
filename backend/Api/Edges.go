@@ -1,5 +1,6 @@
 package Api
 
+//imports
 import (
 	"fmt"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// CHANGE LATER
+//Structs
 type EdgeStruct struct {
 	NodeId     string `json:"NodeId"`
 	EdgeNodeId string `json:"EdgeNodeId"`
@@ -26,30 +27,23 @@ type ProcessedEdgeStruct struct {
 	Label string `json:"label"`
 }
 
-// CREATE TABLE IF NOT EXISTS testdb.test_edges4
-// (
-// `EdgeNodeId` char(100) NOT NULL,
-// `NodeId` char(100) NOT NULL,
-// `Distance` char(100),
-// `Angle` char(100),
-// PRIMARY KEY (`NodeId`, `EdgeNodeId`),
-// FOREIGN KEY (`EdgeNodeId`) REFERENCES example(`NodeId`),
-// FOREIGN KEY (`NodeId`) REFERENCES example(`NodeId`)
-// )
-// ENGINE=InnoDB;
 
 // Create the table, this is REQUIRED before reading
 func CreateEdgeTable(c *gin.Context) {
+	//query
 	BugId := c.Query("BugId")
 
+	//check if query was inputted
 	if len(BugId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "enter a BugId"})
 		return
 	}
 
+	//variables used
 	var BugName string
 	var SessionId string
 
+	//query db for BugId-BugName Translation
 	BugNameQuery := db.QueryRow("SELECT `BugName` FROM `BugInformation` WHERE `BugId`=?;", BugId)
 	switch err := BugNameQuery.Scan(&BugName); err {
 	case sql.ErrNoRows:
@@ -63,6 +57,7 @@ func CreateEdgeTable(c *gin.Context) {
 		return
 	}
 
+	//query if latest session created exists
 	SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1;")
 	switch err := SessionIdQuery.Scan(&SessionId); err {
 	case sql.ErrNoRows:
@@ -76,6 +71,7 @@ func CreateEdgeTable(c *gin.Context) {
 		return
 	}
 
+	//create the table
 	SqlCommand := fmt.Sprintf("CREATE TABLE IF NOT EXISTS `testdb.%s_edges` (`NodeId` char(100) NOT NULL, `EdgeNodeId` char(100) NOT NULL, `Distance` char(100), `Angle` char(100), PRIMARY KEY (`NodeId`, `EdgeNodeId`), FOREIGN KEY (`NodeId`) REFERENCES `testdb.%s_nodes`(`NodeId`), FOREIGN KEY (`EdgeNodeId`) REFERENCES `testdb.%s_nodes`(`NodeId`)) ENGINE=InnoDB;", SessionId, SessionId, SessionId)
 
 	req, err := db.Query(SqlCommand)
@@ -86,22 +82,24 @@ func CreateEdgeTable(c *gin.Context) {
 	}
 	req.Close()
 
-	// Return JSON object of all rows
+	// return JSON
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 	c.JSON(http.StatusCreated, gin.H{"message": "successfully created new table"})
 }
 
-// CRUD: Create Read Update Delete API Format
-// DISPLAY SESSION IDs
+//Display Edges
 func DisplayAllEdges(c *gin.Context) {
+	//query
 	SessionId := c.Query("SessionId")
 
+	//check if query was inputted
 	if len(SessionId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a valid SessionId!"})
 		return
 	}
-
+	
+	//query all items in the table associated to that of the input
 	SqlQuery := fmt.Sprintf("SELECT * FROM `testdb.%s_edges`", SessionId)
 	rows, err := db.Query(SqlQuery)
 	if err != nil {
@@ -109,9 +107,10 @@ func DisplayAllEdges(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "error with DB, maybe the appropriate table hasn't been created yet"})
 	}
 
-	// Get all rows and add into SessionListStructs
+	//get all rows and make into ProcessedEdgeStruct, to directly feed into the graph viewer
 	EdgeLists := make([]ProcessedEdgeStruct, 0)
 
+	//process the rows
 	if rows != nil {
 		defer rows.Close()
 		for rows.Next() {
@@ -127,24 +126,27 @@ func DisplayAllEdges(c *gin.Context) {
 		}
 	}
 
-	// Return JSON object of all rows
+	//return JSON of the rows
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 	c.JSON(http.StatusOK, &EdgeLists)
 }
 
+//Add the Edge
 func AddEdge(c *gin.Context) {
+	//variables
 	var EdgeNew EdgeStruct
 	var BugName string
 	var SessionId string
 
+	//input Queries
 	BugId := c.Query("BugId")
 	EdgeNew.NodeId = c.Query("NodeId")
 	EdgeNew.EdgeNodeId = c.Query("EdgeNodeId")
 	EdgeNew.Distance = c.Query("Distance")
 	EdgeNew.Angle = c.Query("Angle")
 
-	// Validate entry
+	//check the input queries were inputted
 	if len(EdgeNew.NodeId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a NodeId"})
 	} else if len(EdgeNew.EdgeNodeId) == 0 {
@@ -156,8 +158,7 @@ func AddEdge(c *gin.Context) {
 	} else if len(BugId) == 0 {
 		c.JSON(http.StatusNotAcceptable, gin.H{"message": "please enter a BugId"})
 	} else {
-		// Insert item to DB
-		// fmt.Println("SessionID: ", SessionId)
+		//query db for BugId-BugName Translation
 		BugNameQuery := db.QueryRow("SELECT `BugName` FROM `BugInformation` WHERE `BugId`=?;", BugId)
 		switch err := BugNameQuery.Scan(&BugName); err {
 		case sql.ErrNoRows:
@@ -171,6 +172,7 @@ func AddEdge(c *gin.Context) {
 			return
 		}
 
+		//query db for latest session
 		SessionIdQuery := db.QueryRow("SELECT `SessionId` FROM testdb.SessionList ORDER BY `TimeStamp` DESC LIMIT 1;")
 		switch err := SessionIdQuery.Scan(&SessionId); err {
 		case sql.ErrNoRows:
@@ -184,10 +186,10 @@ func AddEdge(c *gin.Context) {
 			return
 		}
 
+		//insert entry into the db
 		SqlCommand := fmt.Sprintf("INSERT INTO `testdb.%s_edges` (`NodeId`, `EdgeNodeId`, `Distance`, `Angle`) VALUES((SELECT NodeId FROM `testdb.%s_nodes` WHERE NodeId='%s'),(SELECT NodeId FROM `testdb.%s_nodes` WHERE NodeId='%s'),%s,%s);", SessionId, SessionId, EdgeNew.NodeId, SessionId, EdgeNew.EdgeNodeId, EdgeNew.Distance, EdgeNew.Angle)
 
-		// fmt.Println("SQL Command: ", SqlCommand)
-
+		//do query
 		req, err := db.Query(SqlCommand)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -196,10 +198,10 @@ func AddEdge(c *gin.Context) {
 		}
 		req.Close()
 
-		// Log message
+		//log
 		fmt.Println("created SessionList entry", EdgeNew)
 
-		// Return success response
+		//return Edge created (can be used for checking of correct entry if required)
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Headers", "access-control-allow-origin, access-control-allow-headers")
 		c.JSON(http.StatusCreated, &EdgeNew)

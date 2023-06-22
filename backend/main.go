@@ -1,14 +1,11 @@
 package main
 
+//imports
 import (
-	// "BalanceBugServer/backend/api"
 	"net/http"
 
 	api "BalanceBugServer/backend/Api"
-	// "BalanceBugServer/backend/api/Databaseapi"
-	// // api "BalanceBugServer/backend/api"
 
-	//"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -22,59 +19,46 @@ func indexView(c *gin.Context) {
 
 // Setup Gin Routes
 func SetupRoutes() *gin.Engine {
-	// Use Gin as router
-	// gin.SetMode(gin.releaseMode)
+	//setup router
 	router := gin.Default()
 	config := cors.DefaultConfig()
+
+	//create custom config to allow all standard types of requests
 	config.AllowAllOrigins = true
 	config.AllowMethods = []string{"Get", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
 	router.Use(cors.New(config))
-	// router.Use(cors.New(cors.Config{
-	// 	AllowAllOrigins: true,
-	// 	AllowMethods: []string{"Get","POST","PUT","PATCH","DELETE","OPTIONS"},
-	// 	AllowHeaders: []string{"Origin"},
-	// 	ExposeHeaders: []string{"Content-Length"},
-	// 	AllowCredentials: true,
-	// 	MaxAge:12 * time.Hour,
-	// }))
 
-	// Set route for index
+	// Set main route, used for checking connection
 	router.GET("/", indexView)
 
 	// Set routes for api
 	//api Paths
+
+	//Sessions
 	router.GET("/Session/Add", api.AddSession)
 	router.PATCH("/Session/Ping", api.PingSession)
 	router.GET("/Session/DisplayAll", api.DisplaySessionList)
 	router.GET("/Session/CheckNewSession", api.CheckNewSession)
 
+	//Nodes
 	router.PUT("/Nodes/Add", api.AddNode)
 	router.GET("/Nodes/DisplayAll", api.DisplayAllNodes)
 	router.PUT("/Nodes/CreateTable", api.CreateNodeTable)
 
+	//Edges
 	router.PUT("/Edges/Add", api.AddEdge)
 	router.GET("/Edges/DisplayAll", api.DisplayAllEdges)
 	router.PUT("/Edges/CreateTable", api.CreateEdgeTable)
 
+	//BugInformation
 	router.PATCH("/BugInformation/Ping", api.PingBugInformation)
 	router.GET("/BugInformation/Online", api.OnlineBugInformation)
 	router.GET("/BugInformation/DisplayAll", api.DisplayBugInformation)
 	router.PATCH("/BugInformation/UpdateBugName", api.UpdateBugNameBugInformation)
 
+	//Beacon System
 	router.PATCH("/Beacon/TurnOn", api.TurnOn)
 	router.PATCH("/Beacon/BeaconPing", api.BeaconPing)
-
-	/*
-		SessionId.Edges
-			- Foreign keys
-				- Node             - PRIMARY1
-				- Connecting Node  - PRIMARY2
-			- Distance
-			- Angle
-	*/
-
-	// router.GET("/item/update/:id/:done", api.UpdateTodoItem)
-	// router.GET("/item/delete/:id", api.DeleteTodoItem)
 
 	// Set up Gin Server
 	return router
@@ -82,6 +66,7 @@ func SetupRoutes() *gin.Engine {
 
 // Main function
 func main() {
+	//run the api
 	api.SetupMySQL()
 	router := SetupRoutes()
 	router.Run(":8081")
