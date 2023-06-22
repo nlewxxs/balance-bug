@@ -208,19 +208,19 @@ void loop() {
           move(0.1);
           break;
         case Left:
-          rotate(-20);
+          rotate(-5);
           break;
         case Right:
-          rotate(20);
+          rotate(5);
           break;
         case Backwards:
           move(-0.1);
           break;
         case MoveThenLeft:
-          moveDir(0.5, false);
+          moveDir(0.1, false);
           break;
         case MoveThenRight:
-          moveDir(0.5, true);
+          moveDir(0.1, true);
           break;
         case DeadEnd:
           moveDir(0, true);
@@ -231,11 +231,11 @@ void loop() {
     }
     if (movingRight && classification.isClear) {
       movingRight = false;
-      move(0.5);
+      // move(0.5);
     }
     if (movingLeft && classification.isClear) {
       movingLeft = false;
-      move(0.5);
+      // move(0.5);
     }
   }
   controller.update(ypr[0] * 180/M_PI);
@@ -255,7 +255,7 @@ void rotate(float amount) {
 
 void moveDir(float distance, bool isRight) {
   controller.updatePositionSetpoint(controller.getDistance() + distance);
-  float rotationSet = ypr[0] * 180/M_PI + (isRight ? 45 : -45);
+  float rotationSet = ypr[0] * 180/M_PI + (isRight ? 20 : -20);
   controller.setNextHeadingSetpoint(rotationSet);
   if (isRight) {
     movingRight = true;
@@ -312,7 +312,9 @@ void communicationCode(void* pvParameters) {
 
     #ifdef ENABLE_TRAVERSAL    
       if(!controller.getMoving() && !movingRight && !movingLeft) {
-        D8M.update();
+        for (int g = 0; g < 10; g++){
+          D8M.update();
+        }
         Matrix frame = D8M.getBoxMatrix();
         char tmp[128];
       
@@ -336,10 +338,15 @@ void communicationCode(void* pvParameters) {
         debugOutput("made a decision: ");
         debugOutput(traversal.getDecision());
 
+        char newtmp[128];
+        sprintf(newtmp, "Box index 6: %d, %d, %d, %d \t Box index 7: %d, %d, %d, %d", frame.boxes[6][0], frame.boxes[6][1], frame.boxes[6][2], frame.boxes[6][3],
+                      frame.boxes[7][0], frame.boxes[7][1], frame.boxes[7][2], frame.boxes[7][3]);
+        SerialBT.println(newtmp);
+
         // if (SerialBT.available()) {
         //   String test = SerialBT.readString();
         //   if (test.substring(0,1) == "F") {
-        //     move(0.05);
+        //     move(0.05);]
         //   } else if (test.substring(0,1) == "L") {
         //     rotate(-15);
         //   } else if (test.substring(0,1) == "R") {
@@ -355,16 +362,16 @@ void communicationCode(void* pvParameters) {
       }
     #endif
 
-    SerialBT.print("RRR");
-    SerialBT.print(controller.getDistance());
-    SerialBT.print(", ");
-    SerialBT.print(controller.getPositionSetpoint());
-    SerialBT.print(", ");
-    SerialBT.print(ypr[0] * 180/M_PI);
-    SerialBT.print(", ");
-    SerialBT.print(controller.getLeftOutput());
-    SerialBT.print(", HS:");
-    SerialBT.print(controller.getHeadingSetpoint());
+    // SerialBT.print("RRR");
+    // SerialBT.print(controller.getDistance());
+    // SerialBT.print(", ");
+    // SerialBT.print(controller.getPositionSetpoint());
+    // SerialBT.print(", ");
+    // SerialBT.print(ypr[0] * 180/M_PI);
+    // SerialBT.print(", ");
+    // SerialBT.print(controller.getLeftOutput());
+    // SerialBT.print(", HS:");
+    // SerialBT.print(controller.getHeadingSetpoint());
     //SerialBT.print(", im:");
     //SerialBT.println(newImage.printInfo());
 

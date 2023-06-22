@@ -10,7 +10,8 @@ void SimpleTraversal::init(char *_ssid, char *_password, char *_serverName, Stri
   angle = 0;
   distance = 0;
   movementDecision = Stationary;
-  prevNode = "";
+  prevNode = "0";
+  nodeNameCtr = 1;
 }
 
 //Setters
@@ -44,11 +45,11 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
   //check if in a session
   if(communicate.getInSession()){
     //process movementDecision based on result from Classify
-    if (_isEnd) {
-      Serial.println("Is End");
-      movementDecision = DeadEnd;
+    if(_rightTurn){
+      Serial.println("Move Then Right");
+      movementDecision = MoveThenRight;
     }
-    else if(_isPath && _isClear){
+    else if(_isClear/*&& isPath*/){
       Serial.println("Move");
       movementDecision = Forward;
     }
@@ -56,17 +57,19 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
       Serial.println("Move Then Left");
       movementDecision = MoveThenLeft;
     }
-    else if(_rightTurn){
-      Serial.println("Move Then Right");
-      movementDecision = MoveThenRight;
+    else {
+      Serial.println("Is End");
+      movementDecision = Left;
     }
 
     //send API request if Classify detects as a node
     if (_isNode) {
       Serial.println("Adding Node");
       calculateCoords();
-      // communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
-      // communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
+
+      
+      communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
+      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
       prevNode = nodeNameCtr;
       nodeNameCtr++;
     }
