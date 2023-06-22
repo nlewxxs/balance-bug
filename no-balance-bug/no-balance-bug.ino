@@ -184,7 +184,8 @@ void loop() {
 
       Image newImage;   
       classification = newImage.classify(frame.boxes);
-      newImage.debugInfo();
+      // newImage.debugInfo();
+      debugOutput(newImage.printInfo());
     } else if (movingLeft && !classification.isClear) {
       rotate(-5);
       for (int g = 0; g < 10; g++){

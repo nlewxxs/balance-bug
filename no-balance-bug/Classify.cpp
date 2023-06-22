@@ -10,6 +10,13 @@ const int rightPathBounds[4]  = {320,280,640,320};
 const int leftWallBoundSimplified[4] = {10,100,160,240};
 const int rightWallBoundSimplified[4] = {650,540,480,400};
 
+
+String Image::printInfo(){
+  return "isNode: " + String(info.isNode) + ", isPath: " + String(info.isPath) + ", isClear: " + String(info.isClear) + ", leftWall: " + String(info.leftWall) + ", rightWall" + String(info.rightWall) + ", leftTurn" + String(info.leftTurn) + ", rightTurn: " + String(info.rightTurn);
+}
+
+
+
 // all below should be false
 // xmin, ymin, xmax, ymax
 bool Image::outsideBounds(const int box[4], const int bound[4]){

@@ -27,6 +27,7 @@ class Image {
         bool hasWall(const int lowerL[4], const int lowerR[4], const int upperL[4], const int upperR[4],const int xLR, const int bound[4], bool L);
         void debugInfo();
         classifyElement classify(int grid[12][4]); 
+        String printInfo();
     private:
         classifyElement info;
 };
