@@ -1,7 +1,0 @@
-to do:
-- fix pico dodgy wifi
-- esp 32 dual core ness and http back end communications
-- schematic and design for relay switching
-- boost smps code?
-- FPGA control debugging??
-/
