@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  mysql:
+    build: ./database
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: backend
+      MYSQL_PASSWORD: helloworld
+      MYSQL_ROOT_PASSWORD: helloworld
+    ports:
+      - "3308:3306"
+
+  go-api:
+    build: ./backend
+    container_name: go-api
+    ports:
+    - 8081:8081
+    volumes:
+     - .:/app
+    expose:
+      - 8081
+    depends_on:
+      - mysql
+      - app
+    links:
+      - mysql
+      - app
+    tty: true
+
+  app:
+      build: ./frontend/app 
+      container_name: reactapp_c
+      ports:
+        - 3000:3000
+      volumes:
+        - ./frontend/app:/frontend/app
+        - /frontend/app/node_modules 
+      stdin_open: true
+      tty: true
