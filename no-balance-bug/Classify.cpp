@@ -166,6 +166,16 @@ classifyElement Image::classify(int grid[13][4]) {
         info.rightWall = false;
     }
 
+    for (int i = 0; i <13; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (grid[i][j] >= 700) {
+          info.isEnd=true;
+          info.isClear=true;
+        }
+      }
+    }
+
+
     info.isNode = info.isEnd   || info.leftTurn || info.rightTurn;
     info.isPath = info.isClear && info.leftWall && info.rightWall;
     

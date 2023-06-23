@@ -45,10 +45,16 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
   //check if in a session
   if(communicate.getInSession()){
     //process movementDecision based on result from Classify
-    // if(_isEnd && _isRightWall && _isLeftWall){
+    if (_isEnd && _isClear) {
+      Serial.println("Stationary");
+      movementDecision = Stationary;
+    }
+    else if(_isEnd && !_leftWall && !_rightTurn){
+      Serial.println("Dead End");
+      movementDecision = DeadEnd;
+    }
+    else if(_leftTurn){
 
-    // }
-    if(_leftTurn){
       Serial.println("Move Then Left");
       turningLeft = true;
       movementDecision = MoveThenLeft;
@@ -72,8 +78,8 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
       Serial.println("Adding Node");
       calculateCoords();
       
-      communicate.addNode(String(nodeNameCtr), String(coords.x), String(coords.y));
-      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance * 10), String(angle));
+      communicate.addNode(String(nodeNameCtr), String(coords.x*5), String(coords.y*5));
+      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance   ), String(angle));
       prevNode = nodeNameCtr;
       nodeNameCtr++;
     }

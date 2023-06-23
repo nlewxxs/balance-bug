@@ -47,8 +47,8 @@ Communicate communicate;
 
 #define CHECK_NEW_SESSION_TIMEOUT 20
 
-char* ssid = "JJ's Galaxy S22+";
-char* password = "sbsx6554";
+char* ssid = "nik";
+char* password = "khawalkhawal";
 char* serverId = "http://3.86.45.6:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
@@ -216,13 +216,13 @@ void loop() {
           move(-0.1);
           break;
         case MoveThenLeft:
-          moveDir(0.64, false);
+          moveDir(0.2, false);
           break;
         case MoveThenRight:
-          moveDir(0.64, true);
+          moveDir(0.2, true);
           break;
         case DeadEnd:
-          moveDir(0, true);
+          rotate(180);
         default:
           break;
       }
