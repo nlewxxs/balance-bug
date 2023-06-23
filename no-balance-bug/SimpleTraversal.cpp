@@ -12,6 +12,7 @@ void SimpleTraversal::init(char *_ssid, char *_password, char *_serverName, Stri
   movementDecision = Stationary;
   prevNode = "0";
   nodeNameCtr = 1;
+  prevDistance = 0;
 }
 
 //Setters
@@ -31,12 +32,23 @@ Decision SimpleTraversal::getDecision(){ return movementDecision; }
 
 //calculate new coordinates relative to previous coordinates to add in the query
 void SimpleTraversal::calculateCoords(){
-  coords.x = distance * sin(angle);
-  coords.y = distance * cos(angle);
+  prevCoords = coords;
+
+
+  // coords.x = distance * sin(angle);
+  // coords.y = distance * cos(angle);
+
+  coords.x = prevCoords.x + ((distance - prevDistance) * sin(angle));
+  coords.y = prevCoords.y + ((distance - prevDistance) * cos(angle));
+
+  prevDistance = distance;
+  // prevAngle = angle;
+
+
   Serial.print("Calculated Coords: x=");
-  Serial.println(coords.x);
+  Serial.print(coords.x);
   Serial.print(", y=");
-  Serial.print(coords.y);
+  Serial.println(coords.y);
 
 }
 
@@ -49,10 +61,11 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
       Serial.println("Stationary");
       movementDecision = Stationary;
     }
-    else if(_isEnd && !_leftWall && !_rightTurn){
-      Serial.println("Dead End");
-      movementDecision = DeadEnd;
-    }
+    // else if(_isEnd && !_leftTurn && !_rightTurn){
+    //   Serial.println("Dead End");
+    //   movementDecision = turningLeft ? Left : Right;
+
+    // }
     else if(_leftTurn){
 
       Serial.println("Move Then Left");
@@ -76,10 +89,11 @@ void SimpleTraversal::makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool
     //send API request if Classify detects as a node
     if (_isNode) {
       Serial.println("Adding Node");
+      // float tmpDist = distance-prevDistance
+
       calculateCoords();
-      
-      communicate.addNode(String(nodeNameCtr), String(coords.x*5), String(coords.y*5));
-      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance   ), String(angle));
+      communicate.addNode(String(nodeNameCtr), String(coords.x*15), String(coords.y*15));
+      communicate.addEdge(String(nodeNameCtr), String(prevNode), String(distance), String(angle));
       prevNode = nodeNameCtr;
       nodeNameCtr++;
     }

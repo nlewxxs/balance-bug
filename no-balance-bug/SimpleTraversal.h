@@ -43,9 +43,11 @@ class SimpleTraversal {
   private:
     //private variables
     String bugId;
+    float prevDistance;
     float distance;
     float angle;
     Coords coords;
+    Coords prevCoords;
     int nodeNameCtr;
     String prevNode;
 

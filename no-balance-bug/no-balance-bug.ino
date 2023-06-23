@@ -47,8 +47,10 @@ Communicate communicate;
 
 #define CHECK_NEW_SESSION_TIMEOUT 20
 
-char* ssid = "nik";
-char* password = "khawalkhawal";
+// char* ssid = "nik";
+// char* password = "khawalkhawal";
+char* ssid = "JJ's Galaxy S22+";
+char* password = "sbsx6554";
 char* serverId = "http://3.86.45.6:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
@@ -177,9 +179,9 @@ void loop() {
     // SerialBT.println(classification.isClear);
     if (movingRight && !classification.isClear) {
       rotate(5);
-      for (int g = 0; g < 10; g++){
+      // for (int g = 0; g < 3; g++){
         D8M.update();
-      }
+      // }
       Matrix frame = D8M.getBoxMatrix();
       char tmp[128];
 
@@ -189,9 +191,9 @@ void loop() {
       debugOutput(newImage.printInfo());
     } else if (movingLeft && !classification.isClear) {
       rotate(-5);
-      for (int g = 0; g < 10; g++){
+      // for (int g = 0; g < 3; g++){
         D8M.update();
-      }
+      // }
       Matrix frame = D8M.getBoxMatrix();
       char tmp[128];
 
@@ -311,9 +313,9 @@ void communicationCode(void* pvParameters) {
 
     #ifdef ENABLE_TRAVERSAL
       if(!controller.getMoving() && !movingRight && !movingLeft) {
-        for (int g = 0; g < 10; g++){
+        // for (int g = 0; g < 3; g++){
           D8M.update();
-        }
+        // }
         Matrix frame = D8M.getBoxMatrix();
         char tmp[128];
       
@@ -328,6 +330,9 @@ void communicationCode(void* pvParameters) {
         classification = newImage.classify(frame.boxes);
         newImage.debugInfo();
         debugOutput(newImage.printInfo());
+
+        debugOutput("Colour: ", false);
+        debugOutput(frame.colour);
 
         traversal.setAngle(ypr[0] * (180/M_PI));
         traversal.setDistance(controller.getDistance() * 10);
@@ -377,7 +382,7 @@ void communicationCode(void* pvParameters) {
     //SerialBT.print(", im:");
     //SerialBT.println(newImage.printInfo());
 
-    vTaskDelay(100);
+    vTaskDelay(200);
   }
 }
 
