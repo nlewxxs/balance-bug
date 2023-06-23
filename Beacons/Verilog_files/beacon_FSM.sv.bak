@@ -1,0 +1,111 @@
+module beacon_FSM (
+	input logic clk,
+	input logic cap_charged, // not charged 0, charged 1
+	input logic cap_over5, // below 5V 0, above 5V 1
+	input logic PV_power_high, // 0 low power, 1 high power
+	input logic lights_on_flag, // off 0, on 1 
+	output logic charge_mode, //buck 0, boost 1
+	output logic light_power_source // panels 0, cap 1
+	output logic charge_on; //0 not charging, 1 charging
+);
+
+	typedef enum {IDLE, charge_buck, charge_boost, beacons_panel, beacons_cap} state;
+	state current_state, next_state;
+
+	always_ff @ (posedge clk)
+		current_state <= next_state;
+		
+	always comb
+		case(current_state)
+			IDLE : begin
+					    charge_mode = 0;
+						 light_power_source = 0;
+						 charge_on = 0;
+						 
+						 if (lights_on_flag)
+							 next_state = beacons_panel;
+							
+						 else if (~cap_charged)&&(~cap_over5)
+							 next_state = charge_buck;
+							
+						 else if (~cap_charged)&&(cap_over5)
+							 next_state = charge_boost;
+						
+						 else 
+							 next_state = IDLE;
+							
+					 end
+						
+			charge_buck : begin
+							     charge_mode = 0;
+								  light_power_source = 0;
+								  charge_on =  1;
+						
+								  if (lights_on_flag)
+								  	  next_state = beacons_panel;
+						
+								  else if (cap_over5)
+									  next_state = charge_boost;
+									
+								  else
+									  next_state = charge_buck;
+								
+							  end
+							  
+			charge_boost : begin
+								   charge_mode = 1;
+									light_power_source = 0;
+									charge_on = 1;
+									
+									if (lights_on_flag)
+								  	   next_state = beacons_panel;
+									  
+									else if (cap_charged)
+										next_state = IDLE;
+									
+									else 
+										next_state = charge_boost;
+							
+								end
+								
+			beacons_panel : begin
+								    charge_mode = 0;
+									 light_power_source = 0;
+									 charge_on = 0;
+									 
+									 if (~lights_on_flag)
+									    next_state = IDLE;
+										 
+									 else if (~PV_power_high)
+										 next_state = beacons_cap;
+										 
+									 else 
+										 next_state = beacons_panel;
+										 
+								 end
+								 
+			beacons_cap : begin
+							     charge_mode = 0;
+								  light_power_source = 1;
+								  charge_on = 0;
+								  
+								  if (~lights_on_flag)
+								     next_state = IDLE;
+									  
+								  else if (PV_power_high)
+									  next_state = beacons_panel;
+									  
+								  else 
+									  next_state = beacons_cap;
+								  	  
+							  end 
+							  
+		endcase
+													
+endmodule				
+									  
+							
+							
+						
+					
+	

@@ -1,0 +1,7 @@
+solution: broadcast to all devices at 192.168.128.255
+append 1 at the front for LED drivers, or 0 for SMPS
+all picows receive udp packets, they themselves look for if it is relevent to them
+
+need to:
+recombine udp test and driver v2 into driver v3
+adjust esp32 to add extra digit and send to broadcast address

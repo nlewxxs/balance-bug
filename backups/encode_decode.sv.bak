@@ -1,0 +1,17 @@
+module encode_decode(
+	input logic [15:0] received0, received1,
+	input logic [2:0] state,
+	input logic [9:0] val,
+	output logic [7:0] V_panel, I_panel,
+	output logic [15:0] return_data
+);
+
+assign V_panel = received0[7:0];
+assign I_panel = received0[15:8];
+
+assign return_data = {3'b0, state[2:0], val[9:0]};
+
+endmodule
+
+
+	
