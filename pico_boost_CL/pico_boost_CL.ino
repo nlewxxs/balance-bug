@@ -342,7 +342,7 @@ void setup() {
           closed_loop = pidv(eV);
           closed_loop = pidi(closed_loop - iL);
           //closed_loop = 1- closed_loop;
-          closed_loop = saturation(closed_loop, 0.99, 0.13);
+          closed_loop = saturation(closed_loop, 0.90, 0.13);
           pwm_modulate(closed_loop);
       }
 
