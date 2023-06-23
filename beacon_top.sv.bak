@@ -1,0 +1,45 @@
+module beacon_top (
+	input logic MAX10_CLK1_50,
+	input logic lights_on_pin,
+	input logic MPPT_data1_pin;
+	input logic MPPT_data2_pin;
+	input logic MPPT_data3_pin;
+	output logic charge_mode_pin, 
+	output logic light_power_source_pin,
+	output logic charge_on_pin;
+	output logic pin1,
+	output logic pin2,
+	output logic pin3
+//assign pins for these
+);
+
+logic pwm_en, cap_ch, cap_5, PV_pwr, low_pwr
+
+
+pwm_3phase_19Hz pwm (.clk_50MHz(MAX10_CLK1_50),
+							.enable(lights_on_pin),
+							.pwm_phase1(pin1),
+							.pwm_phase2(pin2),
+							.pwm_phase3(pin3)
+						  );
+						  
+beacon_FSM fsm (.clk(MAX10_CLK1_50),
+					 .cap_charged(cap_ch),
+					 .cap_over5(cap_5),
+					 .PV_power_high(PV_pwr),
+					 .low_power(low_pwr),
+					 .lights_on_flag(lights_on_pin),
+					 .charge_mode(charge_mode_pin),
+					 .light_power_source(light_power_source_pin),
+					 .charge_on(charge_on_pin)
+					);
+				
+MPPT_alg mppt (.MPPT_data1(MPPT_data1_pin),
+					.MPPT_data2(MPPT_data2_pin),
+					.MPPT_data3(MPPT_data3_pin),
+					.cap_charged(cap_ch),
+					.cap_over5(cap_5),
+					.PV_power_high(PV_pwr),
+					.low_power(low_pwr)
+				  );
+endmodule
