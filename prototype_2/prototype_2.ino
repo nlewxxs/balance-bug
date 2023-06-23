@@ -178,7 +178,7 @@ void loop() {
 
   if (update) {
     update = false;
-    float tiltReading = ypr[1] * 180/M_PI;
+    float tiltReading = -ypr[1] * 180/M_PI;
     float headingReading = ypr[0] * 180/M_PI;
     float pitchRate = gyro.y;
     controller.update(tiltReading, pitchRate, headingReading);
@@ -201,7 +201,7 @@ void communicationCode(void* pvParameters) {
     SerialBT.print(", R: ");
     SerialBT.print(R);
     SerialBT.print(", Pit: ");
-    SerialBT.print(ypr[1] * 180/M_PI);
+    SerialBT.print(-ypr[1] * 180/M_PI);
     // SerialBT.print(", Dis: ");
     // SerialBT.print(controller.getDistance());
     SerialBT.print(", LV: ");
@@ -276,6 +276,27 @@ void communicationCode(void* pvParameters) {
         controller.updateValues("D2", D2);
         SerialBT.print("Set D2 to ");
         SerialBT.println(D2, 4);
+      } else if (test.substring(0,2) == "P3") {
+        float P3 = test.substring(2,test.length()-1).toFloat();
+        // preferences.putFloat("P2", P2);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        controller.updateValues("P3", P3);
+        SerialBT.print("Set P3 to ");
+        SerialBT.println(P3, 4);
+      } else if (test.substring(0,2) == "I3") {
+        float I3 = test.substring(2,test.length()-1).toFloat();
+        // preferences.putFloat("I2", I2);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        controller.updateValues("I3", I3);
+        SerialBT.print("Set I3 to ");
+        SerialBT.println(I3, 4);
+      } else if (test.substring(0,2) == "D3") {
+        float D3 = test.substring(2,test.length()-1).toFloat();
+        // preferences.putFloat("D2", D2);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        controller.updateValues("D3", D3);
+        SerialBT.print("Set D3 to ");
+        SerialBT.println(D3, 4);
       } else if (test.substring(0,2) == "S1") {
         int S1 = test.substring(2,test.length()-1).toInt();
         // preferences.putInt("S1", S1);
@@ -325,6 +346,12 @@ void communicationCode(void* pvParameters) {
         controller.updateValues("MTO", MTO);
         SerialBT.print("Set MTO to ");
         SerialBT.println(MTO, 4);
+      } else if (test.substring(0,2) == "SF") {
+        float MTO = test.substring(2,test.length()-1).toFloat();
+        // preferences.putFloat("B3", B3);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        controller.stopMoving();
+        SerialBT.print("Stop moving");
       } else if (test.substring(0,2) == "MV") {
         float MV = test.substring(2,test.length()-1).toFloat();
         // preferences.putFloat("B3", B3);
@@ -339,6 +366,13 @@ void communicationCode(void* pvParameters) {
         // controller.updateValues("MTO", MTO);
         controller.moveForwards();
         SerialBT.println("Move forwards");
+      } else if (test.substring(0,1) == "R") {
+        // float MTO = test.substring(3,test.length()-1).toFloat();
+        // preferences.putFloat("B3", B3);
+        // Kp_tilt = preferences.getFloat("P", 0);
+        // controller.updateValues("MTO", MTO);
+        controller.rotate(ypr[0] * 180/M_PI + test.substring(1, test.length()-1).toFloat());
+        SerialBT.println("rotating");
       } else if (test[0] == 'C') {
         SerialBT.print("P1: ");
         SerialBT.print(controller.getValue("P1"), 4);
@@ -352,6 +386,12 @@ void communicationCode(void* pvParameters) {
         SerialBT.print(controller.getValue("I2"), 4);
         SerialBT.print(" D2: ");
         SerialBT.print(controller.getValue("D2"), 7);
+        SerialBT.print(" P3: ");
+        SerialBT.print(controller.getValue("P3"), 4);
+        SerialBT.print(" I3: ");
+        SerialBT.print(controller.getValue("I3"), 4);
+        SerialBT.print(" D3: ");
+        SerialBT.print(controller.getValue("D3"), 7);
         SerialBT.print(" Pp1: ");
         SerialBT.print(controller.getValue("Pp1"), 4);
         SerialBT.print(" Ii1: ");

@@ -18,6 +18,8 @@ class Controller {
     void updateSpeed();
     float getValue(String param);
     void moveForwards();
+    void stopMoving();
+    void rotate(float amount);
     float getVOut();
 };
 

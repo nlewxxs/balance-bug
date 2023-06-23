@@ -2,6 +2,9 @@
 #include <AccelStepper.h>
 #include <Preferences.h>
 #include "Controller.h"
+#include <SimpleFOC.h>
+
+LowPassFilter filter = LowPassFilter(0.001); // Tf = 1ms
 
 Preferences preferences;
 
@@ -10,12 +13,14 @@ Preferences preferences;
 // Define motor interface type
 #define motorInterfaceType 1
 #define stepsPerRevolution 200
-#define HEADING_SETPOINT 0
-#define POSITION_SETPOINT 0
+// #define HEADING_SETPOINT 0
+// #define POSITION_SETPOINT 0
+float headingSetpoint = 0;
 float velocitySetpoint = 0;
 float moveVelocity;
 
-bool moving = false;
+// bool moving = false;
+// bool stop = false;
 
 // Define pin connections
 const int leftDirPin = 32; //A4
@@ -45,12 +50,14 @@ float Kp_velocity, Ki_velocity, Kd_velocity;
 // balance PID controller
 float Kp_tilt, Ki_tilt, Kd_tilt;
 
-float Pp1, Pp2, P1, P2, I1, I2, D1, D2, hahha, B2, B3, maxTiltOffset;
+float Pp1, Pp2, P1, P2, I1, I2, D1, D2, hahha, B2, B3, maxTiltOffset, P3, I3, D3;
 int S1, S2, S3;
 
 bool correcting1 = false;
 bool correcting2 = false;
 bool microStepping = false;
+
+float moveOffset = 0;
 
 // acceptable pid values -- 200,8,1,20 -- 160,25,0.02,30. Correcting: 4,4,-0.5
 
@@ -94,6 +101,9 @@ void Controller::setup() {
   I2 = preferences.getFloat("I2", 0);
   D1 = preferences.getFloat("D1", 0);
   D2 = preferences.getFloat("D2", 0);
+  P3 = preferences.getFloat("P3", 0);
+  I3 = preferences.getFloat("I3", 0);
+  D3 = preferences.getFloat("D3", 0);
   hahha = preferences.getFloat("B1", 0);
   B2 = preferences.getFloat("B2", 0);
   B3 = preferences.getFloat("B3", 0);
@@ -115,7 +125,7 @@ void Controller::update(float pitch, float pitchRate, float heading) {
   float iteration_time = (millis() - oldMillis) / 1000.0;
   oldMillis = millis();
 
-  // if (abs(pitch) <= hahha && !(correcting1 || correcting2)) {
+  // if (abs(pitch) ) {
     microStepping = true;
     Kp_tilt = P1;
     Ki_tilt = I1;
@@ -123,6 +133,9 @@ void Controller::update(float pitch, float pitchRate, float heading) {
     Kp_velocity = P2;
     Ki_velocity = I2;
     Kd_velocity = D2;
+    Kp_heading = P3;
+    Ki_heading = I3;
+    Kd_heading = D3;
     maxSpeed = S1;
 	  leftStepper.setMaxSpeed(maxSpeed);
 	  rightStepper.setMaxSpeed(maxSpeed);
@@ -135,13 +148,8 @@ void Controller::update(float pitch, float pitchRate, float heading) {
   // }
   
   float linearVelocity = getLinearVelocity();
-  float velocity = pitchRate + linearVelocity; //pitchrate is actually -pitchrate (gyro reading backwards) move forwards to catch falling rover, move back to stop moving wheels
+  float velocity = -pitchRate + linearVelocity; //pitchrate is actually -pitchrate (gyro reading backwards) move forwards to catch falling rover, move back to stop moving wheels
   // float velocity = pitchRate - linearVelocity; // move forwards to catch falling rover, move back to stop moving wheels
-
-  if (moving && velocity >= velocitySetpoint) {
-    velocitySetpoint = 0;
-    moving = false;
-  }
 
   // position control first
   V_error[1] = velocitySetpoint - velocity;
@@ -152,19 +160,37 @@ void Controller::update(float pitch, float pitchRate, float heading) {
   V_integral[0] = V_integral[1];  // time shift integral readings after out calculated
   V_error[0] = V_error[1];
 
+  // if (moving && pitch >= V_out + moveOffset) {
+  // if (moving && stop) {
+  //   moveOffset = 0;
+  //   moving = false;
+  //   stop = false;
+  // }
+
+  // float signal_filtered = filter(V_out);
+
   // V_out = constrain(V_out, -maxTiltOffset, maxTiltOffset); // so as to not overcompensate and make us fall over
 
   // balance control
-  T_error[1] = V_out - pitch;             // offset the tilt reading with the distance output to allow us to manipulate the position of the robot via tilt
+  T_error[1] = V_out + moveOffset - pitch;             // offset the tilt reading with the distance output to allow us to manipulate the position of the robot via tilt
+  // if (abs(T_error[1]) <= B2) {
+  // if (abs(T_error[1]) > hahha) {
+  //   Kp_tilt = P3;
+  //   Ki_tilt = I3;
+  //   Kd_tilt = D3;
+  // }
   T_integral[1] = T_integral[0] + T_error[1] * iteration_time;  // 1 is current, 0 is old
   T_derivative = (T_error[1] - T_error[0]) / iteration_time;
   T_out = Kp_tilt * T_error[1] + Ki_tilt * T_integral[1] + Kd_tilt * T_derivative + T_bias;
 
   T_integral[0] = T_integral[1];  // time shift integral readings after out calculated
+  // } else {
+  //   T_out = (T_error[1] < 0) ? -maxSpeed : maxSpeed;
+  // }
   T_error[0] = T_error[1];
 
   // heading control to offset the wheels for rotation
-  H_error[1] = HEADING_SETPOINT - heading;
+  H_error[1] = headingSetpoint - heading;
   H_integral[1] = H_integral[0] + H_error[1] * iteration_time;  // 1 is current, 0 is old
   H_derivative = (H_error[1] - H_error[0]) / iteration_time;
   H_out = Kp_heading * H_error[1] + Ki_heading * H_integral[1] + Kd_heading * H_derivative + H_bias;
@@ -238,8 +264,17 @@ float Controller::getDistance() {
 }
 
 void Controller::moveForwards() {
-  velocitySetpoint = moveVelocity;
-  moving = true;
+  moveOffset += B3;
+  // moving = true;
+}
+
+void Controller::stopMoving() {
+  // stop = true;
+}
+
+void Controller::rotate(float amount) {
+  headingSetpoint = amount;
+  // rotating = true;
 }
 
 float Controller::getLeftOutput() {
@@ -262,18 +297,27 @@ void Controller::updateValues(String param, float val) {
   } else if (param == "P2") {
     P2 = val;
     preferences.putFloat("P2", P2);
+  } else if (param == "P3") {
+    P3 = val;
+    preferences.putFloat("P3", P3);
   } else if (param == "I1") {
     I1 = val;
     preferences.putFloat("I1", I1);
   } else if (param == "I2") {
     I2 = val;
     preferences.putFloat("I2", I2);
+  } else if (param == "I3") {
+    I3 = val;
+    preferences.putFloat("I3", I3);
   } else if (param == "D1") {
     D1 = val;
     preferences.putFloat("D1", D1);
   } else if (param == "D2") {
     D2 = val;
     preferences.putFloat("D2", D2);
+  } else if (param == "D3") {
+    D3 = val;
+    preferences.putFloat("D3", D3);
   } else if (param == "B1") {
     hahha = val;
     preferences.putFloat("B1", hahha);
@@ -314,14 +358,20 @@ float Controller::getValue(String param) {
     return preferences.getFloat("P1", P1);
   } else if (param == "P2") {
     return preferences.getFloat("P2", P2);
+  } else if (param == "P3") {
+    return preferences.getFloat("P3", P3);
   } else if (param == "I1") {
     return preferences.getFloat("I1", I1);
   } else if (param == "I2") {
     return preferences.getFloat("I2", I2);
+  } else if (param == "I3") {
+    return preferences.getFloat("I3", I3);
   } else if (param == "D1") {
     return preferences.getFloat("D1", D1);
   } else if (param == "D2") {
     return preferences.getFloat("D2", D2);
+  } else if (param == "D3") {
+    return preferences.getFloat("D3", D3);
   } else if (param == "B1") {
     return preferences.getFloat("B1", hahha);
   } else if (param == "B2") {
