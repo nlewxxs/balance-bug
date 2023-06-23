@@ -203,20 +203,20 @@ int main()
 
   while(1){
 
-    //    // touch KEY0 to trigger Auto focus
-	  //  if((IORD(KEY_BASE,0)&0x03) == 0x02){
+       // touch KEY0 to trigger Auto focus
+	   if((IORD(KEY_BASE,0)&0x03) == 0x02){
 
-    // 	   current_focus = Focus_Window(320,240);
-    //    }
-	  //  // touch KEY1 to ZOOM
-	  //        if((IORD(KEY_BASE,0)&0x03) == 0x01){
-	  //     	   if(bin_level == 3 )bin_level = 1;
-	  //     	   else bin_level ++;
-	  //     	   printf("set bin level to %d\n",bin_level);
-	  //     	   MIPI_BIN_LEVEL(bin_level);
-	  //     	 	usleep(500000);
+    	   current_focus = Focus_Window(320,240);
+       }
+	   // touch KEY1 to ZOOM
+	         if((IORD(KEY_BASE,0)&0x03) == 0x01){
+	      	   if(bin_level == 3 )bin_level = 1;
+	      	   else bin_level ++;
+	      	   printf("set bin level to %d\n",bin_level);
+	      	   MIPI_BIN_LEVEL(bin_level);
+	      	 	usleep(500000);
 
-	  //        }
+	         }
 
 
 	#if 0
@@ -266,41 +266,41 @@ int main()
        boundingBoxColour = ((boundingBoxColour + 1) & 0xff);
        IOWR(0x42000, EEE_IMGPROC_BBCOL, (boundingBoxColour << 8) | (0xff - boundingBoxColour));
 
-    //    //Process input commands
-    //    int in = getchar();
-    //    switch (in) {
-    //    	   case 'e': {
-    //    		   exposureTime += EXPOSURE_STEP;
-    //    		   OV8865SetExposure(exposureTime);
-    //    		   printf("\nExposure = %x ", exposureTime);
-    //    	   	   break;}
-    //    	   case 'd': {
-    //    		   exposureTime -= EXPOSURE_STEP;
-    //    		   OV8865SetExposure(exposureTime);
-    //    		   printf("\nExposure = %x ", exposureTime);
-    //    	   	   break;}
-    //    	   case 't': {
-    //    		   gain += GAIN_STEP;
-    //    		   OV8865SetGain(gain);
-    //    		   printf("\nGain = %x ", gain);
-    //    	   	   break;}
-    //    	   case 'g': {
-    //    		   gain -= GAIN_STEP;
-    //    		   OV8865SetGain(gain);
-    //    		   printf("\nGain = %x ", gain);
-    //    	   	   break;}
-    //    	   case 'r': {
-    //     	   current_focus += manual_focus_step;
-    //     	   if(current_focus >1023) current_focus = 1023;
-    //     	   OV8865_FOCUS_Move_to(current_focus);
-    //     	   printf("\nFocus = %x ",current_focus);
-    //    	   	   break;}
-    //    	   case 'f': {
-    //     	   if(current_focus > manual_focus_step) current_focus -= manual_focus_step;
-    //     	   OV8865_FOCUS_Move_to(current_focus);
-    //     	   printf("\nFocus = %x ",current_focus);
-    //    	   	   break;}
-    //    }
+       //Process input commands
+       int in = getchar();
+       switch (in) {
+       	   case 'e': {
+       		   exposureTime += EXPOSURE_STEP;
+       		   OV8865SetExposure(exposureTime);
+       		   printf("\nExposure = %x ", exposureTime);
+       	   	   break;}
+       	   case 'd': {
+       		   exposureTime -= EXPOSURE_STEP;
+       		   OV8865SetExposure(exposureTime);
+       		   printf("\nExposure = %x ", exposureTime);
+       	   	   break;}
+       	   case 't': {
+       		   gain += GAIN_STEP;
+       		   OV8865SetGain(gain);
+       		   printf("\nGain = %x ", gain);
+       	   	   break;}
+       	   case 'g': {
+       		   gain -= GAIN_STEP;
+       		   OV8865SetGain(gain);
+       		   printf("\nGain = %x ", gain);
+       	   	   break;}
+       	   case 'r': {
+        	   current_focus += manual_focus_step;
+        	   if(current_focus >1023) current_focus = 1023;
+        	   OV8865_FOCUS_Move_to(current_focus);
+        	   printf("\nFocus = %x ",current_focus);
+       	   	   break;}
+       	   case 'f': {
+        	   if(current_focus > manual_focus_step) current_focus -= manual_focus_step;
+        	   OV8865_FOCUS_Move_to(current_focus);
+        	   printf("\nFocus = %x ",current_focus);
+       	   	   break;}
+       }
 
 
 	   //Main loop delay
