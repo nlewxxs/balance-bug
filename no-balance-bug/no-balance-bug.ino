@@ -16,7 +16,6 @@
 // #define ENABLE_YAW_OUTPUT
 #define ENABLE_HTTP_SERVER
 #define ENABLE_BLUETOOTH
-// #define ENABLE_CAMERA  
 #define ENABLE_TRAVERSAL
 #define ENABLE_MOTORS
 #define ENABLE_CAMERA
@@ -50,7 +49,7 @@ Communicate communicate;
 
 char* ssid = "JJ's Galaxy S22+";
 char* password = "sbsx6554";
-char* serverId = "http://54.152.2.20:8081";
+char* serverId = "http://3.86.45.6:8081";
 
 // String serverName = "http://90.196.3.86:8081";  // local ip of the backend host (NOT localhost)
 // unsigned long lastTime = 0;
@@ -176,7 +175,7 @@ void loop() {
   if (!controller.getMoving()) {
     // SerialBT.print("clear: ");
     // SerialBT.println(classification.isClear);
-    if (movingRight && !classification.isPath) {
+    if (movingRight && !classification.isClear) {
       rotate(5);
       for (int g = 0; g < 10; g++){
         D8M.update();
@@ -188,7 +187,7 @@ void loop() {
       classification = newImage.classify(frame.boxes);
       // newImage.debugInfo();
       debugOutput(newImage.printInfo());
-    } else if (movingLeft && !classification.isPath) {
+    } else if (movingLeft && !classification.isClear) {
       rotate(-5);
       for (int g = 0; g < 10; g++){
         D8M.update();
@@ -217,10 +216,10 @@ void loop() {
           move(-0.1);
           break;
         case MoveThenLeft:
-          moveDir(0.5, false);
+          moveDir(0.64, false);
           break;
         case MoveThenRight:
-          moveDir(0.5, true);
+          moveDir(0.64, true);
           break;
         case DeadEnd:
           moveDir(0, true);
@@ -229,11 +228,11 @@ void loop() {
       }
       decisionMade = false;
     }
-    if (movingRight && classification.isPath) {
+    if (movingRight && classification.isClear) {
       movingRight = false;
       // move(0.5);
     }
-    if (movingLeft && classification.isPath) {
+    if (movingLeft && classification.isClear) {
       movingLeft = false;
       // move(0.5);
     }
@@ -329,6 +328,9 @@ void communicationCode(void* pvParameters) {
         classification = newImage.classify(frame.boxes);
         newImage.debugInfo();
         debugOutput(newImage.printInfo());
+
+        traversal.setAngle(ypr[0] * (180/M_PI));
+        traversal.setDistance(controller.getDistance() * 10);
       
         traversal.makeDecision(classification.isEnd, classification.isNode, 
                         classification.isPath, classification.isClear, 

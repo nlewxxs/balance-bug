@@ -36,7 +36,7 @@ class SimpleTraversal {
     void setMovementDecision(Decision _movementDecision);
     void makeDecision(bool _isEnd, bool _isNode, bool _isPath, bool _isClear, bool _leftWall, bool _rightWall, bool _leftTurn, bool _rightTurn);
     Decision getDecision();
-    bool turningRight = true;
+    bool turningLeft = true;
 
     //public objects
     Communicate communicate;

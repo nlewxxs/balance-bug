@@ -11,7 +11,7 @@ const int leftWallBoundSimplified[4] = {10,100,160,240};
 const int rightWallBoundSimplified[4] = {650,540,480,400};
 
 String Image::printInfo(){
-  return "isNode: " + String(info.isNode) + ", isPath: " + String(info.isPath) + ", isClear: " + String(info.isClear) + ", leftWall: " + String(info.leftWall) + ", rightWall" + String(info.rightWall) + ", leftTurn" + String(info.leftTurn) + ", rightTurn: " + String(info.rightTurn);
+  return "isNode: " + String(info.isNode) + ", isPath: " + String(info.isPath) + ", isClear: " + String(info.isClear) + ", leftWall: " + String(info.leftWall) + ", rightWall" + String(info.rightWall) + ", leftTurn" + String(info.leftTurn) + ", rightTurn: " + String(info.rightTurn) + "isEnd: " + String(info.isEnd);
 }
 
 // all below should be false
@@ -100,6 +100,8 @@ void Image::debugInfo() {
     sprintf(tmp, "isClear:    %d leftTurn:    %d rightTurn:   %d",info.isClear,info.leftTurn,info.rightTurn);
     Serial.println(tmp);
     sprintf(tmp, "leftWall:   %d rightWall:   %d",info.leftWall,info.rightWall);
+    Serial.println(tmp);
+    sprintf(tmp, "isEnd:    %d",info.isEnd);
     Serial.println(tmp);
 }
 
